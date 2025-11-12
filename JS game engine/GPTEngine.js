@@ -32,6 +32,22 @@ class GPTEngine {
 			const gamepad = e.gamepad;
 			console.log("Gamepad disconnected:", gamepad.id);
 		});
+
+		// Listen for fullscreen changes to restore canvas style
+		const fullscreenChangeHandler = () => {
+			if (!this.isFullScreen) {
+				// Remove fullscreen inline styles to restore canvas to original size
+				this._canvas.style.position = '';
+				this._canvas.style.top = '';
+				this._canvas.style.left = '';
+				this._canvas.style.width = '';
+				this._canvas.style.height = '';
+			}
+		};
+		this._document.addEventListener('fullscreenchange', fullscreenChangeHandler);
+		this._document.addEventListener('webkitfullscreenchange', fullscreenChangeHandler);
+		this._document.addEventListener('mozfullscreenchange', fullscreenChangeHandler);
+		this._document.addEventListener('MSFullscreenChange', fullscreenChangeHandler);
 	}
 	
 	get mousePos() { return this._mousePos; }
@@ -48,9 +64,8 @@ class GPTEngine {
 		} else if (element.msRequestFullscreen) { // IE/Edge
 			element.msRequestFullscreen();
 		}
-		
+
 		// make canvas full screen
-		this._oldStyleCopy = Object.assign({}, this._canvas.style);
 		var style = this._canvas.style;
 		style.position = 'fixed';
 		style.top = '0';
@@ -69,6 +84,13 @@ class GPTEngine {
 		} else if (this._document.msExitFullscreen) { // IE/Edge
 			this._document.msExitFullscreen();
 		}
+
+		// Remove fullscreen inline styles to restore canvas to original size
+		this._canvas.style.position = '';
+		this._canvas.style.top = '';
+		this._canvas.style.left = '';
+		this._canvas.style.width = '';
+		this._canvas.style.height = '';
 	}
 	
 	get isFullScreen() {
