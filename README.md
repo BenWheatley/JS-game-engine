@@ -85,11 +85,18 @@ The included demo showcases a space shooter with:
 - Fullscreen toggle (ESC key or Start button)
 - Asset preloading with loading state
 - Full gamepad support with analog controls and deadzone handling
+- AABB collision detection (shots destroy aliens, aliens damage player)
 
 **Game Loop:**
 - Delta-time based updates for frame-rate independent movement
 - Separate render and update phases
 - RequestAnimationFrame for smooth 60 FPS
+
+**Collision System:**
+- AABB (Axis-Aligned Bounding Box) collision detection
+- Shot-alien collisions: Both entities destroyed on impact
+- Player-alien collisions: Alien destroyed, player takes damage equal to alien's health (100)
+- Console logs player health when hit
 
 ## Assets
 
@@ -105,17 +112,17 @@ The engine includes placeholder art assets:
 ## Known Limitations & TODOs
 
 **Missing Core Features:**
-- **No Collision Detection**: Objects pass through each other
 - **No Game States**: No start menu, game over, or win conditions
 - **No Scoring System**: No points or progression tracking
 - **Incomplete Audio Integration**: Music system exists but not used in game
 
 **Incomplete Features:**
-- **Health System**: Defined on entities but never modified
+- **No Visual Health Display**: Health is tracked but not shown to player
+- **No Game Over State**: Player can have negative health without dying
 
 **Technical Issues:**
-- No collision system architecture
 - Camera follows player but doesn't account for world boundaries
+- Collision detection uses basic AABB (could be optimized with spatial partitioning for large entity counts)
 
 ## Getting Started
 
@@ -147,12 +154,14 @@ JS game engine/
 ## Next Steps
 
 Potential areas for development:
-1. Implement collision detection (AABB or circle-based)
-2. Integrate music system into gameplay
-3. Create game state manager (menu, playing, game over)
-4. Add particle effects for explosions
-5. Implement scoring and difficulty progression
-6. Add health system mechanics (damage on collision, player death)
+1. Add visual health display (HUD showing player health)
+2. Implement game over state when player health reaches zero
+3. Create game state manager (menu, playing, game over, restart)
+4. Add scoring system (points for destroying aliens)
+5. Integrate music system into gameplay
+6. Add particle effects for explosions
+7. Implement difficulty progression (faster spawn rates, more aliens)
+8. Add sound effects for shooting and collisions
 
 ## Development History
 

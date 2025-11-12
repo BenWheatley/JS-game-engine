@@ -55,9 +55,25 @@
 			new Vector2D(canvas.width, canvas.height)
 		);
 		let player = new Player();
-		
+
 		function loading() {
 			return Sprite.stillLoading();
+		}
+
+		// AABB collision detection
+		function checkCollision(entity1, entity2) {
+			const pos1 = entity1.sprite.position;
+			const size1 = entity1.sprite.size;
+			const pos2 = entity2.sprite.position;
+			const size2 = entity2.sprite.size;
+
+			// AABB collision: check if rectangles overlap
+			return (
+				pos1.x - size1.x/2 < pos2.x + size2.x/2 &&
+				pos1.x + size1.x/2 > pos2.x - size2.x/2 &&
+				pos1.y - size1.y/2 < pos2.y + size2.y/2 &&
+				pos1.y + size1.y/2 > pos2.y - size2.y/2
+			);
 		}
 		
 		// Render loop
@@ -141,6 +157,33 @@
 			for (const shot of shots) {
 				shot.update();
 			}
+
+			// Collision detection
+			const aliensToRemove = new Set();
+			const shotsToRemove = new Set();
+
+			// Check shot-alien collisions
+			for (const shot of shots) {
+				for (const alien of aliens) {
+					if (checkCollision(shot, alien)) {
+						aliensToRemove.add(alien);
+						shotsToRemove.add(shot);
+					}
+				}
+			}
+
+			// Check player-alien collisions
+			for (const alien of aliens) {
+				if (checkCollision(player, alien)) {
+					aliensToRemove.add(alien);
+					player.health -= alien.health; // Damage player by alien's health value
+					console.log(`Player hit! Health: ${player.health}`);
+				}
+			}
+
+			// Remove collided entities
+			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
+			shots = shots.filter(shot => !shotsToRemove.has(shot));
 
 			// Remove entities that are too far from player (avoid memory leak)
 			const despawnDistance = Math.max(canvas.width, canvas.height) * 2;

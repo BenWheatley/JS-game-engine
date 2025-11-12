@@ -9,6 +9,7 @@ class Player extends GameEntity {
 
   constructor() {
     super(new Vector2D(0, 0), 0, new Vector2D(), Player.size, Player.imageUrl);
+    this.health = Player.health;
   }
 
   accelerate(deltaTime) {
