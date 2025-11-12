@@ -93,6 +93,15 @@ Handles game audio effects:
 - Supports multiple audio formats (m4a, mp3, wav, ogg)
 - Sound preloading during game initialization
 
+#### **MusicPlayer.js** - Background Music System
+Plays background music from MIDI data:
+- Loads and plays MIDI JSON data (converted from .mid files)
+- Converts MIDI pitch numbers to musical notes
+- Precise timing using setTimeout scheduling
+- Automatic looping support
+- Integrates with SimpleMusic.js Note system
+- State-aware (plays during gameplay, stops on menu/game over)
+
 ## Demo Game (skeleton.html)
 
 The included demo showcases a space shooter with:
@@ -112,6 +121,7 @@ The included demo showcases a space shooter with:
 - HUD displaying health and score
 - Player death and game over when health reaches zero
 - Sound effects system with shooting, explosion, and hit sounds
+- Background music system that plays during gameplay and loops automatically
 
 **Game Loop:**
 - Delta-time based updates for frame-rate independent movement
@@ -146,14 +156,12 @@ The included demo showcases a space shooter with:
 - `laser_1.2.m4a` - Player weapon firing sound
 - `explosion_medium.m4a` - Alien destruction sound
 - `explosion_small.m4a` - Player hit/collision sound
-- `missile_launcher.m4a` - Alternative weapon sound (not used)
-- `pulse 2.m4a` - Alternative weapon sound (not used)
-- `slow_guitar.mid` / `.json` - Music data (not yet integrated)
+- `missile_launcher.m4a` - Alternative weapon sound (available for future use)
+- `pulse 2.m4a` - Alternative weapon sound (available for future use)
+- `slow_guitar.json` - Background music MIDI data (76 seconds, auto-looping)
+- `slow_guitar.mid` - Original MIDI file
 
 ## Known Limitations & TODOs
-
-**Missing Core Features:**
-- **Incomplete Audio Integration**: Music system exists but not used in game
 
 **Incomplete Features:**
 - **No Difficulty Progression**: Game maintains same difficulty throughout
@@ -184,26 +192,28 @@ JS game engine/
 ├── Player.js             # Player ship implementation
 ├── Alien.js              # Enemy ship class
 ├── Shot.js               # Projectile class
-├── SimpleMusic.js        # Web Audio API wrapper for music
+├── SimpleMusic.js        # Web Audio API wrapper for music synthesis
+├── MusicPlayer.js        # Background music player for MIDI data
 ├── SoundManager.js       # Sound effects manager
 ├── skeleton.html         # Demo game
 ├── soundtest.html        # Audio system test
 ├── *.png                 # Game assets
-└── *.m4a                 # Sound effect files
+├── *.m4a                 # Sound effect files
+└── slow_guitar.json      # Background music data
 ```
 
 ## Next Steps
 
 Potential areas for development:
-1. Integrate background music system into gameplay (slow_guitar.json)
-2. Add particle effects for explosions and thruster trails
-3. Implement difficulty progression (faster spawn rates, increased alien speed)
-4. Add high score persistence (localStorage or backend)
-5. Add power-ups (health packs, weapon upgrades, shields)
-6. Add different enemy types with varied behaviors
-7. Implement world boundaries or wrapping
-8. Add visual effects (screen shake on hits, muzzle flash)
-9. Add more sound variety (engine sounds, ambient space sounds)
+1. Add particle effects for explosions and thruster trails
+2. Implement difficulty progression (faster spawn rates, increased alien speed)
+3. Add high score persistence (localStorage or backend)
+4. Add power-ups (health packs, weapon upgrades, shields)
+5. Add different enemy types with varied behaviors
+6. Implement world boundaries or wrapping
+7. Add visual effects (screen shake on hits, muzzle flash)
+8. Add more sound variety (engine sounds, ambient space sounds, additional music tracks)
+9. Add music volume control in menu
 
 ## Development History
 

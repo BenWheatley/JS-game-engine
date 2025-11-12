@@ -22,6 +22,8 @@
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="SoundManager.js"></script>
+	<script type="text/javascript" src="SimpleMusic.js"></script>
+	<script type="text/javascript" src="MusicPlayer.js"></script>
 </head>
 <body>
 	<canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -54,8 +56,9 @@
 		let shotDelayMilliseconds = 500;
 		let lastShotTime = Date.now();
 
-		// Initialize sound manager
+		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
+		const musicPlayer = new MusicPlayer();
 
 		// Preload assets
 		(async () => {
@@ -67,6 +70,7 @@
 				'explosion': 'explosion_medium.m4a',
 				'hit': 'explosion_small.m4a'
 			});
+			await musicPlayer.loadMusic('slow_guitar.json');
 		})();
 
 		backgroundSprite = new Sprite(
@@ -100,6 +104,7 @@
 		function startGame() {
 			currentState = GameState.PLAYING;
 			resetGame();
+			musicPlayer.play();
 		}
 
 		function resetGame() {
@@ -113,10 +118,12 @@
 
 		function gameOver() {
 			currentState = GameState.GAME_OVER;
+			musicPlayer.stop();
 		}
 
 		function returnToMenu() {
 			currentState = GameState.MENU;
+			musicPlayer.stop();
 		}
 
 		// Render loop
