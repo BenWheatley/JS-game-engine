@@ -61,10 +61,10 @@ class Note {
     this.oscillator = new OscillatorNode(Note.audioContext, { type: 'sine', frequency: this.frequency });
     this.oscillator.connect(this.gainNode);
 
-    // Fade-in to prevent click at start (10ms)
+    // Fade-in to prevent click at start (50ms for smoother attack)
     const now = Note.audioContext.currentTime;
-    this.gainNode.gain.setValueAtTime(0.01, now); // Start from 0.01 for exponential (can't start from 0)
-    this.gainNode.gain.exponentialRampToValueAtTime(0.5, now + 0.01);
+    this.gainNode.gain.setValueAtTime(0.001, now); // Start from very quiet for exponential
+    this.gainNode.gain.exponentialRampToValueAtTime(0.5, now + 0.05);
 
     this.oscillator.start();
   }

@@ -2,6 +2,9 @@
 <html>
 <head>
   <title>Sound Test - MIDI Playback</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,10 +46,17 @@
     <div><strong>Total Notes:</strong> <span id="totalNotes">-</span></div>
   </div>
 
-  <script src="SimpleMusic.js"></script>
   <script>
-    // Initialize audio context
-    Note.initAudioContext();
+    // Load SimpleMusic.js with cache busting
+    const script = document.createElement('script');
+    script.src = 'SimpleMusic.js?v=' + Date.now();
+    document.head.appendChild(script);
+
+    script.onload = function() {
+      // Initialize audio context
+      Note.initAudioContext();
+      initMIDIPlayer();
+    };
 
     let midiData = null;
     let isPlaying = false;
@@ -55,8 +65,9 @@
     let scheduledTimeouts = [];
     let currentNoteIndex = 0;
 
-    // Load MIDI data
-    fetch('slow_guitar.json')
+    function initMIDIPlayer() {
+      // Load MIDI data
+      fetch('slow_guitar.json')
       .then(response => response.json())
       .then(data => {
         midiData = data[0].notes;
@@ -69,6 +80,7 @@
         console.error('Error loading MIDI data:', error);
         document.getElementById('statusText').textContent = 'Error loading MIDI file';
       });
+    }
 
     function playMIDI() {
       if (!midiData) {
@@ -85,7 +97,7 @@
       document.getElementById('statusText').textContent = 'Playing';
       document.getElementById('playBtn').disabled = true;
 
-      // Schedule all notes
+      // Schedule all notes with original MIDI timing
       midiData.forEach((noteData, index) => {
         const noteName = Note.midiToNoteName(noteData.pitch);
         const startDelay = noteData.startTime;
