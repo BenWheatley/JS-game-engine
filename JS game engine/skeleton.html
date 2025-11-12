@@ -151,24 +151,71 @@
 				return distance < despawnDistance;
 			});
 
-			checkGamepadInput();
+			checkGamepadInput(deltaTime);
 		}
-		
-		function checkGamepadInput() {
+
+		function checkGamepadInput(deltaTime) {
 			const gamepads = navigator.getGamepads();
+			const deadzone = 0.15; // Ignore small stick movements to prevent drift
+
 			for (const gamepad of gamepads) {
-				if (gamepad) {
-					// Check button presses
-					for (const button of gamepad.buttons) {
-						if (button.pressed) {
-							console.log("Button pressed:", button.index);
-						}
+				if (!gamepad) continue;
+
+				// Left stick horizontal (axis 0): Turn left/right
+				const leftStickX = gamepad.axes[0];
+				if (Math.abs(leftStickX) > deadzone) {
+					if (leftStickX < 0) {
+						player.turnLeft(deltaTime * Math.abs(leftStickX));
+					} else {
+						player.turnRight(deltaTime * leftStickX);
 					}
-					
-					// Check analog stick inputs
-					for (const stick of gamepad.axes) {
-						console.log("Stick value:", stick);
+				}
+
+				// Right stick vertical (axis 3) or triggers for thrust
+				const rightStickY = gamepad.axes[3];
+				if (rightStickY < -deadzone) {
+					// Right stick pushed up: forward thrust
+					player.accelerate(deltaTime * Math.abs(rightStickY));
+				} else if (rightStickY > deadzone) {
+					// Right stick pulled down: reverse thrust
+					player.reverseThrust(deltaTime * rightStickY);
+				}
+
+				// Button 7 (RT/R2): Forward thrust
+				if (gamepad.buttons[7] && gamepad.buttons[7].pressed) {
+					const triggerValue = gamepad.buttons[7].value || 1.0;
+					player.accelerate(deltaTime * triggerValue);
+				}
+
+				// Button 6 (LT/L2): Reverse thrust
+				if (gamepad.buttons[6] && gamepad.buttons[6].pressed) {
+					const triggerValue = gamepad.buttons[6].value || 1.0;
+					player.reverseThrust(deltaTime * triggerValue);
+				}
+
+				// Button 0 (A/Cross): Shoot
+				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
+					if (Date.now() > lastShotTime + shotDelayMilliseconds) {
+						lastShotTime = Date.now();
+						const newShot = new Shot(
+							new Vector2D(
+								player.sprite.position.x,
+								player.sprite.position.y
+							)
+						);
+						shots.push(newShot);
 					}
+				}
+
+				// Button 9 (Start/Options): Toggle fullscreen
+				if (gamepad.buttons[9] && gamepad.buttons[9].pressed) {
+					// Debounce by checking if button was just pressed
+					if (!gamepad.buttons[9].wasPressed) {
+						GPTEngine.instance.toggleFullScreen();
+						gamepad.buttons[9].wasPressed = true;
+					}
+				} else if (gamepad.buttons[9]) {
+					gamepad.buttons[9].wasPressed = false;
 				}
 			}
 		}

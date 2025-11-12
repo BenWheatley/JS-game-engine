@@ -47,11 +47,20 @@ Fully implemented player character with:
 - Maximum speed clamping
 - Configurable physics constants
 
-**Controls:**
+**Keyboard Controls:**
 - Arrow Up: Forward thrust
 - Arrow Down: Reverse thrust
 - Arrow Left/Right: Rotate
 - Spacebar: Fire weapon
+- ESC: Toggle fullscreen
+
+**Gamepad Controls:**
+- Left Stick (horizontal): Rotate left/right
+- Right Stick (vertical): Forward/reverse thrust (analog)
+- Right Trigger (RT/R2): Forward thrust (analog)
+- Left Trigger (LT/L2): Reverse thrust (analog)
+- A Button (Cross on PlayStation): Fire weapon
+- Start Button: Toggle fullscreen
 
 #### **Alien.js** - Enemy Ships
 Simple enemy entity with health property, currently spawns from top of screen and moves downward.
@@ -73,9 +82,9 @@ The included demo showcases a space shooter with:
 - Player-centered scrolling camera that follows ship movement
 - Periodic alien spawning with rotation animation
 - Rate-limited weapon firing
-- Fullscreen toggle (ESC key)
+- Fullscreen toggle (ESC key or Start button)
 - Asset preloading with loading state
-- Gamepad connection detection
+- Full gamepad support with analog controls and deadzone handling
 
 **Game Loop:**
 - Delta-time based updates for frame-rate independent movement
@@ -102,7 +111,6 @@ The engine includes placeholder art assets:
 - **Incomplete Audio Integration**: Music system exists but not used in game
 
 **Incomplete Features:**
-- **Gamepad Support**: Detected but not mapped to controls (currently only logs input)
 - **Health System**: Defined on entities but never modified
 - **Shot Direction**: Shots always fire straight up regardless of player rotation
 
@@ -144,9 +152,9 @@ Potential areas for development:
 2. Integrate music system into gameplay
 3. Create game state manager (menu, playing, game over)
 4. Fix shot direction to match player rotation
-5. Complete gamepad control mapping
-6. Add particle effects for explosions
-7. Implement scoring and difficulty progression
+5. Add particle effects for explosions
+6. Implement scoring and difficulty progression
+7. Add health system mechanics (damage on collision, player death)
 
 ## Development History
 
