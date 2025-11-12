@@ -1,87 +1,164 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sound Test</title>
+  <title>Sound Test - MIDI Playback</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    #status {
+      margin: 20px 0;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    .playing {
+      background: #90EE90 !important;
+    }
+  </style>
 </head>
 <body>
-  <h1>Sound Test</h1>
-  <p>Press the middle row of keys to play white notes, and the top row to play black notes.</p>
+  <h1>Sound Test - MIDI Playback</h1>
+  <p>Testing the SimpleMusic.js system with slow_guitar.json MIDI data</p>
+
+  <div>
+    <button id="playBtn" onclick="playMIDI()">Play MIDI</button>
+    <button id="stopBtn" onclick="stopMIDI()">Stop</button>
+    <button id="loopBtn" onclick="toggleLoop()">Loop: OFF</button>
+  </div>
+
+  <div id="status">
+    <div><strong>Status:</strong> <span id="statusText">Ready</span></div>
+    <div><strong>Current Time:</strong> <span id="timeText">0ms</span></div>
+    <div><strong>Current Note:</strong> <span id="noteText">-</span></div>
+    <div><strong>Total Notes:</strong> <span id="totalNotes">-</span></div>
+  </div>
 
   <script src="SimpleMusic.js"></script>
   <script>
-    const audioCtx = new AudioContext();
+    // Initialize audio context
+    Note.initAudioContext();
 
-    const whiteNotes = {
-      'a': 'C4',
-      's': 'D4',
-      'd': 'E4',
-      'f': 'F4',
-      'g': 'G4',
-      'h': 'A4',
-      'j': 'B4',
-      'k': 'C5',
-      'l': 'D5',
-      ';': 'E5',
-      "'": 'F5',
-    };
+    let midiData = null;
+    let isPlaying = false;
+    let shouldLoop = false;
+    let startTime = 0;
+    let scheduledTimeouts = [];
+    let currentNoteIndex = 0;
 
-    const blackNotes = {
-      'w': 'C#4',
-      'e': 'D#4',
-      't': 'F#4',
-      'y': 'G#4',
-      'u': 'A#4',
-      'z': 'Db4',
-      'x': 'Eb4',
-      'c': 'Gb4',
-      'v': 'Ab4',
-      'b': 'Bb4',
-    };
+    // Load MIDI data
+    fetch('slow_guitar.json')
+      .then(response => response.json())
+      .then(data => {
+        midiData = data[0].notes;
+        document.getElementById('totalNotes').textContent = midiData.length;
+        console.log(`Loaded ${midiData.length} notes from MIDI file`);
+        console.log('First note:', midiData[0]);
+        console.log('Last note:', midiData[midiData.length - 1]);
+      })
+      .catch(error => {
+        console.error('Error loading MIDI data:', error);
+        document.getElementById('statusText').textContent = 'Error loading MIDI file';
+      });
 
-    const notes = {};
-
-    function onKeyDown(event) {
-      Note.start(Note.eventToNote(event));
-    }
-
-    function onKeyUp(event) {
-      Note.stop(Note.eventToNote(event));
-    }
-
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('keyup', onKeyUp);
-    
-      // Define the notes of the melody
-      const melody = [
-        "E5", "E5", "F5", "G5",
-        "G5", "F5", "E5", "D5",
-        "C5", "C5", "D5", "E5",
-        "E5", "D5", "D5"
-      ];
-
-      // Define the duration of each note in milliseconds
-      const duration = 500;
-
-      // Define a function to play the melody
-      async function playMelody() {
-        for (let i = 0; i < melody.length; i++) {
-          // Play the current note
-          Note.start(melody[i]);
-          await sleep(duration);
-          Note.stop(melody[i]);
-          
-          // Pause briefly before playing the next note
-          await sleep(50);
-        }
+    function playMIDI() {
+      if (!midiData) {
+        alert('MIDI data not loaded yet');
+        return;
       }
 
-      // Define a helper function to pause for a given number of milliseconds
-      function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+      if (isPlaying) {
+        return;
       }
 
-      // Start playing the melody when the page loads
-      window.addEventListener("load", playMelody);
-    </script>
+      isPlaying = true;
+      startTime = Date.now();
+      document.getElementById('statusText').textContent = 'Playing';
+      document.getElementById('playBtn').disabled = true;
+
+      // Schedule all notes
+      midiData.forEach((noteData, index) => {
+        const noteName = Note.midiToNoteName(noteData.pitch);
+        const startDelay = noteData.startTime;
+        const duration = noteData.duration;
+
+        // Schedule note start
+        const startTimeout = setTimeout(() => {
+          Note.start(noteName);
+          currentNoteIndex = index;
+          document.getElementById('noteText').textContent = `${noteName} (MIDI ${noteData.pitch})`;
+          document.getElementById('timeText').textContent = `${noteData.startTime}ms`;
+          console.log(`Playing: ${noteName} (MIDI ${noteData.pitch}) at ${noteData.startTime}ms for ${duration}ms`);
+        }, startDelay);
+        scheduledTimeouts.push(startTimeout);
+
+        // Schedule note stop
+        const stopTimeout = setTimeout(() => {
+          Note.stop(noteName);
+        }, startDelay + duration);
+        scheduledTimeouts.push(stopTimeout);
+      });
+
+      // Schedule end of playback
+      const lastNote = midiData[midiData.length - 1];
+      const totalDuration = lastNote.startTime + lastNote.duration;
+      const endTimeout = setTimeout(() => {
+        onPlaybackEnd();
+      }, totalDuration);
+      scheduledTimeouts.push(endTimeout);
+    }
+
+    function onPlaybackEnd() {
+      if (shouldLoop) {
+        // Clear and restart
+        scheduledTimeouts = [];
+        playMIDI();
+      } else {
+        isPlaying = false;
+        document.getElementById('statusText').textContent = 'Finished';
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('noteText').textContent = '-';
+      }
+    }
+
+    function stopMIDI() {
+      isPlaying = false;
+      shouldLoop = false;
+
+      // Clear all scheduled timeouts
+      scheduledTimeouts.forEach(timeout => clearTimeout(timeout));
+      scheduledTimeouts = [];
+
+      // Stop all currently playing notes
+      Note.stopAll();
+
+      document.getElementById('statusText').textContent = 'Stopped';
+      document.getElementById('playBtn').disabled = false;
+      document.getElementById('noteText').textContent = '-';
+      document.getElementById('timeText').textContent = '0ms';
+      document.getElementById('loopBtn').textContent = 'Loop: OFF';
+      document.getElementById('loopBtn').classList.remove('playing');
+    }
+
+    function toggleLoop() {
+      shouldLoop = !shouldLoop;
+      const loopBtn = document.getElementById('loopBtn');
+      loopBtn.textContent = shouldLoop ? 'Loop: ON' : 'Loop: OFF';
+      if (shouldLoop) {
+        loopBtn.classList.add('playing');
+      } else {
+        loopBtn.classList.remove('playing');
+      }
+    }
+  </script>
 </body>
 </html>

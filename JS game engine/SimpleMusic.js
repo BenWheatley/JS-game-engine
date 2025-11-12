@@ -2,7 +2,15 @@ class Note {
   static notes = {};
   static baseFrequency = 440;
   static noteLetters = 'C C# D D# E F F# G G# A A# B'.split(' ');
-  
+  static audioContext = null;
+
+  static initAudioContext() {
+    if (!Note.audioContext) {
+      Note.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return Note.audioContext;
+  }
+
   constructor(note) {
     this.note = note;
     this.frequency = this.getFrequencyFromNote();
@@ -40,8 +48,11 @@ class Note {
   }
 
   start() {
-    this.oscillator = new OscillatorNode(audioCtx, { type: 'sine', frequency: this.frequency });
-    this.oscillator.connect(audioCtx.destination);
+    if (!Note.audioContext) {
+      Note.initAudioContext();
+    }
+    this.oscillator = new OscillatorNode(Note.audioContext, { type: 'sine', frequency: this.frequency });
+    this.oscillator.connect(Note.audioContext.destination);
     this.oscillator.start();
   }
 
@@ -55,7 +66,7 @@ class Note {
     if (noteName == null) {
       return;
     }
-    stop(noteName);
+    Note.stop(noteName);
     const note = new Note(noteName);
     note.start();
     Note.notes[noteName] = note;
@@ -69,8 +80,18 @@ class Note {
     note.stop();
     delete Note.notes[noteName];
   }
-  
-  static eventToNote(event) {
-    return whiteNotes[event.key] || blackNotes[event.key];
+
+  static stopAll() {
+    for (const noteName in Note.notes) {
+      Note.stop(noteName);
+    }
+  }
+
+  static midiToNoteName(midiNumber) {
+    // MIDI note 60 is C4 (middle C)
+    const octave = Math.floor(midiNumber / 12) - 1;
+    const noteIndex = midiNumber % 12;
+    const noteLetter = Note.noteLetters[noteIndex];
+    return `${noteLetter}${octave}`;
   }
 }

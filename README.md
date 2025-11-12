@@ -78,8 +78,11 @@ Player weapon projectiles with configurable velocity that fires in the direction
 #### **SimpleMusic.js** - Audio System
 Web Audio API integration featuring:
 - Note-to-frequency conversion (supports standard notation like "A4", "C#5")
+- MIDI pitch number to note name conversion
 - Oscillator-based sound synthesis
 - Dynamic note start/stop control
+- Automatic AudioContext initialization
+- Static methods for playing and stopping notes globally
 
 ## Demo Game (skeleton.html)
 
