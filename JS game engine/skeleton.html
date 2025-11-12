@@ -103,11 +103,13 @@
 			if (engine.keyDown[" "]) {
 				if (Date.now() > lastShotTime + shotDelayMilliseconds) {
 					lastShotTime = Date.now();
+					const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
 					const newShot = new Shot(
 						new Vector2D(
 							player.sprite.position.x,
 							player.sprite.position.y
-						)
+						),
+						shotVelocity
 					);
 					shots.push(newShot);
 				}
@@ -197,11 +199,13 @@
 				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
 					if (Date.now() > lastShotTime + shotDelayMilliseconds) {
 						lastShotTime = Date.now();
+						const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
 						const newShot = new Shot(
 							new Vector2D(
 								player.sprite.position.x,
 								player.sprite.position.y
-							)
+							),
+							shotVelocity
 						);
 						shots.push(newShot);
 					}

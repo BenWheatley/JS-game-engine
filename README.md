@@ -66,7 +66,7 @@ Fully implemented player character with:
 Simple enemy entity with health property, currently spawns from top of screen and moves downward.
 
 #### **Shot.js** - Projectiles
-Player weapon projectiles with fixed upward velocity and damage property.
+Player weapon projectiles with configurable velocity that fires in the direction the player is facing.
 
 #### **SimpleMusic.js** - Audio System
 Web Audio API integration featuring:
@@ -81,7 +81,7 @@ The included demo showcases a space shooter with:
 **Implemented Features:**
 - Player-centered scrolling camera that follows ship movement
 - Periodic alien spawning with rotation animation
-- Rate-limited weapon firing
+- Rate-limited weapon firing that follows player rotation direction
 - Fullscreen toggle (ESC key or Start button)
 - Asset preloading with loading state
 - Full gamepad support with analog controls and deadzone handling
@@ -112,7 +112,6 @@ The engine includes placeholder art assets:
 
 **Incomplete Features:**
 - **Health System**: Defined on entities but never modified
-- **Shot Direction**: Shots always fire straight up regardless of player rotation
 
 **Technical Issues:**
 - No collision system architecture
@@ -151,10 +150,9 @@ Potential areas for development:
 1. Implement collision detection (AABB or circle-based)
 2. Integrate music system into gameplay
 3. Create game state manager (menu, playing, game over)
-4. Fix shot direction to match player rotation
-5. Add particle effects for explosions
-6. Implement scoring and difficulty progression
-7. Add health system mechanics (damage on collision, player death)
+4. Add particle effects for explosions
+5. Implement scoring and difficulty progression
+6. Add health system mechanics (damage on collision, player death)
 
 ## Development History
 
