@@ -47,20 +47,27 @@ Fully implemented player character with:
 - Maximum speed clamping
 - Configurable physics constants
 
-**Keyboard Controls:**
+**Menu Controls:**
+- Spacebar or A Button: Start game
+
+**In-Game Keyboard Controls:**
 - Arrow Up: Forward thrust
 - Arrow Down: Reverse thrust
 - Arrow Left/Right: Rotate
 - Spacebar: Fire weapon
 - ESC: Toggle fullscreen
 
-**Gamepad Controls:**
+**In-Game Gamepad Controls:**
 - Left Stick (horizontal): Rotate left/right
 - Right Stick (vertical): Forward/reverse thrust (analog)
 - Right Trigger (RT/R2): Forward thrust (analog)
 - Left Trigger (LT/L2): Reverse thrust (analog)
 - A Button (Cross on PlayStation): Fire weapon
 - Start Button: Toggle fullscreen
+
+**Game Over Controls:**
+- R: Restart game
+- M: Return to menu
 
 #### **Alien.js** - Enemy Ships
 Simple enemy entity with health property, currently spawns from top of screen and moves downward.
@@ -79,6 +86,9 @@ Web Audio API integration featuring:
 The included demo showcases a space shooter with:
 
 **Implemented Features:**
+- Game state manager with menu, playing, and game over states
+- Start menu with instructions and controls
+- Game over screen with final score and restart options
 - Player-centered scrolling camera that follows ship movement
 - Periodic alien spawning with rotation animation
 - Rate-limited weapon firing that follows player rotation direction
@@ -86,6 +96,9 @@ The included demo showcases a space shooter with:
 - Asset preloading with loading state
 - Full gamepad support with analog controls and deadzone handling
 - AABB collision detection (shots destroy aliens, aliens damage player)
+- Scoring system (100 points per alien destroyed)
+- HUD displaying health and score
+- Player death and game over when health reaches zero
 
 **Game Loop:**
 - Delta-time based updates for frame-rate independent movement
@@ -94,9 +107,16 @@ The included demo showcases a space shooter with:
 
 **Collision System:**
 - AABB (Axis-Aligned Bounding Box) collision detection
-- Shot-alien collisions: Both entities destroyed on impact
+- Shot-alien collisions: Both entities destroyed on impact, awards 100 points
 - Player-alien collisions: Alien destroyed, player takes damage equal to alien's health (100)
-- Console logs player health when hit
+- Game over triggered when player health reaches zero
+
+**Game State System:**
+- **Menu State**: Title screen with instructions, press Space or A button to start
+- **Playing State**: Active gameplay with HUD showing health and score
+- **Game Over State**: Shows final score with options to restart (R) or return to menu (M)
+- State transitions handle game reset and cleanup
+- ESC key toggles fullscreen in all states
 
 ## Assets
 
@@ -112,13 +132,12 @@ The engine includes placeholder art assets:
 ## Known Limitations & TODOs
 
 **Missing Core Features:**
-- **No Game States**: No start menu, game over, or win conditions
-- **No Scoring System**: No points or progression tracking
 - **Incomplete Audio Integration**: Music system exists but not used in game
+- **No Sound Effects**: No audio feedback for shooting, collisions, or game events
 
 **Incomplete Features:**
-- **No Visual Health Display**: Health is tracked but not shown to player
-- **No Game Over State**: Player can have negative health without dying
+- **No Difficulty Progression**: Game maintains same difficulty throughout
+- **No High Score System**: Score resets each game with no persistence
 
 **Technical Issues:**
 - Camera follows player but doesn't account for world boundaries
@@ -154,14 +173,15 @@ JS game engine/
 ## Next Steps
 
 Potential areas for development:
-1. Add visual health display (HUD showing player health)
-2. Implement game over state when player health reaches zero
-3. Create game state manager (menu, playing, game over, restart)
-4. Add scoring system (points for destroying aliens)
-5. Integrate music system into gameplay
-6. Add particle effects for explosions
-7. Implement difficulty progression (faster spawn rates, more aliens)
-8. Add sound effects for shooting and collisions
+1. Integrate music system into gameplay
+2. Add sound effects for shooting, hits, and explosions
+3. Add particle effects for explosions and thruster trails
+4. Implement difficulty progression (faster spawn rates, increased alien speed)
+5. Add high score persistence (localStorage or backend)
+6. Add power-ups (health packs, weapon upgrades, shields)
+7. Add different enemy types with varied behaviors
+8. Implement world boundaries or wrapping
+9. Add visual effects (screen shake on hits, muzzle flash)
 
 ## Development History
 

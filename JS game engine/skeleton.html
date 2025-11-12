@@ -33,7 +33,16 @@
 		
 		const engine = GPTEngine.begin(document, canvasName);
 		Sprite.begin(context);
-		
+
+		// Game state management
+		const GameState = {
+			MENU: 'menu',
+			PLAYING: 'playing',
+			GAME_OVER: 'game_over'
+		};
+		let currentState = GameState.MENU;
+		let score = 0;
+
 		const alienSize = 48;
 		const alienSpeed = 1000/1000.0; // pixels per millisecond
 		let backgroundSprite;
@@ -75,35 +84,180 @@
 				pos1.y + size1.y/2 > pos2.y - size2.y/2
 			);
 		}
-		
+
+		// Game state management functions
+		function startGame() {
+			currentState = GameState.PLAYING;
+			resetGame();
+		}
+
+		function resetGame() {
+			player = new Player();
+			aliens = [];
+			shots = [];
+			score = 0;
+			lastAlienTime = Date.now();
+			lastShotTime = Date.now();
+		}
+
+		function gameOver() {
+			currentState = GameState.GAME_OVER;
+		}
+
+		function returnToMenu() {
+			currentState = GameState.MENU;
+		}
+
 		// Render loop
 		function render() {
 			if (loading()) { return; }
-			
+
+			switch (currentState) {
+				case GameState.MENU:
+					renderMenu();
+					break;
+				case GameState.PLAYING:
+					renderGame();
+					break;
+				case GameState.GAME_OVER:
+					renderGameOver();
+					break;
+			}
+		}
+
+		function renderMenu() {
+			// Clear screen
+			context.fillStyle = '#000000';
+			context.fillRect(0, 0, canvas.width, canvas.height);
+
+			// Title
+			context.fillStyle = '#FFFFFF';
+			context.font = 'bold 48px Arial';
+			context.textAlign = 'center';
+			context.fillText('SPACE SHOOTER', canvas.width / 2, canvas.height / 3);
+
+			// Instructions
+			context.font = '24px Arial';
+			context.fillText('Press SPACE or A Button to Start', canvas.width / 2, canvas.height / 2);
+
+			context.font = '18px Arial';
+			context.fillStyle = '#CCCCCC';
+			context.fillText('Arrow Keys or Left Stick: Move', canvas.width / 2, canvas.height / 2 + 60);
+			context.fillText('Space or A Button: Shoot', canvas.width / 2, canvas.height / 2 + 90);
+			context.fillText('ESC or Start: Fullscreen', canvas.width / 2, canvas.height / 2 + 120);
+		}
+
+		function renderGame() {
 			context.save();
 			context.translate(
 				canvas.width/2-player.sprite.position.x,
 				canvas.height/2-player.sprite.position.y
 			);
-			
+
 			backgroundSprite.draw();
-			
+
 			player.draw();
-			
+
 			for (const alien of aliens) {
 				alien.draw();
 			}
 			for (const shot of shots) {
 				shot.draw();
 			}
-			
+
 			context.restore();
+
+			// HUD - render in screen space
+			context.fillStyle = '#FFFFFF';
+			context.font = '20px Arial';
+			context.textAlign = 'left';
+			context.fillText(`Health: ${player.health}`, 10, 30);
+			context.fillText(`Score: ${score}`, 10, 60);
+		}
+
+		function renderGameOver() {
+			// Clear screen
+			context.fillStyle = '#000000';
+			context.fillRect(0, 0, canvas.width, canvas.height);
+
+			// Game Over text
+			context.fillStyle = '#FF0000';
+			context.font = 'bold 64px Arial';
+			context.textAlign = 'center';
+			context.fillText('GAME OVER', canvas.width / 2, canvas.height / 3);
+
+			// Score
+			context.fillStyle = '#FFFFFF';
+			context.font = '32px Arial';
+			context.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2);
+
+			// Restart instructions
+			context.font = '24px Arial';
+			context.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 80);
+			context.fillText('Press M for Menu', canvas.width / 2, canvas.height / 2 + 120);
 		}
 		
 		// Update loop; deltaTime is milliseconds
 		function update(deltaTime) {
 			if (loading()) { return; }
-			
+
+			// Toggle fullscreen on ESC key (works in all states)
+			if (engine.keyDown["Escape"]) {
+				engine.keyDown["Escape"] = false;
+				GPTEngine.instance.toggleFullScreen();
+			}
+
+			switch (currentState) {
+				case GameState.MENU:
+					updateMenu();
+					break;
+				case GameState.PLAYING:
+					updateGame(deltaTime);
+					break;
+				case GameState.GAME_OVER:
+					updateGameOver();
+					break;
+			}
+		}
+
+		function updateMenu() {
+			// Start game on space key
+			if (engine.keyDown[" "]) {
+				engine.keyDown[" "] = false;
+				startGame();
+			}
+
+			// Check gamepad input for starting
+			const gamepads = navigator.getGamepads();
+			for (const gamepad of gamepads) {
+				if (gamepad && gamepad.buttons[0] && gamepad.buttons[0].pressed) {
+					if (!gamepad.buttons[0].wasPressed) {
+						startGame();
+						gamepad.buttons[0].wasPressed = true;
+					}
+				} else if (gamepad && gamepad.buttons[0]) {
+					gamepad.buttons[0].wasPressed = false;
+				}
+			}
+		}
+
+		function updateGameOver() {
+			// Restart on R key
+			if (engine.keyDown["r"] || engine.keyDown["R"]) {
+				engine.keyDown["r"] = false;
+				engine.keyDown["R"] = false;
+				startGame();
+			}
+
+			// Return to menu on M key
+			if (engine.keyDown["m"] || engine.keyDown["M"]) {
+				engine.keyDown["m"] = false;
+				engine.keyDown["M"] = false;
+				returnToMenu();
+			}
+		}
+
+		function updateGame(deltaTime) {
 			if (engine.keyDown["ArrowLeft"]) {
 				player.turnLeft(deltaTime);
 			}
@@ -130,14 +284,8 @@
 					shots.push(newShot);
 				}
 			}
-			
+
 			player.update(deltaTime);
-			
-			// Toggle fullscreen on ESC key
-			if (engine.keyDown["Escape"]) {
-				engine.keyDown["Escape"] = false;
-				GPTEngine.instance.toggleFullScreen();
-			}
 			
 			if (Date.now() > lastAlienTime + alienDelayMilliseconds) {
 				lastAlienTime = Date.now();
@@ -168,6 +316,7 @@
 					if (checkCollision(shot, alien)) {
 						aliensToRemove.add(alien);
 						shotsToRemove.add(shot);
+						score += 100; // Award points for destroying alien
 					}
 				}
 			}
@@ -184,6 +333,12 @@
 			// Remove collided entities
 			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
 			shots = shots.filter(shot => !shotsToRemove.has(shot));
+
+			// Check for game over
+			if (player.health <= 0) {
+				gameOver();
+				return;
+			}
 
 			// Remove entities that are too far from player (avoid memory leak)
 			const despawnDistance = Math.max(canvas.width, canvas.height) * 2;
