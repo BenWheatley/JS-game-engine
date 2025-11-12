@@ -75,7 +75,7 @@ Simple enemy entity with health property, currently spawns from top of screen an
 #### **Shot.js** - Projectiles
 Player weapon projectiles with configurable velocity that fires in the direction the player is facing.
 
-#### **SimpleMusic.js** - Audio System
+#### **SimpleMusic.js** - Music System
 Web Audio API integration featuring:
 - Note-to-frequency conversion (supports standard notation like "A4", "C#5")
 - MIDI pitch number to note name conversion
@@ -84,6 +84,14 @@ Web Audio API integration featuring:
 - Dynamic note start/stop control
 - Automatic AudioContext initialization
 - Static methods for playing and stopping notes globally
+
+#### **SoundManager.js** - Sound Effects System
+Handles game audio effects:
+- Asynchronous sound file loading with Web Audio API
+- Audio buffer caching for instant playback
+- Volume control per sound effect
+- Supports multiple audio formats (m4a, mp3, wav, ogg)
+- Sound preloading during game initialization
 
 ## Demo Game (skeleton.html)
 
@@ -103,6 +111,7 @@ The included demo showcases a space shooter with:
 - Scoring system (100 points per alien destroyed)
 - HUD displaying health and score
 - Player death and game over when health reaches zero
+- Sound effects system with shooting, explosion, and hit sounds
 
 **Game Loop:**
 - Delta-time based updates for frame-rate independent movement
@@ -124,20 +133,27 @@ The included demo showcases a space shooter with:
 
 ## Assets
 
-The engine includes placeholder art assets:
+**Visual Assets:**
 - `player-ship.png` - Player spacecraft sprite
 - `alien-ship.png` - Enemy spacecraft sprite
 - `energy-blast.png` - Weapon projectile
 - `background.png` - Scrolling background
 - `planet-1.png`, `planet-2.png` - Environmental objects
 - `asteroid-1/2/3.png` - Obstacle sprites
+- `interstellar-news-anchors.png` - Additional artwork
+
+**Audio Assets:**
+- `laser_1.2.m4a` - Player weapon firing sound
+- `explosion_medium.m4a` - Alien destruction sound
+- `explosion_small.m4a` - Player hit/collision sound
+- `missile_launcher.m4a` - Alternative weapon sound (not used)
+- `pulse 2.m4a` - Alternative weapon sound (not used)
 - `slow_guitar.mid` / `.json` - Music data (not yet integrated)
 
 ## Known Limitations & TODOs
 
 **Missing Core Features:**
 - **Incomplete Audio Integration**: Music system exists but not used in game
-- **No Sound Effects**: No audio feedback for shooting, collisions, or game events
 
 **Incomplete Features:**
 - **No Difficulty Progression**: Game maintains same difficulty throughout
@@ -168,24 +184,26 @@ JS game engine/
 ├── Player.js             # Player ship implementation
 ├── Alien.js              # Enemy ship class
 ├── Shot.js               # Projectile class
-├── SimpleMusic.js        # Web Audio API wrapper
+├── SimpleMusic.js        # Web Audio API wrapper for music
+├── SoundManager.js       # Sound effects manager
 ├── skeleton.html         # Demo game
 ├── soundtest.html        # Audio system test
-└── *.png                 # Game assets
+├── *.png                 # Game assets
+└── *.m4a                 # Sound effect files
 ```
 
 ## Next Steps
 
 Potential areas for development:
-1. Integrate music system into gameplay
-2. Add sound effects for shooting, hits, and explosions
-3. Add particle effects for explosions and thruster trails
-4. Implement difficulty progression (faster spawn rates, increased alien speed)
-5. Add high score persistence (localStorage or backend)
-6. Add power-ups (health packs, weapon upgrades, shields)
-7. Add different enemy types with varied behaviors
-8. Implement world boundaries or wrapping
-9. Add visual effects (screen shake on hits, muzzle flash)
+1. Integrate background music system into gameplay (slow_guitar.json)
+2. Add particle effects for explosions and thruster trails
+3. Implement difficulty progression (faster spawn rates, increased alien speed)
+4. Add high score persistence (localStorage or backend)
+5. Add power-ups (health packs, weapon upgrades, shields)
+6. Add different enemy types with varied behaviors
+7. Implement world boundaries or wrapping
+8. Add visual effects (screen shake on hits, muzzle flash)
+9. Add more sound variety (engine sounds, ambient space sounds)
 
 ## Development History
 

@@ -21,6 +21,7 @@
 	<script type="text/javascript" src="Alien.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
+	<script type="text/javascript" src="SoundManager.js"></script>
 </head>
 <body>
 	<canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -52,12 +53,22 @@
 		let shots = [];
 		let shotDelayMilliseconds = 500;
 		let lastShotTime = Date.now();
+
+		// Initialize sound manager
+		const soundManager = SoundManager.init();
+
+		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
 				['background.png', 'player-ship.png', 'alien-ship.png', 'energy-blast.png']
-				);
+			);
+			await soundManager.loadSounds({
+				'shoot': 'laser_1.2.m4a',
+				'explosion': 'explosion_medium.m4a',
+				'hit': 'explosion_small.m4a'
+			});
 		})();
-		
+
 		backgroundSprite = new Sprite(
 			'background.png',
 			new Vector2D(0, 0),
@@ -282,6 +293,7 @@
 						shotVelocity
 					);
 					shots.push(newShot);
+					soundManager.play('shoot', 0.3);
 				}
 			}
 
@@ -317,6 +329,7 @@
 						aliensToRemove.add(alien);
 						shotsToRemove.add(shot);
 						score += 100; // Award points for destroying alien
+						soundManager.play('explosion', 0.5);
 					}
 				}
 			}
@@ -327,6 +340,7 @@
 					aliensToRemove.add(alien);
 					player.health -= alien.health; // Damage player by alien's health value
 					console.log(`Player hit! Health: ${player.health}`);
+					soundManager.play('hit', 0.6);
 				}
 			}
 
@@ -406,6 +420,7 @@
 							shotVelocity
 						);
 						shots.push(newShot);
+						soundManager.play('shoot', 0.3);
 					}
 				}
 
