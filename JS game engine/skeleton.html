@@ -73,10 +73,12 @@
 			await musicPlayer.loadMusic('slow_guitar.json');
 		})();
 
+		// Background will be tiled - store a single tile sprite
+		let backgroundTileSize = new Vector2D(800, 600); // Size of background.png
 		backgroundSprite = new Sprite(
 			'background.png',
 			new Vector2D(0, 0),
-			new Vector2D(canvas.width, canvas.height)
+			backgroundTileSize
 		);
 		let player = new Player();
 
@@ -172,7 +174,24 @@
 				canvas.height/2-player.sprite.position.y
 			);
 
-			backgroundSprite.draw();
+			// Draw tiled background
+			const tileWidth = backgroundTileSize.x;
+			const tileHeight = backgroundTileSize.y;
+
+			// Calculate which tiles are visible
+			const startX = Math.floor((player.sprite.position.x - canvas.width) / tileWidth) * tileWidth;
+			const startY = Math.floor((player.sprite.position.y - canvas.height) / tileHeight) * tileHeight;
+			const endX = Math.ceil((player.sprite.position.x + canvas.width) / tileWidth) * tileWidth;
+			const endY = Math.ceil((player.sprite.position.y + canvas.height) / tileHeight) * tileHeight;
+
+			// Draw tiles
+			for (let x = startX; x <= endX; x += tileWidth) {
+				for (let y = startY; y <= endY; y += tileHeight) {
+					backgroundSprite.position.x = x + tileWidth / 2;
+					backgroundSprite.position.y = y + tileHeight / 2;
+					backgroundSprite.draw();
+				}
+			}
 
 			player.draw();
 
