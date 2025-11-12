@@ -139,7 +139,18 @@
 			for (const shot of shots) {
 				shot.update();
 			}
-			
+
+			// Remove entities that are too far from player (memory leak fix)
+			const despawnDistance = Math.max(canvas.width, canvas.height) * 2;
+			aliens = aliens.filter(alien => {
+				const distance = alien.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
+			shots = shots.filter(shot => {
+				const distance = shot.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
+
 			checkGamepadInput();
 		}
 		
