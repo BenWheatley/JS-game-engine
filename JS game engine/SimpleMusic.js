@@ -61,10 +61,10 @@ class Note {
     this.oscillator = new OscillatorNode(Note.audioContext, { type: 'sine', frequency: this.frequency });
     this.oscillator.connect(this.gainNode);
 
-    // Quick fade-in to prevent click at start (5ms)
+    // Fade-in to prevent click at start (10ms)
     const now = Note.audioContext.currentTime;
-    this.gainNode.gain.setValueAtTime(0, now);
-    this.gainNode.gain.linearRampToValueAtTime(0.3, now + 0.005);
+    this.gainNode.gain.setValueAtTime(0.01, now); // Start from 0.01 for exponential (can't start from 0)
+    this.gainNode.gain.exponentialRampToValueAtTime(0.5, now + 0.01);
 
     this.oscillator.start();
   }
@@ -74,11 +74,15 @@ class Note {
       return;
     }
 
-    // Fade out over 20ms to prevent click
+    // Exponential fade out over 50ms to prevent click (sounds more natural)
     const now = Note.audioContext.currentTime;
+    const fadeTime = 0.05; // 50ms fade-out
+
     this.gainNode.gain.cancelScheduledValues(now);
-    this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, now);
-    this.gainNode.gain.linearRampToValueAtTime(0, now + 0.02);
+    const currentGain = this.gainNode.gain.value;
+    this.gainNode.gain.setValueAtTime(currentGain > 0 ? currentGain : 0.01, now);
+    // Use exponential ramp to near-zero (can't use exact 0 with exponential)
+    this.gainNode.gain.exponentialRampToValueAtTime(0.001, now + fadeTime);
 
     // Stop and disconnect after fade-out completes
     setTimeout(() => {
@@ -91,7 +95,7 @@ class Note {
         this.gainNode.disconnect();
         this.gainNode = null;
       }
-    }, 25); // 20ms fade + 5ms buffer
+    }, (fadeTime * 1000) + 10); // fadeTime in ms + small buffer
   }
 
   static start(noteName) {
