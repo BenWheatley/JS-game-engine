@@ -15,6 +15,7 @@ class Note {
     this.note = note;
     this.frequency = this.getFrequencyFromNote();
     this.oscillator = null;
+    this.gainNode = null;
   }
 
   getFrequencyFromNote() {
@@ -51,15 +52,46 @@ class Note {
     if (!Note.audioContext) {
       Note.initAudioContext();
     }
+
+    // Create gain node for envelope control (prevents clicks)
+    this.gainNode = Note.audioContext.createGain();
+    this.gainNode.connect(Note.audioContext.destination);
+
+    // Create oscillator
     this.oscillator = new OscillatorNode(Note.audioContext, { type: 'sine', frequency: this.frequency });
-    this.oscillator.connect(Note.audioContext.destination);
+    this.oscillator.connect(this.gainNode);
+
+    // Quick fade-in to prevent click at start (5ms)
+    const now = Note.audioContext.currentTime;
+    this.gainNode.gain.setValueAtTime(0, now);
+    this.gainNode.gain.linearRampToValueAtTime(0.3, now + 0.005);
+
     this.oscillator.start();
   }
 
   stop() {
-    this.oscillator.stop();
-    this.oscillator.disconnect();
-    this.oscillator = null;
+    if (!this.oscillator || !this.gainNode) {
+      return;
+    }
+
+    // Fade out over 20ms to prevent click
+    const now = Note.audioContext.currentTime;
+    this.gainNode.gain.cancelScheduledValues(now);
+    this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, now);
+    this.gainNode.gain.linearRampToValueAtTime(0, now + 0.02);
+
+    // Stop and disconnect after fade-out completes
+    setTimeout(() => {
+      if (this.oscillator) {
+        this.oscillator.stop();
+        this.oscillator.disconnect();
+        this.oscillator = null;
+      }
+      if (this.gainNode) {
+        this.gainNode.disconnect();
+        this.gainNode = null;
+      }
+    }, 25); // 20ms fade + 5ms buffer
   }
 
   static start(noteName) {

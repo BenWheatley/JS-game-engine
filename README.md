@@ -79,7 +79,8 @@ Player weapon projectiles with configurable velocity that fires in the direction
 Web Audio API integration featuring:
 - Note-to-frequency conversion (supports standard notation like "A4", "C#5")
 - MIDI pitch number to note name conversion
-- Oscillator-based sound synthesis
+- Oscillator-based sound synthesis with envelope control
+- Click-free note start/stop with fade-in/fade-out envelopes
 - Dynamic note start/stop control
 - Automatic AudioContext initialization
 - Static methods for playing and stopping notes globally
