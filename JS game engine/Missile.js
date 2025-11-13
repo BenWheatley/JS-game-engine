@@ -6,5 +6,7 @@ class Missile extends Projectile {
 
   constructor(position, velocity) {
     super(position, velocity, Missile.imageUrl, Missile.size, Missile.damage);
+    // Set rotation to face direction of travel (+PI/2 because sprite faces up at 0 rotation)
+    this.sprite.rotation = Math.atan2(velocity.y, velocity.x) + Math.PI / 2;
   }
 }
