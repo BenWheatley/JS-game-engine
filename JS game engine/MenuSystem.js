@@ -65,9 +65,9 @@ class MenuSystem {
     const slider = document.createElement('input');
     slider.type = 'range';
     slider.className = 'menu-slider';
-    slider.min = config.min || 0;
-    slider.max = config.max || 100;
-    slider.value = config.value || 50;
+    slider.min = config.min !== undefined ? config.min : 0;
+    slider.max = config.max !== undefined ? config.max : 100;
+    slider.value = config.value !== undefined ? config.value : config.max;
     slider.oninput = (e) => {
       valueDisplay.textContent = e.target.value + (config.suffix || '');
       if (config.onChange) config.onChange(e.target.value);
