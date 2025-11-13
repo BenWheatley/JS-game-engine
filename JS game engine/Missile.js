@@ -1,7 +1,7 @@
 class Missile extends Projectile {
   static imageUrl = 'missile.png';
-  static size = new Vector2D(20, 20);
-  static speed = 0.08; // Speed magnitude (slower than regular shots)
+  static size = new Vector2D(40, 40);
+  static speed = 3;
   static damage = 50;
 
   constructor(position, velocity) {
