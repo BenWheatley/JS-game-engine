@@ -19,6 +19,7 @@
     <script type="text/javascript" src="GameEntity.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
 	<script type="text/javascript" src="Alien.js"></script>
+	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="SoundManager.js"></script>
@@ -52,6 +53,9 @@
 		let aliens = [];
 		let alienDelayMilliseconds = 500;
 		let lastAlienTime = Date.now();
+		let asteroids = [];
+		let asteroidDelayMilliseconds = 2000;
+		let lastAsteroidTime = Date.now();
 		let shots = [];
 		let shotDelayMilliseconds = 500;
 		let lastShotTime = Date.now();
@@ -63,7 +67,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'player-ship.png', 'alien-ship.png', 'energy-blast.png']
+				['background.png', 'player-ship.png', 'alien-ship.png', 'asteroid-1.png', 'energy-blast.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
@@ -112,9 +116,11 @@
 		function resetGame() {
 			player = new Player();
 			aliens = [];
+			asteroids = [];
 			shots = [];
 			score = 0;
 			lastAlienTime = Date.now();
+			lastAsteroidTime = Date.now();
 			lastShotTime = Date.now();
 		}
 
@@ -197,6 +203,9 @@
 
 			for (const alien of aliens) {
 				alien.draw();
+			}
+			for (const asteroid of asteroids) {
+				asteroid.draw();
 			}
 			for (const shot of shots) {
 				shot.draw();
@@ -335,10 +344,23 @@
 				);
 				aliens.push(newAlien);
 			}
-			
+
+			if (Date.now() > lastAsteroidTime + asteroidDelayMilliseconds) {
+				lastAsteroidTime = Date.now();
+				const newAsteroid = new Asteroid(
+					player.sprite.position,
+					canvas.width,
+					canvas.height
+				);
+				asteroids.push(newAsteroid);
+			}
+
 			for (const alien of aliens) {
 				alien.sprite.position.y += alienSpeed;
 				alien.sprite.rotation += 0.02;
+			}
+			for (const asteroid of asteroids) {
+				asteroid.update(deltaTime);
 			}
 			for (const shot of shots) {
 				shot.update();
@@ -360,6 +382,24 @@
 				}
 			}
 
+			// Check shot-asteroid collisions
+			const asteroidsToRemove = new Set();
+			for (const shot of shots) {
+				for (const asteroid of asteroids) {
+					if (checkCollision(shot, asteroid)) {
+						shotsToRemove.add(shot);
+						asteroid.health -= 1;
+						if (asteroid.health <= 0) {
+							asteroidsToRemove.add(asteroid);
+							score += 200; // Award more points for destroying asteroid
+							soundManager.play('explosion', 0.5);
+						} else {
+							soundManager.play('hit', 0.4);
+						}
+					}
+				}
+			}
+
 			// Check player-alien collisions
 			for (const alien of aliens) {
 				if (checkCollision(player, alien)) {
@@ -370,8 +410,19 @@
 				}
 			}
 
+			// Check player-asteroid collisions
+			for (const asteroid of asteroids) {
+				if (checkCollision(player, asteroid)) {
+					asteroidsToRemove.add(asteroid);
+					player.health -= 50; // Asteroids deal fixed damage
+					console.log(`Player hit by asteroid! Health: ${player.health}`);
+					soundManager.play('hit', 0.6);
+				}
+			}
+
 			// Remove collided entities
 			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
+			asteroids = asteroids.filter(asteroid => !asteroidsToRemove.has(asteroid));
 			shots = shots.filter(shot => !shotsToRemove.has(shot));
 
 			// Check for game over
@@ -385,6 +436,12 @@
 			aliens = aliens.filter(alien => {
 				const distance = alien.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
+			});
+			asteroids = asteroids.filter(asteroid => {
+				return !asteroid.shouldDespawn(
+					player.sprite.position,
+					new Vector2D(canvas.width, canvas.height)
+				);
 			});
 			shots = shots.filter(shot => {
 				const distance = shot.sprite.position.dist(player.sprite.position);
