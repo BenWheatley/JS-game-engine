@@ -94,7 +94,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'player-ship.png', 'alien-ship.png', 'asteroid-1.png', 'energy-blast.png']
+				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'asteroid-1.png', 'energy-blast.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
@@ -454,7 +454,7 @@
 			}
 
 			for (const alienScout of alienScouts) {
-				alienScout.update(deltaTime);
+				alienScout.update(deltaTime, player.sprite.position);
 			}
 			for (const asteroid of asteroids) {
 				asteroid.update(deltaTime);
