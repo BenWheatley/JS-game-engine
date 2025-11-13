@@ -269,6 +269,9 @@
 				'hit': 'explosion_small.m4a'
 			});
 			await musicPlayer.loadMusic('slow_guitar.json');
+
+			// Initialize music volume after Note class is available
+			Note.setVolume(musicVolume / 100);
 		})();
 
 		// Background will be tiled - store a single tile sprite
@@ -420,7 +423,7 @@
 						suffix: '%',
 						onChange: (value) => {
 							musicVolume = parseInt(value);
-							// TODO: Apply music volume to music player
+							Note.setVolume(musicVolume / 100); // Convert percentage to 0.0-1.0
 						}
 					},
 					{

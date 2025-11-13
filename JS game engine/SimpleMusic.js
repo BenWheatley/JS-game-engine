@@ -3,12 +3,17 @@ class Note {
   static baseFrequency = 440;
   static noteLetters = 'C C# D D# E F F# G G# A A# B'.split(' ');
   static audioContext = null;
+  static volume = 0.5; // 0.0 to 1.0
 
   static initAudioContext() {
     if (!Note.audioContext) {
       Note.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
     return Note.audioContext;
+  }
+
+  static setVolume(volume) {
+    Note.volume = Math.max(0, Math.min(1, volume)); // Clamp between 0 and 1
   }
 
   constructor(note) {
@@ -63,8 +68,9 @@ class Note {
 
     // Fade-in to prevent click at start (50ms for smoother attack)
     const now = Note.audioContext.currentTime;
+    const targetVolume = Note.volume > 0 ? Note.volume : 0.001; // Ensure > 0 for exponential ramp
     this.gainNode.gain.setValueAtTime(0.001, now); // Start from very quiet for exponential
-    this.gainNode.gain.exponentialRampToValueAtTime(0.5, now + 0.05);
+    this.gainNode.gain.exponentialRampToValueAtTime(targetVolume, now + 0.05);
 
     this.oscillator.start();
   }
