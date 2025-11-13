@@ -10,8 +10,89 @@
 <head>
 	<title>Game Engine</title>
 	<style type="text/css">
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: Arial, sans-serif;
+			background: #000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 100vh;
+		}
+
+		#gameContainer {
+			position: relative;
+		}
+
 		canvas {
 			border: 1px solid black;
+			display: block;
+		}
+
+		#menuOverlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 800px;
+			height: 600px;
+			background: rgba(0, 0, 0, 0.9);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			z-index: 10;
+		}
+
+		#menuOverlay.hidden {
+			display: none;
+		}
+
+		.menu-title {
+			color: #fff;
+			font-size: 48px;
+			font-weight: bold;
+			margin-bottom: 60px;
+			text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+		}
+
+		.menu-buttons {
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		.menu-button {
+			background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+			border: 2px solid #666;
+			color: #fff;
+			padding: 15px 60px;
+			font-size: 24px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+		}
+
+		.menu-button:hover {
+			background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%);
+			border-color: #888;
+			transform: translateY(-2px);
+			box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+		}
+
+		.menu-button:active {
+			transform: translateY(0);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+		}
+
+		.menu-instructions {
+			position: absolute;
+			bottom: 40px;
+			color: #999;
+			font-size: 14px;
+			text-align: center;
 		}
 	</style>
 	<script type="text/javascript" src="GPTEngine.js"></script>
@@ -26,9 +107,17 @@
 	<script type="text/javascript" src="SoundManager.js"></script>
 	<script type="text/javascript" src="SimpleMusic.js"></script>
 	<script type="text/javascript" src="MusicPlayer.js"></script>
+	<script type="text/javascript" src="MenuSystem.js"></script>
 </head>
 <body>
-	<canvas id="gameCanvas" width="800" height="600"></canvas>
+	<div id="gameContainer">
+		<canvas id="gameCanvas" width="800" height="600"></canvas>
+		<div id="menuOverlay">
+			<div class="menu-title" id="menuTitle">SPACE SHOOTER</div>
+			<div class="menu-buttons" id="menuButtons"></div>
+			<div class="menu-instructions" id="menuInstructions"></div>
+		</div>
+	</div>
 	<script type="text/javascript">
 		const canvasName = "gameCanvas";
 		// Get the canvas element
@@ -38,6 +127,14 @@
 		
 		const engine = GPTEngine.begin(document, canvasName);
 		Sprite.begin(context);
+
+		// Initialize menu system
+		const menuSystem = new MenuSystem(
+			document.getElementById('menuOverlay'),
+			document.getElementById('menuTitle'),
+			document.getElementById('menuButtons'),
+			document.getElementById('menuInstructions')
+		);
 
 		// Game state management
 		const GameState = {
@@ -114,6 +211,7 @@
 		function startGame() {
 			currentState = GameState.PLAYING;
 			resetGame();
+			menuSystem.hideMenu();
 			musicPlayer.play();
 		}
 
@@ -133,11 +231,52 @@
 		function gameOver() {
 			currentState = GameState.GAME_OVER;
 			musicPlayer.stop();
+			showGameOverMenu();
 		}
 
 		function returnToMenu() {
 			currentState = GameState.MENU;
 			musicPlayer.stop();
+			showMainMenu();
+		}
+
+		// Menu configuration functions
+		function showMainMenu() {
+			menuSystem.showMenu({
+				title: 'SPACE SHOOTER',
+				buttons: [
+					{
+						label: 'New Game',
+						action: () => startGame()
+					},
+					{
+						label: 'High Scores',
+						action: () => alert('High Scores - Coming Soon!')
+					},
+					{
+						label: 'Achievements',
+						action: () => alert('Achievements - Coming Soon!')
+					}
+				],
+				instructions: 'Arrow Keys or Left Stick: Move | Space or A Button: Shoot | ESC or Start: Fullscreen'
+			});
+		}
+
+		function showGameOverMenu() {
+			menuSystem.showMenu({
+				title: 'GAME OVER',
+				buttons: [
+					{
+						label: 'Restart',
+						action: () => startGame()
+					},
+					{
+						label: 'Main Menu',
+						action: () => returnToMenu()
+					}
+				],
+				instructions: `Final Score: ${score}`
+			});
 		}
 
 		// Render loop
@@ -158,25 +297,9 @@
 		}
 
 		function renderMenu() {
-			// Clear screen
+			// Clear screen - menu is now HTML overlay
 			context.fillStyle = '#000000';
 			context.fillRect(0, 0, canvas.width, canvas.height);
-
-			// Title
-			context.fillStyle = '#FFFFFF';
-			context.font = 'bold 48px Arial';
-			context.textAlign = 'center';
-			context.fillText('SPACE SHOOTER', canvas.width / 2, canvas.height / 3);
-
-			// Instructions
-			context.font = '24px Arial';
-			context.fillText('Press SPACE or A Button to Start', canvas.width / 2, canvas.height / 2);
-
-			context.font = '18px Arial';
-			context.fillStyle = '#CCCCCC';
-			context.fillText('Arrow Keys or Left Stick: Move', canvas.width / 2, canvas.height / 2 + 60);
-			context.fillText('Space or A Button: Shoot', canvas.width / 2, canvas.height / 2 + 90);
-			context.fillText('ESC or Start: Fullscreen', canvas.width / 2, canvas.height / 2 + 120);
 		}
 
 		function renderGame() {
@@ -231,25 +354,9 @@
 		}
 
 		function renderGameOver() {
-			// Clear screen
+			// Clear screen - game over menu is now HTML overlay
 			context.fillStyle = '#000000';
 			context.fillRect(0, 0, canvas.width, canvas.height);
-
-			// Game Over text
-			context.fillStyle = '#FF0000';
-			context.font = 'bold 64px Arial';
-			context.textAlign = 'center';
-			context.fillText('GAME OVER', canvas.width / 2, canvas.height / 3);
-
-			// Score
-			context.fillStyle = '#FFFFFF';
-			context.font = '32px Arial';
-			context.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2);
-
-			// Restart instructions
-			context.font = '24px Arial';
-			context.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 80);
-			context.fillText('Press M for Menu', canvas.width / 2, canvas.height / 2 + 120);
 		}
 		
 		// Update loop; deltaTime is milliseconds
@@ -276,40 +383,11 @@
 		}
 
 		function updateMenu() {
-			// Start game on space key
-			if (engine.keyDown[" "]) {
-				engine.keyDown[" "] = false;
-				startGame();
-			}
-
-			// Check gamepad input for starting
-			const gamepads = navigator.getGamepads();
-			for (const gamepad of gamepads) {
-				if (gamepad && gamepad.buttons[0] && gamepad.buttons[0].pressed) {
-					if (!gamepad.buttons[0].wasPressed) {
-						startGame();
-						gamepad.buttons[0].wasPressed = true;
-					}
-				} else if (gamepad && gamepad.buttons[0]) {
-					gamepad.buttons[0].wasPressed = false;
-				}
-			}
+			// Menu is now HTML-based, no keyboard input needed
 		}
 
 		function updateGameOver() {
-			// Restart on R key
-			if (engine.keyDown["r"] || engine.keyDown["R"]) {
-				engine.keyDown["r"] = false;
-				engine.keyDown["R"] = false;
-				startGame();
-			}
-
-			// Return to menu on M key
-			if (engine.keyDown["m"] || engine.keyDown["M"]) {
-				engine.keyDown["m"] = false;
-				engine.keyDown["M"] = false;
-				returnToMenu();
-			}
+			// Game over menu is now HTML-based, no keyboard input needed
 		}
 
 		function updateGame(deltaTime) {
@@ -566,8 +644,9 @@
 			// Call the loop function again
 			window.requestAnimationFrame(loop);
 		}
-		
-		// Call the loop function for the first time
+
+		// Show main menu and start game loop
+		showMainMenu();
 		loop();
 	</script>
 </body>
