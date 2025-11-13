@@ -22,6 +22,8 @@
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="AsteroidSpawn.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
+	<script type="text/javascript" src="Missile.js"></script>
+	<script type="text/javascript" src="MissileCruiser.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="SoundManager.js"></script>
 	<script type="text/javascript" src="SimpleMusic.js"></script>
@@ -105,6 +107,10 @@
 		let alienFighterDelayMilliseconds = 3000;
 		let lastAlienFighterTime = Date.now();
 		let alienFighterShots = []; // Shots fired by alien fighters
+		let missileCruisers = [];
+		let missileCruiserDelayMilliseconds = 5000;
+		let lastMissileCruiserTime = Date.now();
+		let cruiserMissiles = []; // Missiles fired by missile cruisers
 		let asteroids = [];
 		let asteroidDelayMilliseconds = 2000;
 		let lastAsteroidTime = Date.now();
@@ -120,12 +126,13 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'asteroid-1.png', 'asteroid-2.png', 'energy-blast.png']
+				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'missile_ship.png', 'asteroid-1.png', 'asteroid-2.png', 'energy-blast.png', 'missile.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
 				'explosion': 'explosion_medium.m4a',
-				'hit': 'explosion_small.m4a'
+				'hit': 'explosion_small.m4a',
+				'missile_launcher': 'missile_launcher.m4a'
 			});
 			await musicPlayer.loadMusic('slow_guitar.json');
 
@@ -176,6 +183,8 @@
 			alienScouts = [];
 			alienFighters = [];
 			alienFighterShots = [];
+			missileCruisers = [];
+			cruiserMissiles = [];
 			asteroids = [];
 			asteroidSpawns = [];
 			shots = [];
@@ -183,6 +192,7 @@
 			lastAlienTime = Date.now();
 			lastAlienScoutTime = Date.now();
 			lastAlienFighterTime = Date.now();
+			lastMissileCruiserTime = Date.now();
 			lastAsteroidTime = Date.now();
 			lastShotTime = Date.now();
 		}
@@ -501,6 +511,9 @@
 			for (const alienFighter of alienFighters) {
 				alienFighter.draw();
 			}
+			for (const missileCruiser of missileCruisers) {
+				missileCruiser.draw();
+			}
 			for (const asteroid of asteroids) {
 				asteroid.draw();
 			}
@@ -512,6 +525,9 @@
 			}
 			for (const alienShot of alienFighterShots) {
 				alienShot.draw();
+			}
+			for (const missile of cruiserMissiles) {
+				missile.draw();
 			}
 
 			context.restore();
@@ -603,6 +619,13 @@
 			}
 			for (const alienFighter of alienFighters) {
 				const pos = worldToMinimap(alienFighter.sprite.position);
+				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
+				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
+					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
+				}
+			}
+			for (const missileCruiser of missileCruisers) {
+				const pos = worldToMinimap(missileCruiser.sprite.position);
 				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
 				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
 					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
@@ -711,6 +734,16 @@
 				alienFighters.push(newAlienFighter);
 			}
 
+			if (Date.now() > lastMissileCruiserTime + missileCruiserDelayMilliseconds) {
+				lastMissileCruiserTime = Date.now();
+				const newMissileCruiser = new MissileCruiser(
+					player.sprite.position,
+					canvas.width,
+					canvas.height
+				);
+				missileCruisers.push(newMissileCruiser);
+			}
+
 			if (Date.now() > lastAsteroidTime + asteroidDelayMilliseconds) {
 				lastAsteroidTime = Date.now();
 				const newAsteroid = new Asteroid(
@@ -733,6 +766,15 @@
 					playSoundEffect('shoot', 0.2); // Quieter than player shots
 				}
 			}
+			for (const missileCruiser of missileCruisers) {
+				missileCruiser.update(deltaTime, player.sprite.position);
+				// Check if cruiser wants to shoot
+				const newMissile = missileCruiser.tryShoot();
+				if (newMissile) {
+					cruiserMissiles.push(newMissile);
+					playSoundEffect('missile_launcher', 0.3);
+				}
+			}
 			for (const asteroid of asteroids) {
 				asteroid.update(deltaTime);
 			}
@@ -745,13 +787,18 @@
 			for (const alienShot of alienFighterShots) {
 				alienShot.update();
 			}
+			for (const missile of cruiserMissiles) {
+				missile.update();
+			}
 
 			// Collision detection
 			const aliensToRemove = new Set();
 			const alienScoutsToRemove = new Set();
 			const alienFightersToRemove = new Set();
+			const missileCruisersToRemove = new Set();
 			const shotsToRemove = new Set();
 			const alienShotsToRemove = new Set();
+			const missilesToRemove = new Set();
 
 			// Check shot-alien collisions
 			for (const shot of shots) {
@@ -785,6 +832,23 @@
 						shotsToRemove.add(shot);
 						score += 200; // Award points for destroying alien fighter
 						playSoundEffect('explosion', 0.5);
+					}
+				}
+			}
+
+			// Check shot-missileCruiser collisions
+			for (const shot of shots) {
+				for (const missileCruiser of missileCruisers) {
+					if (checkCollision(shot, missileCruiser)) {
+						shotsToRemove.add(shot);
+						missileCruiser.health -= shot.damage;
+						if (missileCruiser.health <= 0) {
+							missileCruisersToRemove.add(missileCruiser);
+							score += 300; // Award points for destroying missile cruiser
+							playSoundEffect('explosion', 0.6);
+						} else {
+							playSoundEffect('hit', 0.4);
+						}
 					}
 				}
 			}
@@ -853,6 +917,16 @@
 				}
 			}
 
+			// Check player-missileCruiser collisions
+			for (const missileCruiser of missileCruisers) {
+				if (checkCollision(player, missileCruiser)) {
+					missileCruisersToRemove.add(missileCruiser);
+					player.health -= missileCruiser.health; // Damage player by missile cruiser's health value
+					console.log(`Player hit by missile cruiser! Health: ${player.health}`);
+					playSoundEffect('hit', 0.7);
+				}
+			}
+
 			// Check player-asteroid collisions
 			for (const asteroid of asteroids) {
 				if (checkCollision(player, asteroid)) {
@@ -883,14 +957,26 @@
 				}
 			}
 
+			// Check missile-player collisions
+			for (const missile of cruiserMissiles) {
+				if (checkCollision(player, missile)) {
+					missilesToRemove.add(missile);
+					player.health -= missile.damage; // Missiles deal 50 damage
+					console.log(`Player hit by missile! Health: ${player.health}`);
+					playSoundEffect('explosion', 0.6);
+				}
+			}
+
 			// Remove collided entities
 			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
 			alienScouts = alienScouts.filter(alienScout => !alienScoutsToRemove.has(alienScout));
 			alienFighters = alienFighters.filter(alienFighter => !alienFightersToRemove.has(alienFighter));
+			missileCruisers = missileCruisers.filter(missileCruiser => !missileCruisersToRemove.has(missileCruiser));
 			asteroids = asteroids.filter(asteroid => !asteroidsToRemove.has(asteroid));
 			asteroidSpawns = asteroidSpawns.filter(asteroidSpawn => !asteroidSpawnsToRemove.has(asteroidSpawn));
 			shots = shots.filter(shot => !shotsToRemove.has(shot));
 			alienFighterShots = alienFighterShots.filter(alienShot => !alienShotsToRemove.has(alienShot));
+			cruiserMissiles = cruiserMissiles.filter(missile => !missilesToRemove.has(missile));
 
 			// Check for game over
 			if (player.health <= 0) {
@@ -912,6 +998,10 @@
 				const distance = alienFighter.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
+			missileCruisers = missileCruisers.filter(missileCruiser => {
+				const distance = missileCruiser.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
 			asteroids = asteroids.filter(asteroid => {
 				return !asteroid.shouldDespawn(
 					player.sprite.position,
@@ -930,6 +1020,10 @@
 			});
 			alienFighterShots = alienFighterShots.filter(alienShot => {
 				const distance = alienShot.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
+			cruiserMissiles = cruiserMissiles.filter(missile => {
+				const distance = missile.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
 
