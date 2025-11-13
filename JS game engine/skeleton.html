@@ -985,36 +985,117 @@
 				return;
 			}
 
-			// Remove entities that are too far from player (avoid memory leak)
-			const despawnDistance = Math.max(canvas.width, canvas.height) * 2;
-			aliens = aliens.filter(alien => {
-				const distance = alien.sprite.position.dist(player.sprite.position);
-				return distance < despawnDistance;
-			});
-			alienScouts = alienScouts.filter(alienScout => {
-				const distance = alienScout.sprite.position.dist(player.sprite.position);
-				return distance < despawnDistance;
-			});
-			alienFighters = alienFighters.filter(alienFighter => {
-				const distance = alienFighter.sprite.position.dist(player.sprite.position);
-				return distance < despawnDistance;
-			});
-			missileCruisers = missileCruisers.filter(missileCruiser => {
-				const distance = missileCruiser.sprite.position.dist(player.sprite.position);
-				return distance < despawnDistance;
-			});
-			asteroids = asteroids.filter(asteroid => {
-				return !asteroid.shouldDespawn(
-					player.sprite.position,
-					new Vector2D(canvas.width, canvas.height)
-				);
-			});
-			asteroidSpawns = asteroidSpawns.filter(asteroidSpawn => {
-				return !asteroidSpawn.shouldDespawn(
-					player.sprite.position,
-					new Vector2D(canvas.width, canvas.height)
-				);
-			});
+			// Wrap NPCs that go beyond minimap bounds, despawn projectiles
+			const wrapDistance = 1000; // Minimap range - wrap NPCs at this distance
+			const despawnDistance = Math.max(canvas.width, canvas.height) * 2; // Despawn projectiles
+
+			// Wrap aliens around minimap edges
+			for (const alien of aliens) {
+				const offsetX = alien.sprite.position.x - player.sprite.position.x;
+				const offsetY = alien.sprite.position.y - player.sprite.position.y;
+
+				if (offsetX > wrapDistance) {
+					alien.sprite.position.x = player.sprite.position.x - wrapDistance;
+				} else if (offsetX < -wrapDistance) {
+					alien.sprite.position.x = player.sprite.position.x + wrapDistance;
+				}
+
+				if (offsetY > wrapDistance) {
+					alien.sprite.position.y = player.sprite.position.y - wrapDistance;
+				} else if (offsetY < -wrapDistance) {
+					alien.sprite.position.y = player.sprite.position.y + wrapDistance;
+				}
+			}
+
+			// Wrap alien scouts around minimap edges
+			for (const alienScout of alienScouts) {
+				const offsetX = alienScout.sprite.position.x - player.sprite.position.x;
+				const offsetY = alienScout.sprite.position.y - player.sprite.position.y;
+
+				if (offsetX > wrapDistance) {
+					alienScout.sprite.position.x = player.sprite.position.x - wrapDistance;
+				} else if (offsetX < -wrapDistance) {
+					alienScout.sprite.position.x = player.sprite.position.x + wrapDistance;
+				}
+
+				if (offsetY > wrapDistance) {
+					alienScout.sprite.position.y = player.sprite.position.y - wrapDistance;
+				} else if (offsetY < -wrapDistance) {
+					alienScout.sprite.position.y = player.sprite.position.y + wrapDistance;
+				}
+			}
+
+			// Wrap alien fighters around minimap edges
+			for (const alienFighter of alienFighters) {
+				const offsetX = alienFighter.sprite.position.x - player.sprite.position.x;
+				const offsetY = alienFighter.sprite.position.y - player.sprite.position.y;
+
+				if (offsetX > wrapDistance) {
+					alienFighter.sprite.position.x = player.sprite.position.x - wrapDistance;
+				} else if (offsetX < -wrapDistance) {
+					alienFighter.sprite.position.x = player.sprite.position.x + wrapDistance;
+				}
+
+				if (offsetY > wrapDistance) {
+					alienFighter.sprite.position.y = player.sprite.position.y - wrapDistance;
+				} else if (offsetY < -wrapDistance) {
+					alienFighter.sprite.position.y = player.sprite.position.y + wrapDistance;
+				}
+			}
+
+			// Wrap missile cruisers around minimap edges
+			for (const missileCruiser of missileCruisers) {
+				const offsetX = missileCruiser.sprite.position.x - player.sprite.position.x;
+				const offsetY = missileCruiser.sprite.position.y - player.sprite.position.y;
+
+				if (offsetX > wrapDistance) {
+					missileCruiser.sprite.position.x = player.sprite.position.x - wrapDistance;
+				} else if (offsetX < -wrapDistance) {
+					missileCruiser.sprite.position.x = player.sprite.position.x + wrapDistance;
+				}
+
+				if (offsetY > wrapDistance) {
+					missileCruiser.sprite.position.y = player.sprite.position.y - wrapDistance;
+				} else if (offsetY < -wrapDistance) {
+					missileCruiser.sprite.position.y = player.sprite.position.y + wrapDistance;
+				}
+			}
+
+			// Wrap asteroids around minimap edges
+			for (const asteroid of asteroids) {
+				const offsetX = asteroid.sprite.position.x - player.sprite.position.x;
+				const offsetY = asteroid.sprite.position.y - player.sprite.position.y;
+
+				if (offsetX > wrapDistance) {
+					asteroid.sprite.position.x = player.sprite.position.x - wrapDistance;
+				} else if (offsetX < -wrapDistance) {
+					asteroid.sprite.position.x = player.sprite.position.x + wrapDistance;
+				}
+
+				if (offsetY > wrapDistance) {
+					asteroid.sprite.position.y = player.sprite.position.y - wrapDistance;
+				} else if (offsetY < -wrapDistance) {
+					asteroid.sprite.position.y = player.sprite.position.y + wrapDistance;
+				}
+			}
+
+			// Wrap asteroid spawns around minimap edges
+			for (const asteroidSpawn of asteroidSpawns) {
+				const offsetX = asteroidSpawn.sprite.position.x - player.sprite.position.x;
+				const offsetY = asteroidSpawn.sprite.position.y - player.sprite.position.y;
+
+				if (offsetX > wrapDistance) {
+					asteroidSpawn.sprite.position.x = player.sprite.position.x - wrapDistance;
+				} else if (offsetX < -wrapDistance) {
+					asteroidSpawn.sprite.position.x = player.sprite.position.x + wrapDistance;
+				}
+
+				if (offsetY > wrapDistance) {
+					asteroidSpawn.sprite.position.y = player.sprite.position.y - wrapDistance;
+				} else if (offsetY < -wrapDistance) {
+					asteroidSpawn.sprite.position.y = player.sprite.position.y + wrapDistance;
+				}
+			}
 			shots = shots.filter(shot => {
 				const distance = shot.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
