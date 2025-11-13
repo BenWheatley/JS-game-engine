@@ -227,12 +227,41 @@ canvas {
 	transition: background 0.2s ease;
 }
 
-.menu-score-row:hover:not(.empty) {
+.menu-score-row:hover:not(.empty):not(.ellipsis):not(.recent) {
 	background: rgba(255, 255, 255, 0.1);
 }
 
 .menu-score-row.empty {
 	opacity: 0.4;
+}
+
+.menu-score-row.recent {
+	background: rgba(255, 0, 0, 0.1);
+}
+
+.menu-score-row.recent:hover {
+	background: rgba(255, 0, 0, 0.15);
+}
+
+.menu-score-row.recent .menu-score-rank,
+.menu-score-row.recent .menu-score-content {
+	color: #ff0000;
+	font-weight: bold;
+}
+
+.menu-score-row.ellipsis {
+	justify-content: center;
+	cursor: default;
+}
+
+.menu-score-row.ellipsis:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.menu-score-row.ellipsis .menu-score-content {
+	text-align: center;
+	font-size: 24px;
+	color: #666;
 }
 
 .menu-score-rank {

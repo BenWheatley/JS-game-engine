@@ -161,18 +161,36 @@ class MenuSystem {
 
       const rank = document.createElement('span');
       rank.className = 'menu-score-rank';
-      rank.textContent = `${i + 1}.`;
 
       const nameAndScore = document.createElement('span');
       nameAndScore.className = 'menu-score-content';
 
       if (i < scores.length) {
         const entry = scores[i];
-        const date = new Date(entry.date);
-        const dateStr = date.toLocaleDateString();
-        const timeStr = date.toLocaleTimeString();
-        nameAndScore.textContent = `${entry.name} - ${entry.score} (${dateStr} ${timeStr})`;
+
+        // Set rank from entry (may differ from position for recent scores outside top 10)
+        rank.textContent = `${entry.rank}.`;
+
+        if (entry.isEllipsis) {
+          // Show ellipsis row
+          rank.textContent = '';
+          nameAndScore.textContent = '…';
+          row.classList.add('ellipsis');
+        } else {
+          // Show score entry
+          const date = new Date(entry.date);
+          const dateStr = date.toLocaleDateString();
+          const timeStr = date.toLocaleTimeString();
+          nameAndScore.textContent = `${entry.name} - ${entry.score} (${dateStr} ${timeStr})`;
+
+          // Highlight recent score
+          if (entry.isRecent) {
+            row.classList.add('recent');
+          }
+        }
       } else {
+        // Empty row
+        rank.textContent = `${i + 1}.`;
         nameAndScore.textContent = '-';
         row.classList.add('empty');
       }

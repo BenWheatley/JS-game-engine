@@ -231,28 +231,71 @@
 
 		function saveHighScore(name, score) {
 			const highScores = getHighScores();
+
+			// Clear isRecent flag from all existing scores
+			highScores.forEach(entry => delete entry.isRecent);
+
 			const newScore = {
 				name: name,
 				score: score,
-				date: new Date().toISOString()
+				date: new Date().toISOString(),
+				isRecent: true
 			};
 			highScores.push(newScore);
+
 			// Sort by score descending
 			highScores.sort((a, b) => b.score - a.score);
-			// Keep only top 10
-			const top10 = highScores.slice(0, 10);
-			localStorage.setItem('highScores', JSON.stringify(top10));
+
+			// Keep only top 100 to prevent unlimited growth
+			const top100 = highScores.slice(0, 100);
+			localStorage.setItem('highScores', JSON.stringify(top100));
 		}
 
 		function showHighScoresMenu() {
-			const highScores = getHighScores();
+			const allScores = getHighScores();
+
+			// Find the recent score and its rank
+			const recentIndex = allScores.findIndex(score => score.isRecent);
+			const recentRank = recentIndex >= 0 ? recentIndex + 1 : -1;
+
+			let displayScores = [];
+
+			if (recentRank === -1 || recentRank <= 10) {
+				// Recent score is in top 10 or doesn't exist, show top 10 normally
+				displayScores = allScores.slice(0, 10).map((score, index) => ({
+					...score,
+					rank: index + 1,
+					isEllipsis: false
+				}));
+			} else {
+				// Recent score is outside top 10
+				// Show positions 1-8
+				displayScores = allScores.slice(0, 8).map((score, index) => ({
+					...score,
+					rank: index + 1,
+					isEllipsis: false
+				}));
+
+				// Add ellipsis at position 9
+				displayScores.push({
+					isEllipsis: true,
+					rank: 9
+				});
+
+				// Add recent score at position 10 with its actual rank
+				displayScores.push({
+					...allScores[recentIndex],
+					rank: recentRank,
+					isEllipsis: false
+				});
+			}
 
 			menuSystem.showMenu({
 				title: 'HIGH SCORES',
 				items: [
 					{
 						type: 'scoreList',
-						scores: highScores
+						scores: displayScores
 					},
 					{
 						type: 'button',
