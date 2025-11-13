@@ -228,28 +228,20 @@
 
 		function showHighScoresMenu() {
 			const highScores = getHighScores();
-			let instructionsText = '';
-
-			if (highScores.length === 0) {
-				instructionsText = 'No high scores yet. Play a game to set a record!';
-			} else {
-				instructionsText = highScores.map((entry, index) => {
-					const date = new Date(entry.date);
-					const dateStr = date.toLocaleDateString();
-					return `${index + 1}. ${entry.name} - ${entry.score} (${dateStr})`;
-				}).join('\n');
-			}
 
 			menuSystem.showMenu({
 				title: 'HIGH SCORES',
 				items: [
 					{
+						type: 'scoreList',
+						scores: highScores
+					},
+					{
 						type: 'button',
 						label: 'Back',
 						action: () => showMainMenu()
 					}
-				],
-				instructions: instructionsText
+				]
 			});
 		}
 

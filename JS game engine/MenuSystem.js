@@ -31,6 +31,9 @@ class MenuSystem {
         case 'textInput':
           this.createTextInput(itemConfig);
           break;
+        case 'scoreList':
+          this.createScoreList(itemConfig);
+          break;
       }
     });
 
@@ -141,6 +144,43 @@ class MenuSystem {
 
     container.appendChild(label);
     container.appendChild(input);
+    this.buttonsElement.appendChild(container);
+  }
+
+  createScoreList(config) {
+    const container = document.createElement('div');
+    container.className = 'menu-score-list-container';
+
+    const scores = config.scores || [];
+    const maxScores = 10;
+
+    // Create rows for all 10 positions
+    for (let i = 0; i < maxScores; i++) {
+      const row = document.createElement('div');
+      row.className = 'menu-score-row';
+
+      const rank = document.createElement('span');
+      rank.className = 'menu-score-rank';
+      rank.textContent = `${i + 1}.`;
+
+      const nameAndScore = document.createElement('span');
+      nameAndScore.className = 'menu-score-content';
+
+      if (i < scores.length) {
+        const entry = scores[i];
+        const date = new Date(entry.date);
+        const dateStr = date.toLocaleDateString();
+        nameAndScore.textContent = `${entry.name} - ${entry.score} (${dateStr})`;
+      } else {
+        nameAndScore.textContent = '-';
+        row.classList.add('empty');
+      }
+
+      row.appendChild(rank);
+      row.appendChild(nameAndScore);
+      container.appendChild(row);
+    }
+
     this.buttonsElement.appendChild(container);
   }
 
