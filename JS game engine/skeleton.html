@@ -19,6 +19,7 @@
     <script type="text/javascript" src="GameEntity.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
 	<script type="text/javascript" src="NPC.js"></script>
+	<script type="text/javascript" src="AlienScout.js"></script>
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
@@ -53,6 +54,9 @@
 		let aliens = [];
 		let alienDelayMilliseconds = 500;
 		let lastAlienTime = Date.now();
+		let alienScouts = [];
+		let alienScoutDelayMilliseconds = 1500;
+		let lastAlienScoutTime = Date.now();
 		let asteroids = [];
 		let asteroidDelayMilliseconds = 2000;
 		let lastAsteroidTime = Date.now();
@@ -116,10 +120,12 @@
 		function resetGame() {
 			player = new Player();
 			aliens = [];
+			alienScouts = [];
 			asteroids = [];
 			shots = [];
 			score = 0;
 			lastAlienTime = Date.now();
+			lastAlienScoutTime = Date.now();
 			lastAsteroidTime = Date.now();
 			lastShotTime = Date.now();
 		}
@@ -203,6 +209,9 @@
 
 			for (const alien of aliens) {
 				alien.draw();
+			}
+			for (const alienScout of alienScouts) {
+				alienScout.draw();
 			}
 			for (const asteroid of asteroids) {
 				asteroid.draw();
@@ -345,6 +354,16 @@
 				aliens.push(newAlien);
 			}
 
+			if (Date.now() > lastAlienScoutTime + alienScoutDelayMilliseconds) {
+				lastAlienScoutTime = Date.now();
+				const newAlienScout = new AlienScout(
+					player.sprite.position,
+					canvas.width,
+					canvas.height
+				);
+				alienScouts.push(newAlienScout);
+			}
+
 			if (Date.now() > lastAsteroidTime + asteroidDelayMilliseconds) {
 				lastAsteroidTime = Date.now();
 				const newAsteroid = new Asteroid(
@@ -359,6 +378,9 @@
 				alien.sprite.position.y += alienSpeed;
 				alien.sprite.rotation += 0.02;
 			}
+			for (const alienScout of alienScouts) {
+				alienScout.update(deltaTime);
+			}
 			for (const asteroid of asteroids) {
 				asteroid.update(deltaTime);
 			}
@@ -368,6 +390,7 @@
 
 			// Collision detection
 			const aliensToRemove = new Set();
+			const alienScoutsToRemove = new Set();
 			const shotsToRemove = new Set();
 
 			// Check shot-alien collisions
@@ -377,6 +400,18 @@
 						aliensToRemove.add(alien);
 						shotsToRemove.add(shot);
 						score += 100; // Award points for destroying alien
+						soundManager.play('explosion', 0.5);
+					}
+				}
+			}
+
+			// Check shot-alienScout collisions
+			for (const shot of shots) {
+				for (const alienScout of alienScouts) {
+					if (checkCollision(shot, alienScout)) {
+						alienScoutsToRemove.add(alienScout);
+						shotsToRemove.add(shot);
+						score += 150; // Award points for destroying alien scout
 						soundManager.play('explosion', 0.5);
 					}
 				}
@@ -410,6 +445,16 @@
 				}
 			}
 
+			// Check player-alienScout collisions
+			for (const alienScout of alienScouts) {
+				if (checkCollision(player, alienScout)) {
+					alienScoutsToRemove.add(alienScout);
+					player.health -= alienScout.health; // Damage player by alien scout's health value
+					console.log(`Player hit by alien scout! Health: ${player.health}`);
+					soundManager.play('hit', 0.6);
+				}
+			}
+
 			// Check player-asteroid collisions
 			for (const asteroid of asteroids) {
 				if (checkCollision(player, asteroid)) {
@@ -422,6 +467,7 @@
 
 			// Remove collided entities
 			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
+			alienScouts = alienScouts.filter(alienScout => !alienScoutsToRemove.has(alienScout));
 			asteroids = asteroids.filter(asteroid => !asteroidsToRemove.has(asteroid));
 			shots = shots.filter(shot => !shotsToRemove.has(shot));
 
@@ -435,6 +481,10 @@
 			const despawnDistance = Math.max(canvas.width, canvas.height) * 2;
 			aliens = aliens.filter(alien => {
 				const distance = alien.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
+			alienScouts = alienScouts.filter(alienScout => {
+				const distance = alienScout.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
 			asteroids = asteroids.filter(asteroid => {
