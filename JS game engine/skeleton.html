@@ -342,17 +342,6 @@
 			}
 
 			player.update(deltaTime);
-			
-			if (Date.now() > lastAlienTime + alienDelayMilliseconds) {
-				lastAlienTime = Date.now();
-				const newAlien = new NPC(
-					new Vector2D(
-						NPC.size.x/2 + (Math.random() * (canvas.width - NPC.size.x)),
-						-NPC.size.y
-					)
-				);
-				aliens.push(newAlien);
-			}
 
 			if (Date.now() > lastAlienScoutTime + alienScoutDelayMilliseconds) {
 				lastAlienScoutTime = Date.now();
@@ -374,10 +363,6 @@
 				asteroids.push(newAsteroid);
 			}
 
-			for (const alien of aliens) {
-				alien.sprite.position.y += alienSpeed;
-				alien.sprite.rotation += 0.02;
-			}
 			for (const alienScout of alienScouts) {
 				alienScout.update(deltaTime);
 			}
