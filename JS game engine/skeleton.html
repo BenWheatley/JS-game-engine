@@ -17,6 +17,7 @@
 	<script type="text/javascript" src="Sprite.js"></script>
 	<script type="text/javascript" src="NPC.js"></script>
 	<script type="text/javascript" src="AlienScout.js"></script>
+	<script type="text/javascript" src="AlienFighter.js"></script>
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
@@ -80,6 +81,10 @@
 		let alienScouts = [];
 		let alienScoutDelayMilliseconds = 1500;
 		let lastAlienScoutTime = Date.now();
+		let alienFighters = [];
+		let alienFighterDelayMilliseconds = 3000;
+		let lastAlienFighterTime = Date.now();
+		let alienFighterShots = []; // Shots fired by alien fighters
 		let asteroids = [];
 		let asteroidDelayMilliseconds = 2000;
 		let lastAsteroidTime = Date.now();
@@ -94,7 +99,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'asteroid-1.png', 'energy-blast.png']
+				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'asteroid-1.png', 'energy-blast.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
@@ -148,11 +153,14 @@
 			player = new Player();
 			aliens = [];
 			alienScouts = [];
+			alienFighters = [];
+			alienFighterShots = [];
 			asteroids = [];
 			shots = [];
 			score = 0;
 			lastAlienTime = Date.now();
 			lastAlienScoutTime = Date.now();
+			lastAlienFighterTime = Date.now();
 			lastAsteroidTime = Date.now();
 			lastShotTime = Date.now();
 		}
@@ -341,11 +349,17 @@
 			for (const alienScout of alienScouts) {
 				alienScout.draw();
 			}
+			for (const alienFighter of alienFighters) {
+				alienFighter.draw();
+			}
 			for (const asteroid of asteroids) {
 				asteroid.draw();
 			}
 			for (const shot of shots) {
 				shot.draw();
+			}
+			for (const alienShot of alienFighterShots) {
+				alienShot.draw();
 			}
 
 			context.restore();
@@ -443,6 +457,16 @@
 				alienScouts.push(newAlienScout);
 			}
 
+			if (Date.now() > lastAlienFighterTime + alienFighterDelayMilliseconds) {
+				lastAlienFighterTime = Date.now();
+				const newAlienFighter = new AlienFighter(
+					player.sprite.position,
+					canvas.width,
+					canvas.height
+				);
+				alienFighters.push(newAlienFighter);
+			}
+
 			if (Date.now() > lastAsteroidTime + asteroidDelayMilliseconds) {
 				lastAsteroidTime = Date.now();
 				const newAsteroid = new Asteroid(
@@ -456,17 +480,31 @@
 			for (const alienScout of alienScouts) {
 				alienScout.update(deltaTime, player.sprite.position);
 			}
+			for (const alienFighter of alienFighters) {
+				alienFighter.update(deltaTime, player.sprite.position);
+				// Check if fighter wants to shoot
+				const newShot = alienFighter.tryShoot();
+				if (newShot) {
+					alienFighterShots.push(newShot);
+					playSoundEffect('shoot', 0.2); // Quieter than player shots
+				}
+			}
 			for (const asteroid of asteroids) {
 				asteroid.update(deltaTime);
 			}
 			for (const shot of shots) {
 				shot.update();
 			}
+			for (const alienShot of alienFighterShots) {
+				alienShot.update();
+			}
 
 			// Collision detection
 			const aliensToRemove = new Set();
 			const alienScoutsToRemove = new Set();
+			const alienFightersToRemove = new Set();
 			const shotsToRemove = new Set();
+			const alienShotsToRemove = new Set();
 
 			// Check shot-alien collisions
 			for (const shot of shots) {
@@ -487,6 +525,18 @@
 						alienScoutsToRemove.add(alienScout);
 						shotsToRemove.add(shot);
 						score += 150; // Award points for destroying alien scout
+						playSoundEffect('explosion', 0.5);
+					}
+				}
+			}
+
+			// Check shot-alienFighter collisions
+			for (const shot of shots) {
+				for (const alienFighter of alienFighters) {
+					if (checkCollision(shot, alienFighter)) {
+						alienFightersToRemove.add(alienFighter);
+						shotsToRemove.add(shot);
+						score += 200; // Award points for destroying alien fighter
 						playSoundEffect('explosion', 0.5);
 					}
 				}
@@ -530,6 +580,16 @@
 				}
 			}
 
+			// Check player-alienFighter collisions
+			for (const alienFighter of alienFighters) {
+				if (checkCollision(player, alienFighter)) {
+					alienFightersToRemove.add(alienFighter);
+					player.health -= alienFighter.health; // Damage player by alien fighter's health value
+					console.log(`Player hit by alien fighter! Health: ${player.health}`);
+					playSoundEffect('hit', 0.6);
+				}
+			}
+
 			// Check player-asteroid collisions
 			for (const asteroid of asteroids) {
 				if (checkCollision(player, asteroid)) {
@@ -540,11 +600,23 @@
 				}
 			}
 
+			// Check alienFighterShots-player collisions
+			for (const alienShot of alienFighterShots) {
+				if (checkCollision(player, alienShot)) {
+					alienShotsToRemove.add(alienShot);
+					player.health -= 25; // Alien shots deal 25 damage
+					console.log(`Player hit by alien shot! Health: ${player.health}`);
+					playSoundEffect('hit', 0.5);
+				}
+			}
+
 			// Remove collided entities
 			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
 			alienScouts = alienScouts.filter(alienScout => !alienScoutsToRemove.has(alienScout));
+			alienFighters = alienFighters.filter(alienFighter => !alienFightersToRemove.has(alienFighter));
 			asteroids = asteroids.filter(asteroid => !asteroidsToRemove.has(asteroid));
 			shots = shots.filter(shot => !shotsToRemove.has(shot));
+			alienFighterShots = alienFighterShots.filter(alienShot => !alienShotsToRemove.has(alienShot));
 
 			// Check for game over
 			if (player.health <= 0) {
@@ -562,6 +634,10 @@
 				const distance = alienScout.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
+			alienFighters = alienFighters.filter(alienFighter => {
+				const distance = alienFighter.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
 			asteroids = asteroids.filter(asteroid => {
 				return !asteroid.shouldDespawn(
 					player.sprite.position,
@@ -570,6 +646,10 @@
 			});
 			shots = shots.filter(shot => {
 				const distance = shot.sprite.position.dist(player.sprite.position);
+				return distance < despawnDistance;
+			});
+			alienFighterShots = alienFighterShots.filter(alienShot => {
+				const distance = alienShot.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
 
