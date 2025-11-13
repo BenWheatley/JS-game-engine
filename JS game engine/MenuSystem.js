@@ -28,6 +28,9 @@ class MenuSystem {
         case 'checkbox':
           this.createCheckbox(itemConfig);
           break;
+        case 'textInput':
+          this.createTextInput(itemConfig);
+          break;
       }
     });
 
@@ -104,6 +107,40 @@ class MenuSystem {
 
     container.appendChild(checkbox);
     container.appendChild(label);
+    this.buttonsElement.appendChild(container);
+  }
+
+  createTextInput(config) {
+    const container = document.createElement('div');
+    container.className = 'menu-text-input-container';
+
+    const label = document.createElement('label');
+    label.className = 'menu-text-input-label';
+    label.textContent = config.label;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'menu-text-input';
+    input.placeholder = config.placeholder || '';
+    input.value = config.value || '';
+    input.maxLength = config.maxLength || 20;
+
+    // Store reference for later retrieval
+    if (config.id) {
+      input.id = config.id;
+    }
+
+    input.oninput = (e) => {
+      if (config.onChange) config.onChange(e.target.value);
+    };
+
+    // Focus input when created if autofocus is enabled
+    if (config.autofocus) {
+      setTimeout(() => input.focus(), 100);
+    }
+
+    container.appendChild(label);
+    container.appendChild(input);
     this.buttonsElement.appendChild(container);
   }
 

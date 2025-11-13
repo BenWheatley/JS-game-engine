@@ -193,7 +193,7 @@
 					{
 						type: 'button',
 						label: 'High Scores',
-						action: () => alert('High Scores - Coming Soon!')
+						action: () => showHighScoresMenu()
 					},
 					{
 						type: 'button',
@@ -205,19 +205,88 @@
 			});
 		}
 
+		// High Score Management
+		function getHighScores() {
+			const stored = localStorage.getItem('highScores');
+			return stored ? JSON.parse(stored) : [];
+		}
+
+		function saveHighScore(name, score) {
+			const highScores = getHighScores();
+			const newScore = {
+				name: name,
+				score: score,
+				date: new Date().toISOString()
+			};
+			highScores.push(newScore);
+			// Sort by score descending
+			highScores.sort((a, b) => b.score - a.score);
+			// Keep only top 10
+			const top10 = highScores.slice(0, 10);
+			localStorage.setItem('highScores', JSON.stringify(top10));
+		}
+
+		function showHighScoresMenu() {
+			const highScores = getHighScores();
+			let instructionsText = '';
+
+			if (highScores.length === 0) {
+				instructionsText = 'No high scores yet. Play a game to set a record!';
+			} else {
+				instructionsText = highScores.map((entry, index) => {
+					const date = new Date(entry.date);
+					const dateStr = date.toLocaleDateString();
+					return `${index + 1}. ${entry.name} - ${entry.score} (${dateStr})`;
+				}).join('\n');
+			}
+
+			menuSystem.showMenu({
+				title: 'HIGH SCORES',
+				items: [
+					{
+						type: 'button',
+						label: 'Back',
+						action: () => showMainMenu()
+					}
+				],
+				instructions: instructionsText
+			});
+		}
+
 		function showGameOverMenu() {
+			let playerName = '';
+
 			menuSystem.showMenu({
 				title: 'GAME OVER',
 				items: [
 					{
+						type: 'textInput',
+						id: 'playerNameInput',
+						label: 'Enter Your Name:',
+						placeholder: 'Player',
+						maxLength: 15,
+						autofocus: true,
+						onChange: (value) => {
+							playerName = value;
+						}
+					},
+					{
 						type: 'button',
-						label: 'Restart',
-						action: () => startGame()
+						label: 'Submit Score',
+						action: () => {
+							const name = playerName.trim() || 'Anonymous';
+							saveHighScore(name, score);
+							startGame();
+						}
 					},
 					{
 						type: 'button',
 						label: 'Main Menu',
-						action: () => returnToMenu()
+						action: () => {
+							const name = playerName.trim() || 'Anonymous';
+							saveHighScore(name, score);
+							returnToMenu();
+						}
 					}
 				],
 				instructions: `Final Score: ${score}`
