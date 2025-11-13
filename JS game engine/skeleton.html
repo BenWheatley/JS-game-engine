@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="AlienScout.js"></script>
 	<script type="text/javascript" src="AlienFighter.js"></script>
 	<script type="text/javascript" src="Asteroid.js"></script>
+	<script type="text/javascript" src="AsteroidSpawn.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="SoundManager.js"></script>
@@ -88,6 +89,7 @@
 		let asteroids = [];
 		let asteroidDelayMilliseconds = 2000;
 		let lastAsteroidTime = Date.now();
+		let asteroidSpawns = []; // Smaller asteroids spawned from destroyed asteroids
 		let shots = [];
 		let shotDelayMilliseconds = 500;
 		let lastShotTime = Date.now();
@@ -99,7 +101,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'asteroid-1.png', 'energy-blast.png']
+				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'asteroid-1.png', 'asteroid-2.png', 'energy-blast.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
@@ -156,6 +158,7 @@
 			alienFighters = [];
 			alienFighterShots = [];
 			asteroids = [];
+			asteroidSpawns = [];
 			shots = [];
 			score = 0;
 			lastAlienTime = Date.now();
@@ -355,6 +358,9 @@
 			for (const asteroid of asteroids) {
 				asteroid.draw();
 			}
+			for (const asteroidSpawn of asteroidSpawns) {
+				asteroidSpawn.draw();
+			}
 			for (const shot of shots) {
 				shot.draw();
 			}
@@ -492,6 +498,9 @@
 			for (const asteroid of asteroids) {
 				asteroid.update(deltaTime);
 			}
+			for (const asteroidSpawn of asteroidSpawns) {
+				asteroidSpawn.update(deltaTime);
+			}
 			for (const shot of shots) {
 				shot.update();
 			}
@@ -553,9 +562,25 @@
 							asteroidsToRemove.add(asteroid);
 							score += 200; // Award more points for destroying asteroid
 							playSoundEffect('explosion', 0.5);
+							// Spawn 3 smaller asteroids
+							const spawns = AsteroidSpawn.createSpawnsFromAsteroid(asteroid, canvas.width, canvas.height);
+							asteroidSpawns.push(...spawns);
 						} else {
 							playSoundEffect('hit', 0.4);
 						}
+					}
+				}
+			}
+
+			// Check shot-asteroidSpawn collisions
+			const asteroidSpawnsToRemove = new Set();
+			for (const shot of shots) {
+				for (const asteroidSpawn of asteroidSpawns) {
+					if (checkCollision(shot, asteroidSpawn)) {
+						shotsToRemove.add(shot);
+						asteroidSpawnsToRemove.add(asteroidSpawn);
+						score += 50; // Award points for destroying small asteroid
+						playSoundEffect('explosion', 0.3);
 					}
 				}
 			}
@@ -600,6 +625,16 @@
 				}
 			}
 
+			// Check player-asteroidSpawn collisions
+			for (const asteroidSpawn of asteroidSpawns) {
+				if (checkCollision(player, asteroidSpawn)) {
+					asteroidSpawnsToRemove.add(asteroidSpawn);
+					player.health -= 25; // Small asteroids deal less damage
+					console.log(`Player hit by small asteroid! Health: ${player.health}`);
+					playSoundEffect('hit', 0.4);
+				}
+			}
+
 			// Check alienFighterShots-player collisions
 			for (const alienShot of alienFighterShots) {
 				if (checkCollision(player, alienShot)) {
@@ -615,6 +650,7 @@
 			alienScouts = alienScouts.filter(alienScout => !alienScoutsToRemove.has(alienScout));
 			alienFighters = alienFighters.filter(alienFighter => !alienFightersToRemove.has(alienFighter));
 			asteroids = asteroids.filter(asteroid => !asteroidsToRemove.has(asteroid));
+			asteroidSpawns = asteroidSpawns.filter(asteroidSpawn => !asteroidSpawnsToRemove.has(asteroidSpawn));
 			shots = shots.filter(shot => !shotsToRemove.has(shot));
 			alienFighterShots = alienFighterShots.filter(alienShot => !alienShotsToRemove.has(alienShot));
 
@@ -640,6 +676,12 @@
 			});
 			asteroids = asteroids.filter(asteroid => {
 				return !asteroid.shouldDespawn(
+					player.sprite.position,
+					new Vector2D(canvas.width, canvas.height)
+				);
+			});
+			asteroidSpawns = asteroidSpawns.filter(asteroidSpawn => {
+				return !asteroidSpawn.shouldDespawn(
 					player.sprite.position,
 					new Vector2D(canvas.width, canvas.height)
 				);
