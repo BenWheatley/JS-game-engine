@@ -232,14 +232,10 @@
 		function saveHighScore(name, score) {
 			const highScores = getHighScores();
 
-			// Clear isRecent flag from all existing scores
-			highScores.forEach(entry => delete entry.isRecent);
-
 			const newScore = {
 				name: name,
 				score: score,
-				date: new Date().toISOString(),
-				isRecent: true
+				date: new Date().toISOString()
 			};
 			highScores.push(newScore);
 
@@ -254,8 +250,20 @@
 		function showHighScoresMenu() {
 			const allScores = getHighScores();
 
-			// Find the recent score and its rank
-			const recentIndex = allScores.findIndex(score => score.isRecent);
+			// Find the most recent score by date
+			let mostRecentScore = null;
+			let mostRecentDate = null;
+
+			allScores.forEach(score => {
+				const scoreDate = new Date(score.date);
+				if (!mostRecentDate || scoreDate > mostRecentDate) {
+					mostRecentDate = scoreDate;
+					mostRecentScore = score;
+				}
+			});
+
+			// Find the rank of the most recent score
+			const recentIndex = mostRecentScore ? allScores.indexOf(mostRecentScore) : -1;
 			const recentRank = recentIndex >= 0 ? recentIndex + 1 : -1;
 
 			let displayScores = [];
@@ -265,7 +273,8 @@
 				displayScores = allScores.slice(0, 10).map((score, index) => ({
 					...score,
 					rank: index + 1,
-					isEllipsis: false
+					isEllipsis: false,
+					isRecent: score === mostRecentScore
 				}));
 			} else {
 				// Recent score is outside top 10
@@ -273,7 +282,8 @@
 				displayScores = allScores.slice(0, 8).map((score, index) => ({
 					...score,
 					rank: index + 1,
-					isEllipsis: false
+					isEllipsis: false,
+					isRecent: score === mostRecentScore
 				}));
 
 				// Add ellipsis at position 9
@@ -286,7 +296,8 @@
 				displayScores.push({
 					...allScores[recentIndex],
 					rank: recentRank,
-					isEllipsis: false
+					isEllipsis: false,
+					isRecent: true
 				});
 			}
 
