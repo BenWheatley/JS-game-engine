@@ -94,6 +94,89 @@
 			font-size: 14px;
 			text-align: center;
 		}
+
+		.menu-slider-container {
+			width: 400px;
+			padding: 10px 20px;
+			margin: 0;
+		}
+
+		.menu-slider-label {
+			display: block;
+			color: #fff;
+			font-size: 18px;
+			margin-bottom: 10px;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+		}
+
+		.menu-slider-wrapper {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.menu-slider {
+			flex: 1;
+			height: 6px;
+			-webkit-appearance: none;
+			appearance: none;
+			background: #444;
+			outline: none;
+			border-radius: 3px;
+		}
+
+		.menu-slider::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 20px;
+			height: 20px;
+			background: #fff;
+			cursor: pointer;
+			border-radius: 50%;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+		}
+
+		.menu-slider::-moz-range-thumb {
+			width: 20px;
+			height: 20px;
+			background: #fff;
+			cursor: pointer;
+			border-radius: 50%;
+			border: none;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+		}
+
+		.menu-slider-value {
+			color: #fff;
+			font-size: 18px;
+			min-width: 50px;
+			text-align: right;
+		}
+
+		.menu-checkbox-container {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+			padding: 10px 20px;
+			margin: 0;
+			cursor: pointer;
+		}
+
+		.menu-checkbox {
+			width: 24px;
+			height: 24px;
+			cursor: pointer;
+			accent-color: #fff;
+		}
+
+		.menu-checkbox-label {
+			color: #fff;
+			font-size: 18px;
+			cursor: pointer;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+		}
 	</style>
 	<script type="text/javascript" src="GPTEngine.js"></script>
 	<script type="text/javascript" src="Vector2D.js"></script>
@@ -140,10 +223,20 @@
 		const GameState = {
 			MENU: 'menu',
 			PLAYING: 'playing',
+			PAUSED: 'paused',
 			GAME_OVER: 'game_over'
 		};
 		let currentState = GameState.MENU;
 		let score = 0;
+
+		// Audio settings
+		let soundEffectsVolume = 50;
+		let musicVolume = 50;
+
+		// Helper function to apply volume
+		function playSoundEffect(name, baseVolume) {
+			soundManager.play(name, baseVolume * (soundEffectsVolume / 100));
+		}
 
 		const alienSize = 48;
 		const alienSpeed = 1000/1000.0; // pixels per millisecond
@@ -244,38 +337,111 @@
 		function showMainMenu() {
 			menuSystem.showMenu({
 				title: 'SPACE SHOOTER',
-				buttons: [
+				items: [
 					{
+						type: 'button',
 						label: 'New Game',
 						action: () => startGame()
 					},
 					{
+						type: 'button',
 						label: 'High Scores',
 						action: () => alert('High Scores - Coming Soon!')
 					},
 					{
+						type: 'button',
 						label: 'Achievements',
 						action: () => alert('Achievements - Coming Soon!')
 					}
 				],
-				instructions: 'Arrow Keys or Left Stick: Move | Space or A Button: Shoot | ESC or Start: Fullscreen'
+				instructions: 'Arrow Keys or Left Stick: Move | Space or A Button: Shoot | ESC: Pause'
 			});
 		}
 
 		function showGameOverMenu() {
 			menuSystem.showMenu({
 				title: 'GAME OVER',
-				buttons: [
+				items: [
 					{
+						type: 'button',
 						label: 'Restart',
 						action: () => startGame()
 					},
 					{
+						type: 'button',
 						label: 'Main Menu',
 						action: () => returnToMenu()
 					}
 				],
 				instructions: `Final Score: ${score}`
+			});
+		}
+
+		function pauseGame() {
+			if (currentState === GameState.PLAYING) {
+				currentState = GameState.PAUSED;
+				musicPlayer.pause();
+				showPauseMenu();
+			}
+		}
+
+		function resumeGame() {
+			currentState = GameState.PLAYING;
+			menuSystem.hideMenu();
+			musicPlayer.play();
+		}
+
+		function showPauseMenu() {
+			menuSystem.showMenu({
+				title: 'PAUSED',
+				items: [
+					{
+						type: 'button',
+						label: 'Continue',
+						action: () => resumeGame()
+					},
+					{
+						type: 'slider',
+						label: 'Sound Effects Volume',
+						min: 0,
+						max: 100,
+						value: soundEffectsVolume,
+						suffix: '%',
+						onChange: (value) => {
+							soundEffectsVolume = parseInt(value);
+						}
+					},
+					{
+						type: 'slider',
+						label: 'Music Volume',
+						min: 0,
+						max: 100,
+						value: musicVolume,
+						suffix: '%',
+						onChange: (value) => {
+							musicVolume = parseInt(value);
+							// TODO: Apply music volume to music player
+						}
+					},
+					{
+						type: 'checkbox',
+						label: 'Fullscreen',
+						checked: GPTEngine.instance.isFullScreen,
+						onChange: (checked) => {
+							if (checked && !GPTEngine.instance.isFullScreen) {
+								GPTEngine.instance.enterFullScreen();
+							} else if (!checked && GPTEngine.instance.isFullScreen) {
+								GPTEngine.instance.exitFullScreen();
+							}
+						}
+					},
+					{
+						type: 'button',
+						label: 'Quit',
+						action: () => returnToMenu()
+					}
+				],
+				instructions: 'ESC to resume'
 			});
 		}
 
@@ -289,6 +455,9 @@
 					break;
 				case GameState.PLAYING:
 					renderGame();
+					break;
+				case GameState.PAUSED:
+					renderGame(); // Keep showing game behind pause menu
 					break;
 				case GameState.GAME_OVER:
 					renderGameOver();
@@ -363,10 +532,14 @@
 		function update(deltaTime) {
 			if (loading()) { return; }
 
-			// Toggle fullscreen on ESC key (works in all states)
+			// Handle ESC key for pause/resume
 			if (engine.keyDown["Escape"]) {
 				engine.keyDown["Escape"] = false;
-				GPTEngine.instance.toggleFullScreen();
+				if (currentState === GameState.PLAYING) {
+					pauseGame();
+				} else if (currentState === GameState.PAUSED) {
+					resumeGame();
+				}
 			}
 
 			switch (currentState) {
@@ -375,6 +548,9 @@
 					break;
 				case GameState.PLAYING:
 					updateGame(deltaTime);
+					break;
+				case GameState.PAUSED:
+					// Don't update game state while paused
 					break;
 				case GameState.GAME_OVER:
 					updateGameOver();
@@ -415,7 +591,7 @@
 						shotVelocity
 					);
 					shots.push(newShot);
-					soundManager.play('shoot', 0.3);
+					playSoundEffect('shoot', 0.3);
 				}
 			}
 
@@ -463,7 +639,7 @@
 						aliensToRemove.add(alien);
 						shotsToRemove.add(shot);
 						score += 100; // Award points for destroying alien
-						soundManager.play('explosion', 0.5);
+						playSoundEffect('explosion', 0.5);
 					}
 				}
 			}
@@ -475,7 +651,7 @@
 						alienScoutsToRemove.add(alienScout);
 						shotsToRemove.add(shot);
 						score += 150; // Award points for destroying alien scout
-						soundManager.play('explosion', 0.5);
+						playSoundEffect('explosion', 0.5);
 					}
 				}
 			}
@@ -490,9 +666,9 @@
 						if (asteroid.health <= 0) {
 							asteroidsToRemove.add(asteroid);
 							score += 200; // Award more points for destroying asteroid
-							soundManager.play('explosion', 0.5);
+							playSoundEffect('explosion', 0.5);
 						} else {
-							soundManager.play('hit', 0.4);
+							playSoundEffect('hit', 0.4);
 						}
 					}
 				}
@@ -504,7 +680,7 @@
 					aliensToRemove.add(alien);
 					player.health -= alien.health; // Damage player by alien's health value
 					console.log(`Player hit! Health: ${player.health}`);
-					soundManager.play('hit', 0.6);
+					playSoundEffect('hit', 0.6);
 				}
 			}
 
@@ -514,7 +690,7 @@
 					alienScoutsToRemove.add(alienScout);
 					player.health -= alienScout.health; // Damage player by alien scout's health value
 					console.log(`Player hit by alien scout! Health: ${player.health}`);
-					soundManager.play('hit', 0.6);
+					playSoundEffect('hit', 0.6);
 				}
 			}
 
@@ -524,7 +700,7 @@
 					asteroidsToRemove.add(asteroid);
 					player.health -= 50; // Asteroids deal fixed damage
 					console.log(`Player hit by asteroid! Health: ${player.health}`);
-					soundManager.play('hit', 0.6);
+					playSoundEffect('hit', 0.6);
 				}
 			}
 
@@ -616,15 +792,15 @@
 							shotVelocity
 						);
 						shots.push(newShot);
-						soundManager.play('shoot', 0.3);
+						playSoundEffect('shoot', 0.3);
 					}
 				}
 
-				// Button 9 (Start/Options): Toggle fullscreen
+				// Button 9 (Start/Options): Pause game
 				if (gamepad.buttons[9] && gamepad.buttons[9].pressed) {
 					// Debounce by checking if button was just pressed
 					if (!gamepad.buttons[9].wasPressed) {
-						GPTEngine.instance.toggleFullScreen();
+						pauseGame();
 						gamepad.buttons[9].wasPressed = true;
 					}
 				} else if (gamepad.buttons[9]) {
