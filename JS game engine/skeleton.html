@@ -432,10 +432,30 @@
 			context.restore();
 
 			// HUD - render in screen space
+			const maxHealth = Player.health;
+			const healthBarWidth = maxHealth;
+			const healthBarHeight = 16;
+			const healthBarX = 10;
+			const healthBarY = 20;
+
+			// Draw health bar background (red)
+			context.fillStyle = '#FF0000';
+			context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+			// Draw health bar foreground (green)
+			const currentHealthWidth = Math.max(0, player.health);
+			context.fillStyle = '#00FF00';
+			context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
+
+			// Draw health bar border (white)
+			context.strokeStyle = '#FFFFFF';
+			context.lineWidth = 2;
+			context.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+			// Draw score
 			context.fillStyle = '#FFFFFF';
 			context.font = '20px Arial';
 			context.textAlign = 'left';
-			context.fillText(`Health: ${player.health}`, 10, 30);
 			context.fillText(`Score: ${score}`, 10, 60);
 		}
 
