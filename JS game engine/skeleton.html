@@ -370,7 +370,13 @@
 					{
 						type: 'button',
 						label: 'Quit',
-						action: () => returnToMenu()
+						action: () => {
+							if (score > 0) {
+								gameOver();
+							} else {
+								returnToMenu();
+							}
+						}
 					}
 				],
 				instructions: ''
