@@ -18,7 +18,7 @@
 	<script type="text/javascript" src="Vector2D.js"></script>
     <script type="text/javascript" src="GameEntity.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
-	<script type="text/javascript" src="Alien.js"></script>
+	<script type="text/javascript" src="NPC.js"></script>
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="Shot.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
@@ -336,10 +336,10 @@
 			
 			if (Date.now() > lastAlienTime + alienDelayMilliseconds) {
 				lastAlienTime = Date.now();
-				const newAlien = new Alien(
+				const newAlien = new NPC(
 					new Vector2D(
-						Alien.size.x/2 + (Math.random() * (canvas.width - Alien.size.x)),
-						-Alien.size.y
+						NPC.size.x/2 + (Math.random() * (canvas.width - NPC.size.x)),
+						-NPC.size.y
 					)
 				);
 				aliens.push(newAlien);
