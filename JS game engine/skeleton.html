@@ -54,6 +54,23 @@
 			document.getElementById('menuInstructions')
 		);
 
+		// Preferences Management
+		function getPreferences() {
+			const stored = localStorage.getItem('preferences');
+			if (stored) {
+				return JSON.parse(stored);
+			}
+			// Default preferences
+			return {
+				volume_effects: 100,
+				volume_music: 100
+			};
+		}
+
+		function savePreferences(preferences) {
+			localStorage.setItem('preferences', JSON.stringify(preferences));
+		}
+
 		// Game state management
 		const GameState = {
 			MENU: 'menu',
@@ -64,9 +81,10 @@
 		let currentState = GameState.MENU;
 		let score = 0;
 
-		// Audio settings
-		let soundEffectsVolume = 50;
-		let musicVolume = 50;
+		// Audio settings - load from preferences
+		const preferences = getPreferences();
+		let soundEffectsVolume = preferences.volume_effects;
+		let musicVolume = preferences.volume_music;
 
 		// Helper function to apply volume
 		function playSoundEffect(name, baseVolume) {
@@ -317,6 +335,9 @@
 						suffix: '%',
 						onChange: (value) => {
 							soundEffectsVolume = parseInt(value);
+							const prefs = getPreferences();
+							prefs.volume_effects = soundEffectsVolume;
+							savePreferences(prefs);
 						}
 					},
 					{
@@ -329,6 +350,9 @@
 						onChange: (value) => {
 							musicVolume = parseInt(value);
 							Note.setVolume(musicVolume / 100); // Convert percentage to 0.0-1.0
+							const prefs = getPreferences();
+							prefs.volume_music = musicVolume;
+							savePreferences(prefs);
 						}
 					},
 					{
