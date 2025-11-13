@@ -170,7 +170,8 @@ class MenuSystem {
         const entry = scores[i];
         const date = new Date(entry.date);
         const dateStr = date.toLocaleDateString();
-        nameAndScore.textContent = `${entry.name} - ${entry.score} (${dateStr})`;
+        const timeStr = date.toLocaleTimeString();
+        nameAndScore.textContent = `${entry.name} - ${entry.score} (${dateStr} ${timeStr})`;
       } else {
         nameAndScore.textContent = '-';
         row.classList.add('empty');
