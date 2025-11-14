@@ -7,17 +7,9 @@ class AlienFighter extends NPC {
   static rotationalSpeed = Math.PI / 600; // 2x AlienScout
   static shotCooldown = 2000; // 2 seconds between shots
 
-  // AI behavior constants
-  static SPAWN_MARGIN_MULTIPLIER = 2; // Spawn distance as multiple of sprite size
-  static ARRIVAL_THRESHOLD = 50; // Distance in pixels to consider target reached
-  static OFFSCREEN_TIMEOUT = 2000; // Milliseconds before retargeting when offscreen
-  static TARGET_AREA_FACTOR = 0.8; // Fraction of screen radius for target selection
-  static TURN_PRECISION = 0.01; // Minimum angle difference in radians before turning
-  static SPRITE_UP_ANGLE_OFFSET = Math.PI / 2; // Sprite faces up at rotation 0, add 90° for direction
-
   constructor(playerPosition, canvasWidth, canvasHeight) {
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = AlienFighter.size.x * AlienFighter.SPAWN_MARGIN_MULTIPLIER;
+    const margin = AlienFighter.size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
     const position = AlienFighter.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -77,7 +69,7 @@ class AlienFighter extends NPC {
     // Pick a random location near the player (within screen bounds if player doesn't move)
     const screenRadius = Math.min(this.canvasWidth, this.canvasHeight) / 2;
     const angle = Math.random() * Math.PI * 2;
-    const distance = Math.random() * screenRadius * AlienFighter.TARGET_AREA_FACTOR;
+    const distance = Math.random() * screenRadius * GameConfig.NPC.TARGET_AREA_FACTOR;
 
     this.targetPosition = new Vector2D(
       playerPosition.x + Math.cos(angle) * distance,
@@ -88,7 +80,7 @@ class AlienFighter extends NPC {
   hasReachedTarget() {
     if (!this.targetPosition) return false;
     const distance = this.sprite.position.dist(this.targetPosition);
-    return distance < AlienFighter.ARRIVAL_THRESHOLD;
+    return distance < GameConfig.NPC.ARRIVAL_THRESHOLD;
   }
 
   isOffScreen(playerPosition) {
@@ -118,7 +110,7 @@ class AlienFighter extends NPC {
     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
     // Turn in the direction of smallest angle difference
-    if (Math.abs(angleDiff) > AlienFighter.TURN_PRECISION) {
+    if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
       if (angleDiff > 0) {
         this.sprite.rotation += Math.min(AlienFighter.rotationalSpeed * deltaTime, angleDiff);
       } else {
@@ -163,7 +155,7 @@ class AlienFighter extends NPC {
     // Track off-screen time
     if (this.isOffScreen(playerPosition)) {
       this.offScreenTime += deltaTime;
-      if (this.offScreenTime > AlienFighter.OFFSCREEN_TIMEOUT) {
+      if (this.offScreenTime > GameConfig.NPC.OFFSCREEN_TIMEOUT) {
         this.pickNewTarget(playerPosition);
         this.offScreenTime = 0;
       }
@@ -174,7 +166,7 @@ class AlienFighter extends NPC {
     // AI: Turn towards target and accelerate
     if (this.targetPosition) {
       const toTarget = this.targetPosition.sub(this.sprite.position);
-      const targetAngle = Math.atan2(toTarget.y, toTarget.x) + AlienFighter.SPRITE_UP_ANGLE_OFFSET;
+      const targetAngle = Math.atan2(toTarget.y, toTarget.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
       this.turnTowards(targetAngle, deltaTime);
       this.accelerate(deltaTime);

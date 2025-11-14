@@ -4,15 +4,9 @@ class Asteroid extends GameEntity {
   static health = 3;
   static speed = 0.04; // pixels per millisecond (similar to player max speed)
 
-  // Spawn and behavior constants
-  static SPAWN_MARGIN_MULTIPLIER = 2; // Spawn distance as multiple of sprite size
-  static DIRECTION_CONE_HALF_ANGLE = Math.PI / 4; // 45 degrees - random direction variation
-  static DESPAWN_DISTANCE_MULTIPLIER = 3; // Distance from player before despawning
-  static ROTATION_SPEED = 0.01; // Radians per frame for visual rotation effect
-
   constructor(playerPosition, canvasWidth, canvasHeight) {
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = Asteroid.size.x * Asteroid.SPAWN_MARGIN_MULTIPLIER;
+    const margin = Asteroid.size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
     const position = Asteroid.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -63,7 +57,7 @@ class Asteroid extends GameEntity {
     const angleToPlayer = Math.atan2(toPlayer.y, toPlayer.x);
 
     // Add random offset within 90-degree cone (-45 to +45 degrees)
-    const randomOffset = (Math.random() - 0.5) * 2 * Asteroid.DIRECTION_CONE_HALF_ANGLE;
+    const randomOffset = (Math.random() - 0.5) * 2 * GameConfig.ASTEROID.DIRECTION_CONE_HALF_ANGLE;
     const finalAngle = angleToPlayer + randomOffset;
 
     // Convert back to vector
@@ -72,13 +66,13 @@ class Asteroid extends GameEntity {
 
   shouldDespawn(playerPosition, screenSize) {
     const distance = this.sprite.position.dist(playerPosition);
-    const despawnDistance = Math.max(screenSize.x, screenSize.y) * Asteroid.DESPAWN_DISTANCE_MULTIPLIER;
+    const despawnDistance = Math.max(screenSize.x, screenSize.y) * GameConfig.SHARED.DESPAWN_DISTANCE_MULTIPLIER;
     return distance > despawnDistance;
   }
 
   update(deltaTime) {
     super.update(deltaTime);
     // Add slow rotation for visual effect
-    this.sprite.rotation += Asteroid.ROTATION_SPEED;
+    this.sprite.rotation += GameConfig.ASTEROID.ROTATION_SPEED_LARGE;
   }
 }
