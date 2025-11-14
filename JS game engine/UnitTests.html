@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Unit Tests</title>
+	<style>
+		body {
+			font-family: 'Courier New', monospace;
+			padding: 20px;
+			background: #1e1e1e;
+			color: #d4d4d4;
+		}
+		h1 {
+			color: #4ec9b0;
+		}
+		.test-results {
+			margin-top: 20px;
+		}
+		.test-group {
+			margin: 15px 0;
+			border-left: 3px solid #569cd6;
+			padding-left: 15px;
+		}
+		.test-group h2 {
+			color: #569cd6;
+			font-size: 18px;
+			margin: 5px 0;
+		}
+		.test-case {
+			margin: 5px 0;
+			padding: 5px;
+		}
+		.test-case.pass {
+			color: #4ec9b0;
+		}
+		.test-case.pass::before {
+			content: "✓ ";
+			font-weight: bold;
+		}
+		.test-case.fail {
+			color: #f48771;
+			background: rgba(244, 135, 113, 0.1);
+			padding: 8px;
+			border-radius: 3px;
+		}
+		.test-case.fail::before {
+			content: "✗ ";
+			font-weight: bold;
+		}
+		.error-details {
+			margin-left: 20px;
+			font-size: 12px;
+			color: #ce9178;
+		}
+		.summary {
+			margin-top: 30px;
+			padding: 15px;
+			background: #252526;
+			border-radius: 5px;
+			font-size: 16px;
+		}
+		.summary.success {
+			border-left: 5px solid #4ec9b0;
+		}
+		.summary.failure {
+			border-left: 5px solid #f48771;
+		}
+	</style>
+</head>
+<body>
+	<h1>Vector2D.js Test Suite</h1>
+	<div id="results" class="test-results"></div>
+
+	<script src="Vector2D.js"></script>
+	<script>
+		// Simple test framework
+		class TestRunner {
+			constructor() {
+				this.results = [];
+				this.currentGroup = null;
+			}
+
+			describe(groupName, testFn) {
+				this.currentGroup = groupName;
+				testFn();
+				this.currentGroup = null;
+			}
+
+			it(testName, testFn) {
+				try {
+					testFn();
+					this.results.push({
+						group: this.currentGroup,
+						name: testName,
+						passed: true
+					});
+				} catch (error) {
+					this.results.push({
+						group: this.currentGroup,
+						name: testName,
+						passed: false,
+						error: error.message
+					});
+				}
+			}
+
+			assertEqual(actual, expected, message = '') {
+				if (actual !== expected) {
+					throw new Error(`Expected ${expected}, got ${actual}. ${message}`);
+				}
+			}
+
+			assertAlmostEqual(actual, expected, epsilon = 0.0001, message = '') {
+				if (Math.abs(actual - expected) > epsilon) {
+					throw new Error(`Expected ${expected}, got ${actual} (diff: ${Math.abs(actual - expected)}). ${message}`);
+				}
+			}
+
+			assertTrue(condition, message = '') {
+				if (!condition) {
+					throw new Error(`Expected true, got false. ${message}`);
+				}
+			}
+
+			assertFalse(condition, message = '') {
+				if (condition) {
+					throw new Error(`Expected false, got true. ${message}`);
+				}
+			}
+
+			assertThrows(fn, message = '') {
+				try {
+					fn();
+					throw new Error(`Expected function to throw an error. ${message}`);
+				} catch (error) {
+					// Expected
+				}
+			}
+
+			render() {
+				const resultsDiv = document.getElementById('results');
+				const groups = {};
+
+				// Group results
+				this.results.forEach(result => {
+					if (!groups[result.group]) {
+						groups[result.group] = [];
+					}
+					groups[result.group].push(result);
+				});
+
+				// Render groups
+				Object.keys(groups).forEach(groupName => {
+					const groupDiv = document.createElement('div');
+					groupDiv.className = 'test-group';
+
+					const groupTitle = document.createElement('h2');
+					groupTitle.textContent = groupName;
+					groupDiv.appendChild(groupTitle);
+
+					groups[groupName].forEach(result => {
+						const testDiv = document.createElement('div');
+						testDiv.className = `test-case ${result.passed ? 'pass' : 'fail'}`;
+						testDiv.textContent = result.name;
+
+						if (!result.passed) {
+							const errorDiv = document.createElement('div');
+							errorDiv.className = 'error-details';
+							errorDiv.textContent = result.error;
+							testDiv.appendChild(errorDiv);
+						}
+
+						groupDiv.appendChild(testDiv);
+					});
+
+					resultsDiv.appendChild(groupDiv);
+				});
+
+				// Summary
+				const passed = this.results.filter(r => r.passed).length;
+				const failed = this.results.filter(r => !r.passed).length;
+				const total = this.results.length;
+
+				const summaryDiv = document.createElement('div');
+				summaryDiv.className = `summary ${failed === 0 ? 'success' : 'failure'}`;
+				summaryDiv.innerHTML = `
+					<strong>Test Summary:</strong><br>
+					Total: ${total} | Passed: ${passed} | Failed: ${failed}
+				`;
+				resultsDiv.appendChild(summaryDiv);
+			}
+		}
+
+		// Run tests
+		const runner = new TestRunner();
+
+		// Constructor tests
+		runner.describe('Vector2D Constructor', () => {
+			runner.it('should create vector with default values (0, 0)', () => {
+				const v = new Vector2D();
+				runner.assertEqual(v.x, 0);
+				runner.assertEqual(v.y, 0);
+			});
+
+			runner.it('should create vector with custom values', () => {
+				const v = new Vector2D(3, 4);
+				runner.assertEqual(v.x, 3);
+				runner.assertEqual(v.y, 4);
+			});
+
+			runner.it('should handle negative values', () => {
+				const v = new Vector2D(-5, -12);
+				runner.assertEqual(v.x, -5);
+				runner.assertEqual(v.y, -12);
+			});
+		});
+
+		// fromRadial tests
+		runner.describe('Vector2D.fromRadial()', () => {
+			runner.it('should create vector from angle 0 (pointing up)', () => {
+				const v = Vector2D.fromRadial(0, 1);
+				runner.assertAlmostEqual(v.x, 0);
+				runner.assertAlmostEqual(v.y, -1); // Negative because canvas Y increases downward
+			});
+
+			runner.it('should create vector from angle PI/2 (pointing right)', () => {
+				const v = Vector2D.fromRadial(Math.PI / 2, 1);
+				runner.assertAlmostEqual(v.x, 1);
+				runner.assertAlmostEqual(v.y, 0);
+			});
+
+			runner.it('should scale by radius', () => {
+				const v = Vector2D.fromRadial(Math.PI / 2, 5);
+				runner.assertAlmostEqual(v.x, 5);
+				runner.assertAlmostEqual(v.y, 0);
+			});
+		});
+
+		// Addition tests
+		runner.describe('Vector2D.add()', () => {
+			runner.it('should add two vectors correctly', () => {
+				const v1 = new Vector2D(1, 2);
+				const v2 = new Vector2D(3, 4);
+				const result = v1.add(v2);
+				runner.assertEqual(result.x, 4);
+				runner.assertEqual(result.y, 6);
+			});
+
+			runner.it('should not mutate original vector', () => {
+				const v1 = new Vector2D(1, 2);
+				const v2 = new Vector2D(3, 4);
+				v1.add(v2);
+				runner.assertEqual(v1.x, 1);
+				runner.assertEqual(v1.y, 2);
+			});
+
+			runner.it('should handle negative values', () => {
+				const v1 = new Vector2D(5, 3);
+				const v2 = new Vector2D(-2, -7);
+				const result = v1.add(v2);
+				runner.assertEqual(result.x, 3);
+				runner.assertEqual(result.y, -4);
+			});
+		});
+
+		// Subtraction tests
+		runner.describe('Vector2D.sub()', () => {
+			runner.it('should subtract two vectors correctly', () => {
+				const v1 = new Vector2D(5, 7);
+				const v2 = new Vector2D(2, 3);
+				const result = v1.sub(v2);
+				runner.assertEqual(result.x, 3);
+				runner.assertEqual(result.y, 4);
+			});
+
+			runner.it('should not mutate original vector', () => {
+				const v1 = new Vector2D(5, 7);
+				const v2 = new Vector2D(2, 3);
+				v1.sub(v2);
+				runner.assertEqual(v1.x, 5);
+				runner.assertEqual(v1.y, 7);
+			});
+		});
+
+		// Multiplication tests
+		runner.describe('Vector2D.mul()', () => {
+			runner.it('should multiply vector by scalar', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.mul(2);
+				runner.assertEqual(result.x, 6);
+				runner.assertEqual(result.y, 8);
+			});
+
+			runner.it('should handle zero multiplication', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.mul(0);
+				runner.assertEqual(result.x, 0);
+				runner.assertEqual(result.y, 0);
+			});
+
+			runner.it('should handle negative scalar', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.mul(-1);
+				runner.assertEqual(result.x, -3);
+				runner.assertEqual(result.y, -4);
+			});
+		});
+
+		// Division tests
+		runner.describe('Vector2D.div()', () => {
+			runner.it('should divide vector by scalar', () => {
+				const v = new Vector2D(6, 8);
+				const result = v.div(2);
+				runner.assertEqual(result.x, 3);
+				runner.assertEqual(result.y, 4);
+			});
+
+			runner.it('should handle division by negative', () => {
+				const v = new Vector2D(6, 8);
+				const result = v.div(-2);
+				runner.assertEqual(result.x, -3);
+				runner.assertEqual(result.y, -4);
+			});
+
+			runner.it('should produce Infinity when dividing by zero', () => {
+				const v = new Vector2D(6, 8);
+				const result = v.div(0);
+				runner.assertTrue(result.x === Infinity);
+				runner.assertTrue(result.y === Infinity);
+			});
+		});
+
+		// Dot product tests
+		runner.describe('Vector2D.dot()', () => {
+			runner.it('should calculate dot product correctly', () => {
+				const v1 = new Vector2D(2, 3);
+				const v2 = new Vector2D(4, 5);
+				const result = v1.dot(v2);
+				runner.assertEqual(result, 23); // 2*4 + 3*5 = 8 + 15 = 23
+			});
+
+			runner.it('should be zero for perpendicular vectors', () => {
+				const v1 = new Vector2D(1, 0);
+				const v2 = new Vector2D(0, 1);
+				const result = v1.dot(v2);
+				runner.assertEqual(result, 0);
+			});
+		});
+
+		// Cross product tests
+		runner.describe('Vector2D.cross()', () => {
+			runner.it('should calculate 2D cross product correctly', () => {
+				const v1 = new Vector2D(2, 3);
+				const v2 = new Vector2D(4, 5);
+				const result = v1.cross(v2);
+				runner.assertEqual(result, -2); // 2*5 - 3*4 = 10 - 12 = -2
+			});
+
+			runner.it('should be zero for parallel vectors', () => {
+				const v1 = new Vector2D(2, 4);
+				const v2 = new Vector2D(1, 2);
+				const result = v1.cross(v2);
+				runner.assertEqual(result, 0);
+			});
+		});
+
+		// Magnitude tests
+		runner.describe('Vector2D.mag()', () => {
+			runner.it('should calculate magnitude correctly', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.mag();
+				runner.assertEqual(result, 5); // 3-4-5 triangle
+			});
+
+			runner.it('should return 0 for zero vector', () => {
+				const v = new Vector2D(0, 0);
+				const result = v.mag();
+				runner.assertEqual(result, 0);
+			});
+
+			runner.it('should handle negative components', () => {
+				const v = new Vector2D(-3, -4);
+				const result = v.mag();
+				runner.assertEqual(result, 5);
+			});
+		});
+
+		// Magnitude squared tests
+		runner.describe('Vector2D.magSq()', () => {
+			runner.it('should calculate squared magnitude correctly', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.magSq();
+				runner.assertEqual(result, 25); // 3^2 + 4^2 = 9 + 16 = 25
+			});
+
+			runner.it('should be more efficient than mag() squared', () => {
+				const v = new Vector2D(5, 12);
+				const magSq = v.magSq();
+				const magSquared = v.mag() * v.mag();
+				runner.assertEqual(magSq, magSquared);
+			});
+		});
+
+		// Normalization tests (CRITICAL - includes division by zero fix)
+		runner.describe('Vector2D.norm()', () => {
+			runner.it('should normalize vector to unit length', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.norm();
+				runner.assertAlmostEqual(result.mag(), 1.0);
+			});
+
+			runner.it('should preserve direction', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.norm();
+				runner.assertAlmostEqual(result.x, 0.6);
+				runner.assertAlmostEqual(result.y, 0.8);
+			});
+
+			runner.it('should handle ZERO VECTOR without dividing by zero (CRITICAL BUG FIX)', () => {
+				const v = new Vector2D(0, 0);
+				const result = v.norm();
+				runner.assertEqual(result.x, 0);
+				runner.assertEqual(result.y, 0);
+				runner.assertFalse(isNaN(result.x), 'Result should not be NaN');
+				runner.assertFalse(isNaN(result.y), 'Result should not be NaN');
+			});
+
+			runner.it('should not mutate original vector', () => {
+				const v = new Vector2D(3, 4);
+				v.norm();
+				runner.assertEqual(v.x, 3);
+				runner.assertEqual(v.y, 4);
+			});
+		});
+
+		// Distance tests
+		runner.describe('Vector2D.dist()', () => {
+			runner.it('should calculate distance between two vectors', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(3, 4);
+				const result = v1.dist(v2);
+				runner.assertEqual(result, 5);
+			});
+
+			runner.it('should be symmetric', () => {
+				const v1 = new Vector2D(1, 2);
+				const v2 = new Vector2D(4, 6);
+				runner.assertEqual(v1.dist(v2), v2.dist(v1));
+			});
+
+			runner.it('should return 0 for same vector', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.dist(v);
+				runner.assertEqual(result, 0);
+			});
+		});
+
+		// Distance squared tests
+		runner.describe('Vector2D.distSq()', () => {
+			runner.it('should calculate squared distance between vectors', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(3, 4);
+				const result = v1.distSq(v2);
+				runner.assertEqual(result, 25);
+			});
+		});
+
+		// Angle tests
+		runner.describe('Vector2D.angle()', () => {
+			runner.it('should return angle for vector pointing right', () => {
+				const v = new Vector2D(1, 0);
+				const result = v.angle();
+				runner.assertEqual(result, 0);
+			});
+
+			runner.it('should return PI/2 for vector pointing down', () => {
+				const v = new Vector2D(0, 1);
+				const result = v.angle();
+				runner.assertAlmostEqual(result, Math.PI / 2);
+			});
+
+			runner.it('should return -PI/2 for vector pointing up', () => {
+				const v = new Vector2D(0, -1);
+				const result = v.angle();
+				runner.assertAlmostEqual(result, -Math.PI / 2);
+			});
+		});
+
+		// Angle to tests
+		runner.describe('Vector2D.angleTo()', () => {
+			runner.it('should calculate angle from one vector to another', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(1, 0);
+				const result = v1.angleTo(v2);
+				runner.assertEqual(result, 0);
+			});
+
+			runner.it('should handle diagonal angles', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(1, 1);
+				const result = v1.angleTo(v2);
+				runner.assertAlmostEqual(result, Math.PI / 4); // 45 degrees
+			});
+		});
+
+		// Rotation tests
+		runner.describe('Vector2D.rotate()', () => {
+			runner.it('should rotate vector by 90 degrees', () => {
+				const v = new Vector2D(1, 0);
+				const result = v.rotate(Math.PI / 2);
+				runner.assertAlmostEqual(result.x, 0);
+				runner.assertAlmostEqual(result.y, 1);
+			});
+
+			runner.it('should rotate vector by 180 degrees', () => {
+				const v = new Vector2D(1, 0);
+				const result = v.rotate(Math.PI);
+				runner.assertAlmostEqual(result.x, -1);
+				runner.assertAlmostEqual(result.y, 0);
+			});
+
+			runner.it('should not mutate original vector', () => {
+				const v = new Vector2D(1, 0);
+				v.rotate(Math.PI / 2);
+				runner.assertEqual(v.x, 1);
+				runner.assertEqual(v.y, 0);
+			});
+		});
+
+		// Rotate around tests
+		runner.describe('Vector2D.rotateAround()', () => {
+			runner.it('should rotate around a point', () => {
+				const v = new Vector2D(2, 0);
+				const center = new Vector2D(1, 0);
+				const result = v.rotateAround(center, Math.PI / 2);
+				runner.assertAlmostEqual(result.x, 1);
+				runner.assertAlmostEqual(result.y, 1);
+			});
+
+			runner.it('should not change position when rotating around itself', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.rotateAround(v, Math.PI);
+				runner.assertAlmostEqual(result.x, 3);
+				runner.assertAlmostEqual(result.y, 4);
+			});
+		});
+
+		// Linear interpolation tests
+		runner.describe('Vector2D.lerp()', () => {
+			runner.it('should return start vector when t=0', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(10, 10);
+				const result = v1.lerp(v2, 0);
+				runner.assertEqual(result.x, 0);
+				runner.assertEqual(result.y, 0);
+			});
+
+			runner.it('should return end vector when t=1', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(10, 10);
+				const result = v1.lerp(v2, 1);
+				runner.assertEqual(result.x, 10);
+				runner.assertEqual(result.y, 10);
+			});
+
+			runner.it('should interpolate halfway when t=0.5', () => {
+				const v1 = new Vector2D(0, 0);
+				const v2 = new Vector2D(10, 10);
+				const result = v1.lerp(v2, 0.5);
+				runner.assertEqual(result.x, 5);
+				runner.assertEqual(result.y, 5);
+			});
+
+			runner.it('should handle non-uniform vectors', () => {
+				const v1 = new Vector2D(2, 8);
+				const v2 = new Vector2D(6, 4);
+				const result = v1.lerp(v2, 0.25);
+				runner.assertEqual(result.x, 3);
+				runner.assertEqual(result.y, 7);
+			});
+		});
+
+		// Equality tests
+		runner.describe('Vector2D.equals()', () => {
+			runner.it('should return true for equal vectors', () => {
+				const v1 = new Vector2D(3, 4);
+				const v2 = new Vector2D(3, 4);
+				runner.assertTrue(v1.equals(v2));
+			});
+
+			runner.it('should return false for different vectors', () => {
+				const v1 = new Vector2D(3, 4);
+				const v2 = new Vector2D(3, 5);
+				runner.assertFalse(v1.equals(v2));
+			});
+
+			runner.it('should return true for same vector instance', () => {
+				const v = new Vector2D(3, 4);
+				runner.assertTrue(v.equals(v));
+			});
+
+			runner.it('should use strict equality (not type coercion)', () => {
+				const v1 = new Vector2D(3, 4);
+				const v2 = new Vector2D(3, 4);
+				// This test verifies the fix from == to ===
+				runner.assertTrue(v1.equals(v2));
+			});
+		});
+
+		// toString tests
+		runner.describe('Vector2D.toString()', () => {
+			runner.it('should convert to string format', () => {
+				const v = new Vector2D(3, 4);
+				const result = v.toString();
+				runner.assertEqual(result, '(3, 4)');
+			});
+
+			runner.it('should handle negative values', () => {
+				const v = new Vector2D(-5, -12);
+				const result = v.toString();
+				runner.assertEqual(result, '(-5, -12)');
+			});
+
+			runner.it('should handle decimals', () => {
+				const v = new Vector2D(3.14, 2.71);
+				const result = v.toString();
+				runner.assertEqual(result, '(3.14, 2.71)');
+			});
+		});
+
+		// Edge cases and integration tests
+		runner.describe('Vector2D Edge Cases', () => {
+			runner.it('should handle very large numbers', () => {
+				const v = new Vector2D(1e10, 1e10);
+				const result = v.add(new Vector2D(1e10, 1e10));
+				runner.assertEqual(result.x, 2e10);
+				runner.assertEqual(result.y, 2e10);
+			});
+
+			runner.it('should handle very small numbers', () => {
+				const v = new Vector2D(1e-10, 1e-10);
+				const result = v.mul(2);
+				runner.assertAlmostEqual(result.x, 2e-10);
+				runner.assertAlmostEqual(result.y, 2e-10);
+			});
+
+			runner.it('should chain operations correctly', () => {
+				const v = new Vector2D(1, 2);
+				const result = v.add(new Vector2D(1, 1))
+					.mul(2)
+					.sub(new Vector2D(1, 1))
+					.div(2);
+				runner.assertAlmostEqual(result.x, 1.5);
+				runner.assertAlmostEqual(result.y, 2.5);
+			});
+		});
+
+		// Render results
+		runner.render();
+	</script>
+</body>
+</html>
