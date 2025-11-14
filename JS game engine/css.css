@@ -18,6 +18,10 @@ canvas {
 	display: block;
 }
 
+canvas.hide-cursor {
+	cursor: none;
+}
+
 #menuOverlay {
 	position: absolute;
 	top: 0;

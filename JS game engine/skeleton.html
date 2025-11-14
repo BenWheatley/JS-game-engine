@@ -176,6 +176,7 @@
 			resetGame();
 			menuSystem.hideMenu();
 			musicPlayer.play();
+			canvas.classList.add('hide-cursor');
 		}
 
 		function resetGame() {
@@ -201,12 +202,14 @@
 		function gameOver() {
 			currentState = GameState.GAME_OVER;
 			musicPlayer.stop();
+			canvas.classList.remove('hide-cursor');
 			showGameOverMenu();
 		}
 
 		function returnToMenu() {
 			currentState = GameState.MENU;
 			musicPlayer.stop();
+			canvas.classList.remove('hide-cursor');
 			showMainMenu();
 		}
 
@@ -373,6 +376,7 @@
 			if (currentState === GameState.PLAYING) {
 				currentState = GameState.PAUSED;
 				musicPlayer.pause();
+				canvas.classList.remove('hide-cursor');
 				showPauseMenu();
 			}
 		}
@@ -381,6 +385,7 @@
 			currentState = GameState.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
+			canvas.classList.add('hide-cursor');
 		}
 
 		function showPauseMenu() {
