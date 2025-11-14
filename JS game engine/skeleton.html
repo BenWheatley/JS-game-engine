@@ -100,25 +100,19 @@
 		const alienSpeed = 1000/1000.0; // pixels per millisecond
 		let backgroundSprite;
 		let aliens = [];
-		let alienDelayMilliseconds = 500;
 		let lastAlienTime = Date.now();
 		let alienScouts = [];
-		let alienScoutDelayMilliseconds = 1500;
 		let lastAlienScoutTime = Date.now();
 		let alienFighters = [];
-		let alienFighterDelayMilliseconds = 3000;
 		let lastAlienFighterTime = Date.now();
 		let alienFighterShots = []; // Shots fired by alien fighters
 		let missileCruisers = [];
-		let missileCruiserDelayMilliseconds = 5000;
 		let lastMissileCruiserTime = Date.now();
 		let cruiserMissiles = []; // Missiles fired by missile cruisers
 		let asteroids = [];
-		let asteroidDelayMilliseconds = 2000;
 		let lastAsteroidTime = Date.now();
 		let asteroidSpawns = []; // Smaller asteroids spawned from destroyed asteroids
 		let shots = [];
-		let shotDelayMilliseconds = 500;
 		let lastShotTime = Date.now();
 
 		// Initialize sound manager and music player
@@ -704,7 +698,7 @@
 				player.reverseThrust(deltaTime);
 			}
 			if (engine.keyDown[" "]) {
-				if (Date.now() > lastShotTime + shotDelayMilliseconds) {
+				if (Date.now() > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
 					lastShotTime = Date.now();
 					const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
 					const newShot = new Shot(
@@ -721,7 +715,7 @@
 
 			player.update(deltaTime);
 
-			if (Date.now() > lastAlienScoutTime + alienScoutDelayMilliseconds) {
+			if (Date.now() > lastAlienScoutTime + GameConfig.SPAWNING.ALIEN_SCOUT_INTERVAL) {
 				lastAlienScoutTime = Date.now();
 				const newAlienScout = new AlienScout(
 					player.sprite.position,
@@ -731,7 +725,7 @@
 				alienScouts.push(newAlienScout);
 			}
 
-			if (Date.now() > lastAlienFighterTime + alienFighterDelayMilliseconds) {
+			if (Date.now() > lastAlienFighterTime + GameConfig.SPAWNING.ALIEN_FIGHTER_INTERVAL) {
 				lastAlienFighterTime = Date.now();
 				const newAlienFighter = new AlienFighter(
 					player.sprite.position,
@@ -741,7 +735,7 @@
 				alienFighters.push(newAlienFighter);
 			}
 
-			if (Date.now() > lastMissileCruiserTime + missileCruiserDelayMilliseconds) {
+			if (Date.now() > lastMissileCruiserTime + GameConfig.SPAWNING.MISSILE_CRUISER_INTERVAL) {
 				lastMissileCruiserTime = Date.now();
 				const newMissileCruiser = new MissileCruiser(
 					player.sprite.position,
@@ -751,7 +745,7 @@
 				missileCruisers.push(newMissileCruiser);
 			}
 
-			if (Date.now() > lastAsteroidTime + asteroidDelayMilliseconds) {
+			if (Date.now() > lastAsteroidTime + GameConfig.SPAWNING.ASTEROID_INTERVAL) {
 				lastAsteroidTime = Date.now();
 				const newAsteroid = new Asteroid(
 					player.sprite.position,
@@ -992,8 +986,8 @@
 			}
 
 			// Wrap NPCs that go beyond minimap bounds, despawn projectiles
-			const wrapDistance = 1000; // Minimap range - wrap NPCs at this distance
-			const despawnDistance = Math.max(canvas.width, canvas.height) * 2; // Despawn projectiles
+			const wrapDistance = GameConfig.WORLD.NPC_WRAP_DISTANCE; // Minimap range - wrap NPCs at this distance
+			const despawnDistance = Math.max(canvas.width, canvas.height) * GameConfig.WORLD.PROJECTILE_DESPAWN_MULTIPLIER; // Despawn projectiles
 
 			// Wrap aliens around minimap edges
 			for (const alien of aliens) {
@@ -1120,7 +1114,7 @@
 
 		function checkGamepadInput(deltaTime) {
 			const gamepads = navigator.getGamepads();
-			const deadzone = 0.15; // Ignore small stick movements to prevent drift
+			const deadzone = GameConfig.PLAYER.GAMEPAD_DEADZONE; // Ignore small stick movements to prevent drift
 
 			for (const gamepad of gamepads) {
 				if (!gamepad) continue;
@@ -1159,7 +1153,7 @@
 
 				// Button 0 (A/Cross): Shoot
 				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
-					if (Date.now() > lastShotTime + shotDelayMilliseconds) {
+					if (Date.now() > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
 						lastShotTime = Date.now();
 						const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
 						const newShot = new Shot(
