@@ -7,9 +7,17 @@ class MissileCruiser extends NPC {
   static rotationalSpeed = Math.PI / 1500; // Slower rotation than AlienScout
   static shotCooldown = 4000; // 4 seconds between missile launches
 
+  // AI behavior constants
+  static SPAWN_MARGIN_MULTIPLIER = 2; // Spawn distance as multiple of sprite size
+  static ARRIVAL_THRESHOLD = 50; // Distance in pixels to consider target reached
+  static OFFSCREEN_TIMEOUT = 2000; // Milliseconds before retargeting when offscreen
+  static TARGET_AREA_FACTOR = 0.8; // Fraction of screen radius for target selection
+  static TURN_PRECISION = 0.01; // Minimum angle difference in radians before turning
+  static SPRITE_UP_ANGLE_OFFSET = Math.PI / 2; // Sprite faces up at rotation 0, add 90° for direction
+
   constructor(playerPosition, canvasWidth, canvasHeight) {
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = MissileCruiser.size.x * 2;
+    const margin = MissileCruiser.size.x * MissileCruiser.SPAWN_MARGIN_MULTIPLIER;
     const position = MissileCruiser.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -69,7 +77,7 @@ class MissileCruiser extends NPC {
     // Pick a random location near the player (within screen bounds if player doesn't move)
     const screenRadius = Math.min(this.canvasWidth, this.canvasHeight) / 2;
     const angle = Math.random() * Math.PI * 2;
-    const distance = Math.random() * screenRadius * 0.8; // Stay mostly on-screen
+    const distance = Math.random() * screenRadius * MissileCruiser.TARGET_AREA_FACTOR;
 
     this.targetPosition = new Vector2D(
       playerPosition.x + Math.cos(angle) * distance,
@@ -80,7 +88,7 @@ class MissileCruiser extends NPC {
   hasReachedTarget() {
     if (!this.targetPosition) return false;
     const distance = this.sprite.position.dist(this.targetPosition);
-    return distance < 50; // Within 50 pixels
+    return distance < MissileCruiser.ARRIVAL_THRESHOLD;
   }
 
   isOffScreen(playerPosition) {
@@ -110,7 +118,7 @@ class MissileCruiser extends NPC {
     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
     // Turn in the direction of smallest angle difference
-    if (Math.abs(angleDiff) > 0.01) {
+    if (Math.abs(angleDiff) > MissileCruiser.TURN_PRECISION) {
       if (angleDiff > 0) {
         this.sprite.rotation += Math.min(MissileCruiser.rotationalSpeed * deltaTime, angleDiff);
       } else {
@@ -155,7 +163,7 @@ class MissileCruiser extends NPC {
     // Track off-screen time
     if (this.isOffScreen(playerPosition)) {
       this.offScreenTime += deltaTime;
-      if (this.offScreenTime > 2000) { // 2 seconds
+      if (this.offScreenTime > MissileCruiser.OFFSCREEN_TIMEOUT) {
         this.pickNewTarget(playerPosition);
         this.offScreenTime = 0;
       }
@@ -166,7 +174,7 @@ class MissileCruiser extends NPC {
     // AI: Turn towards target and accelerate
     if (this.targetPosition) {
       const toTarget = this.targetPosition.sub(this.sprite.position);
-      const targetAngle = Math.atan2(toTarget.y, toTarget.x) + Math.PI / 2; // +90 degrees because sprite faces up at 0
+      const targetAngle = Math.atan2(toTarget.y, toTarget.x) + MissileCruiser.SPRITE_UP_ANGLE_OFFSET;
 
       this.turnTowards(targetAngle, deltaTime);
       this.accelerate(deltaTime);
