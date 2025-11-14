@@ -1,6 +1,6 @@
 class Asteroid extends GameEntity {
-  static imageUrl = 'asteroid-1.png'; // Could randomize between asteroid-1/2/3.png
-  static size = new Vector2D(60, 60);
+  static imageUrl = 'asteroid-big.png';
+  static size = new Vector2D(52, 52);
   static health = 3;
   static speed = 0.04; // pixels per millisecond (similar to player max speed)
 
