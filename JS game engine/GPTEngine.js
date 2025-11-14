@@ -3,7 +3,7 @@ class GPTEngine {
 		if (!GPTEngine.instance) {
 			this._document = document;
 			this._canvas = document.getElementById(canvasName);
-			this._configureUserInput()
+			this._configureUserInput();
 			
 			GPTEngine.instance = this;
 		}
