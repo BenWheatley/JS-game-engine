@@ -45,7 +45,11 @@ class Vector2D {
     }
 
     norm() {
-        return this.div(this.mag());
+        const magnitude = this.mag();
+        if (magnitude === 0) {
+            return new Vector2D(0, 0);
+        }
+        return this.div(magnitude);
     }
 
     dist(v) {
