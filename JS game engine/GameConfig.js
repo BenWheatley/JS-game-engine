@@ -51,9 +51,28 @@ const GameConfig = {
     ASTEROID_INTERVAL: 2000             // Milliseconds between Asteroid spawns
   },
 
+  // Minimap display and configuration
+  MINIMAP: {
+    SIZE: 150,                          // Minimap width and height in pixels (square)
+    RANGE: 1000,                        // World units visible on minimap (radius from player)
+    MARGIN: 10,                         // Distance from screen edge in pixels
+    BACKGROUND_COLOR: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black background
+    BORDER_COLOR: '#FFFFFF',            // White border
+    BORDER_WIDTH: 2,                    // Border thickness in pixels
+    PLAYER_COLOR: '#0000FF',            // Blue player indicator
+    PLAYER_SIZE: 3,                     // Player indicator radius in pixels
+    ENEMY_COLOR: '#FF0000',             // Red enemy indicators
+    ENEMY_SIZE_LARGE: 4,                // Large enemy/asteroid indicator size (width/height)
+    ENEMY_SIZE_SMALL: 2,                // Small asteroid spawn indicator size
+    ASTEROID_COLOR: '#FFFFFF'           // White asteroid indicators
+  },
+
   // World boundaries and wrapping
   WORLD: {
-    NPC_WRAP_DISTANCE: 1000,            // Distance from player where NPCs wrap to opposite edge (minimap range)
+    // NPCs wrap at minimap edge - this should match MINIMAP.RANGE
+    get NPC_WRAP_DISTANCE() {
+      return GameConfig.MINIMAP.RANGE;  // Automatically uses minimap range
+    },
     PROJECTILE_DESPAWN_MULTIPLIER: 2    // Projectile despawn distance as multiple of screen size
   }
 };

@@ -31,6 +31,7 @@
 	<script type="text/javascript" src="SimpleMusic.js"></script>
 	<script type="text/javascript" src="MusicPlayer.js"></script>
 	<script type="text/javascript" src="MenuSystem.js"></script>
+	<script type="text/javascript" src="Minimap.js"></script>
 </head>
 <body>
 	<div id="gameContainer">
@@ -144,6 +145,7 @@
 			backgroundTileSize
 		);
 		let player = new Player();
+		let minimap = new Minimap(canvas.width, canvas.height);
 
 		function loading() {
 			return Sprite.stillLoading();
@@ -561,83 +563,14 @@
 			context.fillText(`Score: ${score}`, 10, 60);
 
 			// Mini-map
-			const minimapSize = 150;
-			const minimapX = canvas.width - minimapSize - 10;
-			const minimapY = 10;
-			const minimapRange = 1000; // World units to show on minimap
-			const minimapScale = minimapSize / (minimapRange * 2);
-
-			// Draw minimap background
-			context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-			context.fillRect(minimapX, minimapY, minimapSize, minimapSize);
-
-			// Draw minimap border
-			context.strokeStyle = '#FFFFFF';
-			context.lineWidth = 2;
-			context.strokeRect(minimapX, minimapY, minimapSize, minimapSize);
-
-			// Helper function to convert world position to minimap position
-			function worldToMinimap(worldPos) {
-				const relativeX = worldPos.x - player.sprite.position.x;
-				const relativeY = worldPos.y - player.sprite.position.y;
-				const minimapPosX = minimapX + minimapSize/2 + (relativeX * minimapScale);
-				const minimapPosY = minimapY + minimapSize/2 + (relativeY * minimapScale);
-				return { x: minimapPosX, y: minimapPosY };
-			}
-
-			// Draw asteroids (white)
-			context.fillStyle = '#FFFFFF';
-			for (const asteroid of asteroids) {
-				const pos = worldToMinimap(asteroid.sprite.position);
-				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
-				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
-					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
-				}
-			}
-			for (const asteroidSpawn of asteroidSpawns) {
-				const pos = worldToMinimap(asteroidSpawn.sprite.position);
-				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
-				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
-					context.fillRect(pos.x - 1, pos.y - 1, 2, 2);
-				}
-			}
-
-			// Draw aliens (red)
-			context.fillStyle = '#FF0000';
-			for (const alien of aliens) {
-				const pos = worldToMinimap(alien.sprite.position);
-				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
-				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
-					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
-				}
-			}
-			for (const alienScout of alienScouts) {
-				const pos = worldToMinimap(alienScout.sprite.position);
-				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
-				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
-					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
-				}
-			}
-			for (const alienFighter of alienFighters) {
-				const pos = worldToMinimap(alienFighter.sprite.position);
-				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
-				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
-					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
-				}
-			}
-			for (const missileCruiser of missileCruisers) {
-				const pos = worldToMinimap(missileCruiser.sprite.position);
-				if (pos.x >= minimapX && pos.x <= minimapX + minimapSize &&
-				    pos.y >= minimapY && pos.y <= minimapY + minimapSize) {
-					context.fillRect(pos.x - 2, pos.y - 2, 4, 4);
-				}
-			}
-
-			// Draw player (blue) in center
-			context.fillStyle = '#0000FF';
-			context.beginPath();
-			context.arc(minimapX + minimapSize/2, minimapY + minimapSize/2, 3, 0, Math.PI * 2);
-			context.fill();
+			minimap.draw(context, {
+				asteroids: asteroids,
+				asteroidSpawns: asteroidSpawns,
+				aliens: aliens,
+				alienScouts: alienScouts,
+				alienFighters: alienFighters,
+				missileCruisers: missileCruisers
+			}, player.sprite.position);
 		}
 
 		function renderGameOver() {
