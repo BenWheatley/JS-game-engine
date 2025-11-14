@@ -4,7 +4,8 @@ class Player extends GameEntity {
 
   constructor() {
     super(new Vector2D(0, 0), 0, new Vector2D(), Player.size, Player.imageUrl);
-    this.health = GameConfig.PLAYER.HEALTH;
+    this.maxHealth = GameConfig.PLAYER.INITIAL_HEALTH; // Current maximum (can change with power-ups)
+    this.health = this.maxHealth; // Current health
   }
 
   accelerate(deltaTime) {

@@ -536,24 +536,25 @@
 			context.restore();
 
 			// HUD - render in screen space
-			const maxHealth = Player.health;
-			const healthBarWidth = maxHealth;
-			const healthBarHeight = 16;
-			const healthBarX = 10;
-			const healthBarY = 20;
+			// Health bar
+			const healthBarWidth = GameConfig.HUD.HEALTH_BAR_WIDTH;
+			const healthBarHeight = GameConfig.HUD.HEALTH_BAR_HEIGHT;
+			const healthBarX = GameConfig.HUD.HEALTH_BAR_X;
+			const healthBarY = GameConfig.HUD.HEALTH_BAR_Y;
 
-			// Draw health bar background (red)
-			context.fillStyle = '#FF0000';
+			// Draw health bar background (red - shows damage)
+			context.fillStyle = GameConfig.HUD.HEALTH_BAR_BG_COLOR;
 			context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
-			// Draw health bar foreground (green)
-			const currentHealthWidth = Math.max(0, player.health);
-			context.fillStyle = '#00FF00';
+			// Draw health bar foreground (green - shows current health)
+			const healthPercentage = Math.max(0, Math.min(1, player.health / player.maxHealth));
+			const currentHealthWidth = healthBarWidth * healthPercentage;
+			context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
 			context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
 
 			// Draw health bar border (white)
-			context.strokeStyle = '#FFFFFF';
-			context.lineWidth = 2;
+			context.strokeStyle = GameConfig.HUD.HEALTH_BAR_BORDER_COLOR;
+			context.lineWidth = GameConfig.HUD.HEALTH_BAR_BORDER_WIDTH;
 			context.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
 			// Draw score

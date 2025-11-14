@@ -34,13 +34,25 @@ const GameConfig = {
 
   // Player physics and controls
   PLAYER: {
-    HEALTH: 100,                        // Starting health points
+    INITIAL_HEALTH: 100,                // Starting health points
     FORWARD_ACCELERATION: 0.002,        // Forward thrust acceleration per millisecond
     BACKWARD_ACCELERATION: 0.0002,      // Reverse thrust acceleration per millisecond (10% of forward)
     MAX_SPEED: 0.08,                    // Maximum velocity magnitude
     ROTATIONAL_SPEED: Math.PI / 1000 * 1.1, // Radians per millisecond (rotation speed)
     FIRE_RATE: 500,                     // Milliseconds between shots (fire cooldown)
     GAMEPAD_DEADZONE: 0.15              // Analog stick deadzone to prevent drift
+  },
+
+  // HUD display configuration
+  HUD: {
+    HEALTH_BAR_WIDTH: 100,              // Health bar width in pixels
+    HEALTH_BAR_HEIGHT: 16,              // Health bar height in pixels
+    HEALTH_BAR_X: 10,                   // Health bar X position
+    HEALTH_BAR_Y: 20,                   // Health bar Y position
+    HEALTH_BAR_BG_COLOR: '#FF0000',     // Background color (red - shows damage)
+    HEALTH_BAR_FG_COLOR: '#00FF00',     // Foreground color (green - shows current health)
+    HEALTH_BAR_BORDER_COLOR: '#FFFFFF', // Border color (white)
+    HEALTH_BAR_BORDER_WIDTH: 2          // Border thickness in pixels
   },
 
   // Enemy and obstacle spawn timing
