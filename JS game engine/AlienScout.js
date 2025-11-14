@@ -1,6 +1,6 @@
 class AlienScout extends NPC {
   static imageUrl = 'alien-scout.png';
-  static size = new Vector2D(50, 50);
+  static size = new Vector2D(52, 54);
   static health = 100;
   static forwardAcceleration = 0.0008; // Slightly less than player
   static maxSpeed = 0.05; // Slightly less than player

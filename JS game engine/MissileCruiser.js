@@ -1,6 +1,6 @@
 class MissileCruiser extends NPC {
   static imageUrl = 'missile_ship.png';
-  static size = new Vector2D(180, 180);
+  static size = new Vector2D(72, 92); // 2x sprite asset size (36x46)
   static health = 200;
   static forwardAcceleration = 0.0004; // Slower than AlienScout
   static maxSpeed = 0.04; // Slower than AlienScout

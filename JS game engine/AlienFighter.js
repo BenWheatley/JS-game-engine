@@ -1,6 +1,6 @@
 class AlienFighter extends NPC {
   static imageUrl = 'alien-fighter.png';
-  static size = new Vector2D(50, 50);
+  static size = new Vector2D(52, 50);
   static health = 100;
   static forwardAcceleration = 0.0016; // 2x AlienScout
   static maxSpeed = 0.10; // 2x AlienScout

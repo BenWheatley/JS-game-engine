@@ -1,6 +1,6 @@
 class Player extends GameEntity {
   static imageUrl = 'player-ship.png';
-  static size = new Vector2D(48, 48);
+  static size = new Vector2D(42, 43);
   static health = 100;
   static forwardAcceleration = 0.002;
   static backwardAcceleration = 0.0002;
