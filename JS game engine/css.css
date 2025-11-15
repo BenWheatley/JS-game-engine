@@ -53,7 +53,7 @@ canvas.hide-cursor {
 	color: #fff;
 	font-size: 48px;
 	font-weight: bold;
-	margin-bottom: 60px;
+	margin-bottom: 30px;
 	text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
@@ -222,9 +222,9 @@ canvas.hide-cursor {
 }
 
 .menu-score-list-container {
-	width: 600px;
-	padding: 20px;
-	margin: 20px 0;
+	width: 510px;
+	padding: 17px;
+	margin: 0;
 	background: rgba(0, 0, 0, 0.5);
 	border: 2px solid #444;
 	border-radius: 8px;
@@ -233,8 +233,8 @@ canvas.hide-cursor {
 .menu-score-row {
 	display: flex;
 	align-items: center;
-	padding: 8px 15px;
-	margin: 4px 0;
+	padding: 7px 13px;
+	margin: 3px 0;
 	background: rgba(255, 255, 255, 0.05);
 	border-radius: 4px;
 	transition: background 0.2s ease;
@@ -273,21 +273,21 @@ canvas.hide-cursor {
 
 .menu-score-row.ellipsis .menu-score-content {
 	text-align: center;
-	font-size: 24px;
+	font-size: 20px;
 	color: #666;
 }
 
 .menu-score-rank {
 	color: #fff;
-	font-size: 18px;
+	font-size: 15px;
 	font-weight: bold;
-	min-width: 40px;
+	min-width: 34px;
 	text-align: right;
-	margin-right: 15px;
+	margin-right: 13px;
 }
 
 .menu-score-content {
 	color: #ccc;
-	font-size: 16px;
+	font-size: 14px;
 	flex: 1;
 }
