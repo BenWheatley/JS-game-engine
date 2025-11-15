@@ -2,13 +2,19 @@ class Note {
   static notes = {};
   static baseFrequency = 440;
   static noteLetters = 'C C# D D# E F F# G G# A A# B'.split(' ');
-  static audioContext = null;
   static volume = 0.5; // 0.0 to 1.0
 
-  static initAudioContext() {
-    if (!Note.audioContext) {
-      Note.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  // Use SoundManager's shared AudioContext instead of creating our own
+  static get audioContext() {
+    if (typeof SoundManager !== 'undefined' && SoundManager.audioContext) {
+      return SoundManager.audioContext;
     }
+    return null;
+  }
+
+  static initAudioContext() {
+    // No-op: AudioContext is now managed by SoundManager
+    // This method is kept for backwards compatibility
     return Note.audioContext;
   }
 
@@ -53,9 +59,20 @@ class Note {
     return frequency;
   }
 
-  start() {
+  async start() {
     if (!Note.audioContext) {
-      Note.initAudioContext();
+      console.error('AudioContext not available - SoundManager may not be initialized');
+      return;
+    }
+
+    // Resume AudioContext if suspended (required by browser autoplay policies)
+    if (Note.audioContext.state === 'suspended') {
+      try {
+        await Note.audioContext.resume();
+      } catch (error) {
+        console.error('Failed to resume audio context for music:', error);
+        return;
+      }
     }
 
     // Create gain node for envelope control (prevents clicks)

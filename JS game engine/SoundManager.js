@@ -36,11 +36,21 @@ class SoundManager {
     await Promise.all(promises);
   }
 
-  play(name, volume = 1.0) {
+  async play(name, volume = 1.0) {
     const audioBuffer = SoundManager.sounds[name];
     if (!audioBuffer) {
       console.warn(`Sound not loaded: ${name}`);
       return;
+    }
+
+    // Resume AudioContext if suspended (required by browser autoplay policies)
+    if (SoundManager.audioContext.state === 'suspended') {
+      try {
+        await SoundManager.audioContext.resume();
+      } catch (error) {
+        console.error('Failed to resume audio context:', error);
+        return;
+      }
     }
 
     const source = SoundManager.audioContext.createBufferSource();
