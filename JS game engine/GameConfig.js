@@ -100,6 +100,63 @@ const GameConfig = {
     MAX_LEVEL_INDEX: 9                  // Index of last wave (repeats with scaling after this)
   },
 
+  // Alien Scout - Basic enemy that flies around
+  ALIEN_SCOUT: {
+    IMAGE_URL: 'alien-scout.png',
+    WIDTH: 52,
+    HEIGHT: 54,
+    HEALTH: 100,
+    SCORE_VALUE: 150,
+    FORWARD_ACCELERATION: 0.0008,       // Slightly less than player
+    MAX_SPEED: 0.05,                    // Slightly less than player
+    ROTATIONAL_SPEED: Math.PI / 1200    // Slightly slower rotation than player
+  },
+
+  // Alien Fighter - Aggressive enemy that shoots plasma
+  ALIEN_FIGHTER: {
+    IMAGE_URL: 'alien-fighter.png',
+    WIDTH: 52,
+    HEIGHT: 50,
+    HEALTH: 100,
+    SCORE_VALUE: 200,
+    FORWARD_ACCELERATION: 0.0016,       // 2x AlienScout
+    MAX_SPEED: 0.10,                    // 2x AlienScout
+    ROTATIONAL_SPEED: Math.PI / 600,    // 2x AlienScout
+    SHOT_COOLDOWN: 2000                 // Milliseconds between shots
+  },
+
+  // Missile Cruiser - Heavy enemy that fires homing missiles
+  MISSILE_CRUISER: {
+    IMAGE_URL: 'missile_ship.png',
+    WIDTH: 72,                          // 2x sprite asset size (36x46)
+    HEIGHT: 92,
+    HEALTH: 200,
+    SCORE_VALUE: 300,
+    FORWARD_ACCELERATION: 0.0004,       // Slower than AlienScout
+    MAX_SPEED: 0.04,                    // Slower than AlienScout
+    ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
+    SHOT_COOLDOWN: 4000                 // Milliseconds between missile launches
+  },
+
+  // Asteroid - Large destructible obstacle
+  ASTEROID_BIG: {
+    IMAGE_URL: 'asteroid-big.png',
+    WIDTH: 52,
+    HEIGHT: 52,
+    HEALTH: 3,
+    SCORE_VALUE: 200,
+    SPEED: 0.04                         // Pixels per millisecond (similar to player max speed)
+  },
+
+  // Asteroid Spawn - Small fragments from destroyed asteroids
+  ASTEROID_SPAWN: {
+    IMAGE_URL: 'asteroid-medium.png',
+    WIDTH: 27,
+    HEIGHT: 26,
+    HEALTH: 1,
+    SCORE_VALUE: 50
+  },
+
   // Minimap display and configuration
   MINIMAP: {
     SIZE: 150,                          // Minimap width and height in pixels (square)

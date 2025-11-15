@@ -1,16 +1,10 @@
 class AlienFighter extends NPC {
-  static imageUrl = 'alien-fighter.png';
-  static size = new Vector2D(52, 50);
-  static health = 100;
-  static scoreValue = 200;
-  static forwardAcceleration = 0.0016; // 2x AlienScout
-  static maxSpeed = 0.10; // 2x AlienScout
-  static rotationalSpeed = Math.PI / 600; // 2x AlienScout
-  static shotCooldown = 2000; // 2 seconds between shots
-
   constructor(playerPosition, canvasWidth, canvasHeight) {
+    const config = GameConfig.ALIEN_FIGHTER;
+    const size = new Vector2D(config.WIDTH, config.HEIGHT);
+
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = AlienFighter.size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
+    const margin = size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
     const position = AlienFighter.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -20,11 +14,11 @@ class AlienFighter extends NPC {
 
     super(position);
     // Override sprite with correct image
-    this.sprite = new Sprite(AlienFighter.imageUrl, position, AlienFighter.size);
+    this.sprite = new Sprite(config.IMAGE_URL, position, size);
     this.sprite.rotation = 0;
     this.velocity = new Vector2D(0, 0); // Start with zero velocity
-    this.health = AlienFighter.health;
-    this.scoreValue = AlienFighter.scoreValue;
+    this.health = config.HEALTH;
+    this.scoreValue = config.SCORE_VALUE;
 
     // AI state machine
     this.targetPosition = null;
@@ -93,7 +87,7 @@ class AlienFighter extends NPC {
   }
 
   accelerate(deltaTime) {
-    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(AlienFighter.forwardAcceleration);
+    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.ALIEN_FIGHTER.FORWARD_ACCELERATION);
     const velocityChange = accelerationVector.mul(deltaTime);
     this.velocity = this.velocity.add(velocityChange);
     this.clampSpeed();
@@ -106,22 +100,22 @@ class AlienFighter extends NPC {
     // Turn in the direction of smallest angle difference
     if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
       if (angleDiff > 0) {
-        this.sprite.rotation += Math.min(AlienFighter.rotationalSpeed * deltaTime, angleDiff);
+        this.sprite.rotation += Math.min(GameConfig.ALIEN_FIGHTER.ROTATIONAL_SPEED * deltaTime, angleDiff);
       } else {
-        this.sprite.rotation -= Math.min(AlienFighter.rotationalSpeed * deltaTime, -angleDiff);
+        this.sprite.rotation -= Math.min(GameConfig.ALIEN_FIGHTER.ROTATIONAL_SPEED * deltaTime, -angleDiff);
       }
     }
   }
 
   clampSpeed() {
     const speed = this.velocity.mag();
-    if (speed > AlienFighter.maxSpeed) {
-      this.velocity = this.velocity.norm().mul(AlienFighter.maxSpeed);
+    if (speed > GameConfig.ALIEN_FIGHTER.MAX_SPEED) {
+      this.velocity = this.velocity.norm().mul(GameConfig.ALIEN_FIGHTER.MAX_SPEED);
     }
   }
 
   tryShoot(gameTime) {
-    if (gameTime - this.lastShotTime > AlienFighter.shotCooldown) {
+    if (gameTime - this.lastShotTime > GameConfig.ALIEN_FIGHTER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;
 
       // Fire shot directly forward

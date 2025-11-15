@@ -1,15 +1,10 @@
 class AlienScout extends NPC {
-  static imageUrl = 'alien-scout.png';
-  static size = new Vector2D(52, 54);
-  static health = 100;
-  static scoreValue = 150;
-  static forwardAcceleration = 0.0008; // Slightly less than player
-  static maxSpeed = 0.05; // Slightly less than player
-  static rotationalSpeed = Math.PI / 1200; // Slightly slower rotation than player
-
   constructor(playerPosition, canvasWidth, canvasHeight) {
+    const config = GameConfig.ALIEN_SCOUT;
+    const size = new Vector2D(config.WIDTH, config.HEIGHT);
+
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = AlienScout.size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
+    const margin = size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
     const position = AlienScout.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -19,11 +14,11 @@ class AlienScout extends NPC {
 
     super(position);
     // Override sprite with correct image
-    this.sprite = new Sprite(AlienScout.imageUrl, position, AlienScout.size);
+    this.sprite = new Sprite(config.IMAGE_URL, position, size);
     this.sprite.rotation = 0;
     this.velocity = new Vector2D(0, 0); // Start with zero velocity
-    this.health = AlienScout.health;
-    this.scoreValue = AlienScout.scoreValue;
+    this.health = config.HEALTH;
+    this.scoreValue = config.SCORE_VALUE;
 
     // AI state machine
     this.targetPosition = null;
@@ -88,7 +83,7 @@ class AlienScout extends NPC {
   }
 
   accelerate(deltaTime) {
-    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(AlienScout.forwardAcceleration);
+    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.ALIEN_SCOUT.FORWARD_ACCELERATION);
     const velocityChange = accelerationVector.mul(deltaTime);
     this.velocity = this.velocity.add(velocityChange);
     this.clampSpeed();
@@ -101,17 +96,17 @@ class AlienScout extends NPC {
     // Turn in the direction of smallest angle difference
     if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
       if (angleDiff > 0) {
-        this.sprite.rotation += Math.min(AlienScout.rotationalSpeed * deltaTime, angleDiff);
+        this.sprite.rotation += Math.min(GameConfig.ALIEN_SCOUT.ROTATIONAL_SPEED * deltaTime, angleDiff);
       } else {
-        this.sprite.rotation -= Math.min(AlienScout.rotationalSpeed * deltaTime, -angleDiff);
+        this.sprite.rotation -= Math.min(GameConfig.ALIEN_SCOUT.ROTATIONAL_SPEED * deltaTime, -angleDiff);
       }
     }
   }
 
   clampSpeed() {
     const speed = this.velocity.mag();
-    if (speed > AlienScout.maxSpeed) {
-      this.velocity = this.velocity.norm().mul(AlienScout.maxSpeed);
+    if (speed > GameConfig.ALIEN_SCOUT.MAX_SPEED) {
+      this.velocity = this.velocity.norm().mul(GameConfig.ALIEN_SCOUT.MAX_SPEED);
     }
   }
 

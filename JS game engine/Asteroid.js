@@ -1,13 +1,10 @@
 class Asteroid extends GameEntity {
-  static imageUrl = 'asteroid-big.png';
-  static size = new Vector2D(52, 52);
-  static health = 3;
-  static scoreValue = 200;
-  static speed = 0.04; // pixels per millisecond (similar to player max speed)
-
   constructor(playerPosition, canvasWidth, canvasHeight) {
+    const config = GameConfig.ASTEROID_BIG;
+    const size = new Vector2D(config.WIDTH, config.HEIGHT);
+
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = Asteroid.size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
+    const margin = size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
     const position = Asteroid.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -17,11 +14,11 @@ class Asteroid extends GameEntity {
 
     // Calculate direction within 90-degree cone toward player
     const direction = Asteroid.getDirectionTowardPlayer(position, playerPosition);
-    const velocity = direction.mul(Asteroid.speed);
+    const velocity = direction.mul(config.SPEED);
 
-    super(position, 0, velocity, Asteroid.size, Asteroid.imageUrl);
-    this.health = Asteroid.health;
-    this.scoreValue = Asteroid.scoreValue;
+    super(position, 0, velocity, size, config.IMAGE_URL);
+    this.health = config.HEALTH;
+    this.scoreValue = config.SCORE_VALUE;
   }
 
   static getRandomSpawnPosition(canvasWidth, canvasHeight, margin, playerPosition) {

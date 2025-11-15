@@ -1,16 +1,10 @@
 class MissileCruiser extends NPC {
-  static imageUrl = 'missile_ship.png';
-  static size = new Vector2D(72, 92); // 2x sprite asset size (36x46)
-  static health = 200;
-  static scoreValue = 300;
-  static forwardAcceleration = 0.0004; // Slower than AlienScout
-  static maxSpeed = 0.04; // Slower than AlienScout
-  static rotationalSpeed = Math.PI / 1500; // Slower rotation than AlienScout
-  static shotCooldown = 4000; // 4 seconds between missile launches
-
   constructor(playerPosition, canvasWidth, canvasHeight) {
+    const config = GameConfig.MISSILE_CRUISER;
+    const size = new Vector2D(config.WIDTH, config.HEIGHT);
+
     // Calculate spawn position (2x bounding box offscreen)
-    const margin = MissileCruiser.size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
+    const margin = size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
     const position = MissileCruiser.getRandomSpawnPosition(
       canvasWidth,
       canvasHeight,
@@ -20,11 +14,11 @@ class MissileCruiser extends NPC {
 
     super(position);
     // Override sprite with correct image
-    this.sprite = new Sprite(MissileCruiser.imageUrl, position, MissileCruiser.size);
+    this.sprite = new Sprite(config.IMAGE_URL, position, size);
     this.sprite.rotation = 0;
     this.velocity = new Vector2D(0, 0); // Start with zero velocity
-    this.health = MissileCruiser.health;
-    this.scoreValue = MissileCruiser.scoreValue;
+    this.health = config.HEALTH;
+    this.scoreValue = config.SCORE_VALUE;
 
     // AI state machine
     this.targetPosition = null;
@@ -93,7 +87,7 @@ class MissileCruiser extends NPC {
   }
 
   accelerate(deltaTime) {
-    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(MissileCruiser.forwardAcceleration);
+    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.MISSILE_CRUISER.FORWARD_ACCELERATION);
     const velocityChange = accelerationVector.mul(deltaTime);
     this.velocity = this.velocity.add(velocityChange);
     this.clampSpeed();
@@ -106,22 +100,22 @@ class MissileCruiser extends NPC {
     // Turn in the direction of smallest angle difference
     if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
       if (angleDiff > 0) {
-        this.sprite.rotation += Math.min(MissileCruiser.rotationalSpeed * deltaTime, angleDiff);
+        this.sprite.rotation += Math.min(GameConfig.MISSILE_CRUISER.ROTATIONAL_SPEED * deltaTime, angleDiff);
       } else {
-        this.sprite.rotation -= Math.min(MissileCruiser.rotationalSpeed * deltaTime, -angleDiff);
+        this.sprite.rotation -= Math.min(GameConfig.MISSILE_CRUISER.ROTATIONAL_SPEED * deltaTime, -angleDiff);
       }
     }
   }
 
   clampSpeed() {
     const speed = this.velocity.mag();
-    if (speed > MissileCruiser.maxSpeed) {
-      this.velocity = this.velocity.norm().mul(MissileCruiser.maxSpeed);
+    if (speed > GameConfig.MISSILE_CRUISER.MAX_SPEED) {
+      this.velocity = this.velocity.norm().mul(GameConfig.MISSILE_CRUISER.MAX_SPEED);
     }
   }
 
   tryShoot(gameTime) {
-    if (gameTime - this.lastShotTime > MissileCruiser.shotCooldown) {
+    if (gameTime - this.lastShotTime > GameConfig.MISSILE_CRUISER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;
 
       // Fire missile directly forward
