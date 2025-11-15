@@ -10,8 +10,11 @@ class MenuSystem {
   showMenu(menuConfig) {
     this.currentMenu = menuConfig;
 
-    // Set title
-    this.titleElement.textContent = menuConfig.title;
+    // Set title - only set text if there's no image child (preserves title.png on main menu)
+    const hasImageChild = this.titleElement.querySelector('img');
+    if (!hasImageChild) {
+      this.titleElement.textContent = menuConfig.title;
+    }
 
     // Clear existing items
     this.buttonsElement.innerHTML = '';

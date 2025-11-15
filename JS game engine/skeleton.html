@@ -38,7 +38,9 @@
 	<div id="gameContainer">
 		<canvas id="gameCanvas" width="800" height="600"></canvas>
 		<div id="menuOverlay">
-			<div class="menu-title" id="menuTitle">SPACE SHOOTER</div>
+			<div class="menu-title" id="menuTitle">
+				<img id="menuTitleImage" src="title.png" alt="SPACE SHOOTER" style="width: 256px; height: 256px;">
+			</div>
 			<div class="menu-buttons" id="menuButtons"></div>
 			<div class="menu-instructions" id="menuInstructions"></div>
 		</div>
@@ -125,7 +127,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'energy-blast.png', 'missile.png']
+				['background.png', 'title.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'energy-blast.png', 'missile.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
@@ -140,7 +142,7 @@
 		})();
 
 		// Background will be tiled - store a single tile sprite
-		let backgroundTileSize = new Vector2D(800, 600); // Size of background.png
+		let backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
 		backgroundSprite = new Sprite(
 			'background.png',
 			new Vector2D(0, 0),
@@ -295,6 +297,12 @@
 
 		// Menu configuration functions
 		function showMainMenu() {
+			// Restore title image if it was replaced by text
+			const titleElement = document.getElementById('menuTitle');
+			if (!titleElement.querySelector('img')) {
+				titleElement.innerHTML = '<img id="menuTitleImage" src="title.png" alt="SPACE SHOOTER" style="width: 256px; height: 256px;">';
+			}
+
 			menuSystem.showMenu({
 				title: 'SPACE SHOOTER',
 				items: [
