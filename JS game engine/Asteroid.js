@@ -2,6 +2,7 @@ class Asteroid extends GameEntity {
   static imageUrl = 'asteroid-big.png';
   static size = new Vector2D(52, 52);
   static health = 3;
+  static scoreValue = 200;
   static speed = 0.04; // pixels per millisecond (similar to player max speed)
 
   constructor(playerPosition, canvasWidth, canvasHeight) {
@@ -20,6 +21,7 @@ class Asteroid extends GameEntity {
 
     super(position, 0, velocity, Asteroid.size, Asteroid.imageUrl);
     this.health = Asteroid.health;
+    this.scoreValue = Asteroid.scoreValue;
   }
 
   static getRandomSpawnPosition(canvasWidth, canvasHeight, margin, playerPosition) {

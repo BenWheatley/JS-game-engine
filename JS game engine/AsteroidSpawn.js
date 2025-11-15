@@ -2,10 +2,12 @@ class AsteroidSpawn extends GameEntity {
   static imageUrl = 'asteroid-medium.png';
   static size = new Vector2D(27, 26);
   static health = 1;
+  static scoreValue = 50;
 
   constructor(position, velocity, canvasWidth, canvasHeight) {
     super(position, 0, velocity, AsteroidSpawn.size, AsteroidSpawn.imageUrl);
     this.health = AsteroidSpawn.health;
+    this.scoreValue = AsteroidSpawn.scoreValue;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
   }

@@ -2,6 +2,7 @@ class AlienFighter extends NPC {
   static imageUrl = 'alien-fighter.png';
   static size = new Vector2D(52, 50);
   static health = 100;
+  static scoreValue = 200;
   static forwardAcceleration = 0.0016; // 2x AlienScout
   static maxSpeed = 0.10; // 2x AlienScout
   static rotationalSpeed = Math.PI / 600; // 2x AlienScout
@@ -23,6 +24,7 @@ class AlienFighter extends NPC {
     this.sprite.rotation = 0;
     this.velocity = new Vector2D(0, 0); // Start with zero velocity
     this.health = AlienFighter.health;
+    this.scoreValue = AlienFighter.scoreValue;
 
     // AI state machine
     this.targetPosition = null;

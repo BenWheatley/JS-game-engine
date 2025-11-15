@@ -2,6 +2,7 @@ class MissileCruiser extends NPC {
   static imageUrl = 'missile_ship.png';
   static size = new Vector2D(72, 92); // 2x sprite asset size (36x46)
   static health = 200;
+  static scoreValue = 300;
   static forwardAcceleration = 0.0004; // Slower than AlienScout
   static maxSpeed = 0.04; // Slower than AlienScout
   static rotationalSpeed = Math.PI / 1500; // Slower rotation than AlienScout
@@ -23,6 +24,7 @@ class MissileCruiser extends NPC {
     this.sprite.rotation = 0;
     this.velocity = new Vector2D(0, 0); // Start with zero velocity
     this.health = MissileCruiser.health;
+    this.scoreValue = MissileCruiser.scoreValue;
 
     // AI state machine
     this.targetPosition = null;

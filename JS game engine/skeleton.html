@@ -939,7 +939,7 @@
 					if (checkCollision(shot, alien)) {
 						aliensToRemove.add(alien);
 						shotsToRemove.add(shot);
-						score += 100; // Award points for destroying alien
+						score += alien.scoreValue;
 						playSoundEffect('explosion', 0.5);
 					}
 				}
@@ -951,7 +951,7 @@
 					if (checkCollision(shot, alienScout)) {
 						alienScoutsToRemove.add(alienScout);
 						shotsToRemove.add(shot);
-						score += 150; // Award points for destroying alien scout
+						score += alienScout.scoreValue;
 						playSoundEffect('explosion', 0.5);
 					}
 				}
@@ -963,7 +963,7 @@
 					if (checkCollision(shot, alienFighter)) {
 						alienFightersToRemove.add(alienFighter);
 						shotsToRemove.add(shot);
-						score += 200; // Award points for destroying alien fighter
+						score += alienFighter.scoreValue;
 						playSoundEffect('explosion', 0.5);
 					}
 				}
@@ -977,7 +977,7 @@
 						missileCruiser.health -= shot.damage;
 						if (missileCruiser.health <= 0) {
 							missileCruisersToRemove.add(missileCruiser);
-							score += 300; // Award points for destroying missile cruiser
+							score += missileCruiser.scoreValue;
 							playSoundEffect('explosion', 0.6);
 						} else {
 							playSoundEffect('hit', 0.4);
@@ -995,7 +995,7 @@
 						asteroid.health -= 1;
 						if (asteroid.health <= 0) {
 							asteroidsToRemove.add(asteroid);
-							score += 200; // Award more points for destroying asteroid
+							score += asteroid.scoreValue;
 							playSoundEffect('explosion', 0.5);
 							// Spawn 3 smaller asteroids
 							const spawns = AsteroidSpawn.createSpawnsFromAsteroid(asteroid, canvas.width, canvas.height);
@@ -1014,7 +1014,7 @@
 					if (checkCollision(shot, asteroidSpawn)) {
 						shotsToRemove.add(shot);
 						asteroidSpawnsToRemove.add(asteroidSpawn);
-						score += 50; // Award points for destroying small asteroid
+						score += asteroidSpawn.scoreValue;
 						playSoundEffect('explosion', 0.3);
 					}
 				}
