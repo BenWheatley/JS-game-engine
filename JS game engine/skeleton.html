@@ -819,31 +819,39 @@
 				const dy = wormhole.position.y - player.sprite.position.y;
 				const angle = Math.atan2(dy, dx);
 
-				// Draw arrow at screen edge pointing to wormhole
-				const arrowDistance = 50; // Distance from screen edge
-				const centerX = canvas.width / 2;
-				const centerY = canvas.height / 2;
+				// Check if wormhole is on-screen
+				const screenHalfWidth = canvas.width / 2;
+				const screenHalfHeight = canvas.height / 2;
+				const wormholeOnScreen = Math.abs(dx) < screenHalfWidth && Math.abs(dy) < screenHalfHeight;
 
-				// Calculate arrow position at edge of screen
-				let arrowX = centerX + Math.cos(angle) * (canvas.width / 2 - arrowDistance);
-				let arrowY = centerY + Math.sin(angle) * (canvas.height / 2 - arrowDistance);
+				// Only draw arrow if wormhole is off-screen
+				if (!wormholeOnScreen) {
+					// Draw arrow at screen edge pointing to wormhole
+					const arrowDistance = 50; // Distance from screen edge
+					const centerX = canvas.width / 2;
+					const centerY = canvas.height / 2;
 
-				// Clamp to screen bounds
-				arrowX = Math.max(arrowDistance, Math.min(canvas.width - arrowDistance, arrowX));
-				arrowY = Math.max(arrowDistance, Math.min(canvas.height - arrowDistance, arrowY));
+					// Calculate arrow position at edge of screen
+					let arrowX = centerX + Math.cos(angle) * (canvas.width / 2 - arrowDistance);
+					let arrowY = centerY + Math.sin(angle) * (canvas.height / 2 - arrowDistance);
 
-				// Draw arrow
-				context.save();
-				context.translate(arrowX, arrowY);
-				context.rotate(angle);
-				context.fillStyle = '#00FFFF'; // Cyan
-				context.beginPath();
-				context.moveTo(15, 0);
-				context.lineTo(-10, -10);
-				context.lineTo(-10, 10);
-				context.closePath();
-				context.fill();
-				context.restore();
+					// Clamp to screen bounds
+					arrowX = Math.max(arrowDistance, Math.min(canvas.width - arrowDistance, arrowX));
+					arrowY = Math.max(arrowDistance, Math.min(canvas.height - arrowDistance, arrowY));
+
+					// Draw arrow
+					context.save();
+					context.translate(arrowX, arrowY);
+					context.rotate(angle);
+					context.fillStyle = '#00FFFF'; // Cyan
+					context.beginPath();
+					context.moveTo(15, 0);
+					context.lineTo(-10, -10);
+					context.lineTo(-10, 10);
+					context.closePath();
+					context.fill();
+					context.restore();
+				}
 			}
 
 			// Mini-map
