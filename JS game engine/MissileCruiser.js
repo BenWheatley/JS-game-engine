@@ -104,10 +104,8 @@ class MissileCruiser extends NPC {
   }
 
   turnTowards(targetAngle, deltaTime) {
-    // Normalize angles to -PI to PI range
-    let angleDiff = targetAngle - this.sprite.rotation;
-    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+    // Calculate normalized angle difference using Vector2D utility
+    const angleDiff = Vector2D.normalizeAngleDiff(targetAngle, this.sprite.rotation);
 
     // Turn in the direction of smallest angle difference
     if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {

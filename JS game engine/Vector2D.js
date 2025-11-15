@@ -12,6 +12,20 @@ class Vector2D {
         return new Vector2D(x, y);
     }
 
+    /**
+     * Normalizes the difference between two angles to the range [-PI, PI]
+     * Returns the shortest angular distance from fromAngle to toAngle
+     * @param {number} toAngle - Target angle in radians
+     * @param {number} fromAngle - Source angle in radians
+     * @returns {number} Normalized angle difference in radians
+     */
+    static normalizeAngleDiff(toAngle, fromAngle) {
+        let angleDiff = toAngle - fromAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        return angleDiff;
+    }
+
     add(v) {
         return new Vector2D(this.x + v.x, this.y + v.y);
     }
