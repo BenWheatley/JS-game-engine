@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(cat:*)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(open:*)"
     ],
     "deny": [],
     "ask": []

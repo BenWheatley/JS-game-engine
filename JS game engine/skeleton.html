@@ -101,20 +101,18 @@
 		const alienSpeed = 1000/1000.0; // pixels per millisecond
 		let backgroundSprite;
 		let aliens = [];
-		let lastAlienTime = Date.now();
 		let alienScouts = [];
-		let lastAlienScoutTime = Date.now();
 		let alienFighters = [];
-		let lastAlienFighterTime = Date.now();
 		let alienFighterShots = []; // Shots fired by alien fighters
 		let missileCruisers = [];
-		let lastMissileCruiserTime = Date.now();
 		let cruiserMissiles = []; // Missiles fired by missile cruisers
 		let asteroids = [];
-		let lastAsteroidTime = Date.now();
 		let asteroidSpawns = []; // Smaller asteroids spawned from destroyed asteroids
 		let shots = [];
 		let lastShotTime = Date.now();
+
+		// Wave-based spawning
+		let currentLevel = 1;
 
 		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
@@ -188,12 +186,92 @@
 			asteroidSpawns = [];
 			shots = [];
 			score = 0;
-			lastAlienTime = Date.now();
-			lastAlienScoutTime = Date.now();
-			lastAlienFighterTime = Date.now();
-			lastMissileCruiserTime = Date.now();
-			lastAsteroidTime = Date.now();
 			lastShotTime = Date.now();
+			currentLevel = 1;
+			spawnWave(currentLevel); // Spawn first wave
+		}
+
+		// Wave spawning system
+		function countNPCs() {
+			return alienScouts.length +
+			       alienFighters.length +
+			       missileCruisers.length +
+			       asteroids.length +
+			       asteroidSpawns.length;
+		}
+
+		function getWaveDefinition(level) {
+			const waveIndex = Math.min(level - 1, GameConfig.SPAWNING.MAX_LEVEL_INDEX);
+			const baseWave = GameConfig.SPAWNING.WAVES[waveIndex];
+
+			// If level exceeds wave definitions, scale up the last wave
+			if (level > GameConfig.SPAWNING.WAVES.length) {
+				const levelsOver = level - GameConfig.SPAWNING.WAVES.length;
+				const scaleFactor = Math.pow(GameConfig.SPAWNING.SCALING_FACTOR, levelsOver);
+				return {
+					alienScouts: Math.floor(baseWave.alienScouts * scaleFactor),
+					alienFighters: Math.floor(baseWave.alienFighters * scaleFactor),
+					missileCruisers: Math.floor(baseWave.missileCruisers * scaleFactor),
+					asteroids: Math.floor(baseWave.asteroids * scaleFactor)
+				};
+			}
+
+			return baseWave;
+		}
+
+		function getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight) {
+			// Get random angle around player
+			const angle = Math.random() * Math.PI * 2;
+
+			// Get random distance (on minimap but outside screen)
+			const minDist = GameConfig.SPAWNING.SPAWN_MIN_DISTANCE;
+			const maxDist = GameConfig.SPAWNING.SPAWN_MAX_DISTANCE;
+			const distance = minDist + Math.random() * (maxDist - minDist);
+
+			// Calculate position
+			return new Vector2D(
+				playerPos.x + Math.cos(angle) * distance,
+				playerPos.y + Math.sin(angle) * distance
+			);
+		}
+
+		function spawnWave(level) {
+			const wave = getWaveDefinition(level);
+			const playerPos = player.sprite.position;
+
+			console.log(`Spawning Wave ${level}:`, wave);
+
+			// Spawn alien scouts
+			for (let i = 0; i < wave.alienScouts; i++) {
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const scout = new AlienScout(playerPos, canvas.width, canvas.height);
+				scout.sprite.position = position;
+				alienScouts.push(scout);
+			}
+
+			// Spawn alien fighters
+			for (let i = 0; i < wave.alienFighters; i++) {
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const fighter = new AlienFighter(playerPos, canvas.width, canvas.height);
+				fighter.sprite.position = position;
+				alienFighters.push(fighter);
+			}
+
+			// Spawn missile cruisers
+			for (let i = 0; i < wave.missileCruisers; i++) {
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const cruiser = new MissileCruiser(playerPos, canvas.width, canvas.height);
+				cruiser.sprite.position = position;
+				missileCruisers.push(cruiser);
+			}
+
+			// Spawn asteroids
+			for (let i = 0; i < wave.asteroids; i++) {
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const asteroid = new Asteroid(playerPos, canvas.width, canvas.height);
+				asteroid.sprite.position = position;
+				asteroids.push(asteroid);
+			}
 		}
 
 		function gameOver() {
@@ -649,46 +727,6 @@
 
 			player.update(deltaTime);
 
-			if (Date.now() > lastAlienScoutTime + GameConfig.SPAWNING.ALIEN_SCOUT_INTERVAL) {
-				lastAlienScoutTime = Date.now();
-				const newAlienScout = new AlienScout(
-					player.sprite.position,
-					canvas.width,
-					canvas.height
-				);
-				alienScouts.push(newAlienScout);
-			}
-
-			if (Date.now() > lastAlienFighterTime + GameConfig.SPAWNING.ALIEN_FIGHTER_INTERVAL) {
-				lastAlienFighterTime = Date.now();
-				const newAlienFighter = new AlienFighter(
-					player.sprite.position,
-					canvas.width,
-					canvas.height
-				);
-				alienFighters.push(newAlienFighter);
-			}
-
-			if (Date.now() > lastMissileCruiserTime + GameConfig.SPAWNING.MISSILE_CRUISER_INTERVAL) {
-				lastMissileCruiserTime = Date.now();
-				const newMissileCruiser = new MissileCruiser(
-					player.sprite.position,
-					canvas.width,
-					canvas.height
-				);
-				missileCruisers.push(newMissileCruiser);
-			}
-
-			if (Date.now() > lastAsteroidTime + GameConfig.SPAWNING.ASTEROID_INTERVAL) {
-				lastAsteroidTime = Date.now();
-				const newAsteroid = new Asteroid(
-					player.sprite.position,
-					canvas.width,
-					canvas.height
-				);
-				asteroids.push(newAsteroid);
-			}
-
 			for (const alienScout of alienScouts) {
 				alienScout.update(deltaTime, player.sprite.position);
 			}
@@ -724,6 +762,13 @@
 			}
 			for (const missile of cruiserMissiles) {
 				missile.update();
+			}
+
+			// Wave-based spawning: Check if all NPCs are cleared
+			if (countNPCs() === 0) {
+				currentLevel++;
+				console.log(`Wave ${currentLevel - 1} cleared! Spawning wave ${currentLevel}`);
+				spawnWave(currentLevel);
 			}
 
 			// Collision detection
