@@ -57,10 +57,6 @@ const GameConfig = {
 
   // Wave-based spawning system - defines enemy composition per level
   SPAWNING: {
-    // Distance range from player for spawning (on minimap but offscreen)
-    SPAWN_MIN_DISTANCE: 400,            // Minimum distance from player (outside visible screen)
-    SPAWN_MAX_DISTANCE: 1000,           // Maximum distance (at minimap edge = MINIMAP.RANGE)
-
     // Level progression - defines what spawns at each level
     // Each level specifies counts for: scouts, fighters, cruisers, asteroids
     WAVES: [

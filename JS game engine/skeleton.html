@@ -246,7 +246,7 @@
 			const innerY = screenHalfHeight + npcHalfHeight;
 
 			// Outer bounds (warp boundary)
-			const outerBound = GameConfig.SPAWNING.SPAWN_MAX_DISTANCE;
+			const outerBound = GameConfig.WORLD.NPC_WRAP_DISTANCE;
 
 			// Define 4 rectangular strips: top, bottom, left, right
 			const topArea = (2 * outerBound) * (outerBound - innerY);
