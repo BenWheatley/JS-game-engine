@@ -66,21 +66,15 @@ class AlienFighter extends NPC {
   }
 
   pickNewTarget(playerPosition) {
-    // Pick a random location near the player (within screen bounds if player doesn't move)
-    const screenRadius = Math.min(this.canvasWidth, this.canvasHeight) / 2;
-    const angle = Math.random() * Math.PI * 2;
-    const distance = Math.random() * screenRadius * GameConfig.NPC.TARGET_AREA_FACTOR;
-
-    this.targetPosition = new Vector2D(
-      playerPosition.x + Math.cos(angle) * distance,
-      playerPosition.y + Math.sin(angle) * distance
+    this.targetPosition = NPCAIUtils.pickTargetNearPlayer(
+      playerPosition,
+      this.canvasWidth,
+      this.canvasHeight
     );
   }
 
   hasReachedTarget() {
-    if (!this.targetPosition) return false;
-    const distance = this.sprite.position.dist(this.targetPosition);
-    return distance < GameConfig.NPC.ARRIVAL_THRESHOLD;
+    return NPCAIUtils.hasReachedTarget(this.sprite.position, this.targetPosition);
   }
 
   isOffScreen(playerPosition) {
