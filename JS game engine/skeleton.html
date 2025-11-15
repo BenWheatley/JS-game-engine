@@ -15,6 +15,8 @@
 	<script type="text/javascript" src="GameConfig.js"></script>
 	<script type="text/javascript" src="GPTEngine.js"></script>
 	<script type="text/javascript" src="Vector2D.js"></script>
+	<script type="text/javascript" src="Particle.js"></script>
+	<script type="text/javascript" src="ParticleSystem.js"></script>
 	<script type="text/javascript" src="NPCAIUtils.js"></script>
     <script type="text/javascript" src="GameEntity.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
@@ -151,6 +153,7 @@
 		);
 		let player = new Player();
 		let minimap = new Minimap(canvas.width, canvas.height);
+		let particleSystem = new ParticleSystem();
 
 		function loading() {
 			return Sprite.stillLoading();
@@ -192,6 +195,7 @@
 			asteroids = [];
 			asteroidSpawns = [];
 			shots = [];
+			particleSystem.clear();
 			score = 0;
 			lastShotTime = 0; // Reset to gameTime zero
 			gameTime = 0; // Reset game time
@@ -761,6 +765,9 @@
 				missile.draw();
 			}
 
+			// Draw particles (no camera offset needed - context is already translated)
+			particleSystem.draw(context);
+
 			context.restore();
 
 			// HUD - render in screen space
@@ -917,6 +924,9 @@
 				missile.update();
 			}
 
+			// Update particles
+			particleSystem.update(deltaTime);
+
 			// Wave-based spawning: Check if all NPCs are cleared
 			if (countNPCs() === 0) {
 				currentLevel++;
@@ -941,6 +951,8 @@
 						shotsToRemove.add(shot);
 						score += alien.scoreValue;
 						playSoundEffect('explosion', 0.5);
+						particleSystem.spawnImpact(shot.sprite.position);
+						particleSystem.spawnExplosion(alien.sprite.position);
 					}
 				}
 			}
@@ -953,6 +965,8 @@
 						shotsToRemove.add(shot);
 						score += alienScout.scoreValue;
 						playSoundEffect('explosion', 0.5);
+						particleSystem.spawnImpact(shot.sprite.position);
+						particleSystem.spawnExplosion(alienScout.sprite.position);
 					}
 				}
 			}
@@ -965,6 +979,8 @@
 						shotsToRemove.add(shot);
 						score += alienFighter.scoreValue;
 						playSoundEffect('explosion', 0.5);
+						particleSystem.spawnImpact(shot.sprite.position);
+						particleSystem.spawnExplosion(alienFighter.sprite.position);
 					}
 				}
 			}
@@ -975,10 +991,12 @@
 					if (checkCollision(shot, missileCruiser)) {
 						shotsToRemove.add(shot);
 						missileCruiser.health -= shot.damage;
+						particleSystem.spawnImpact(shot.sprite.position);
 						if (missileCruiser.health <= 0) {
 							missileCruisersToRemove.add(missileCruiser);
 							score += missileCruiser.scoreValue;
 							playSoundEffect('explosion', 0.6);
+							particleSystem.spawnExplosion(missileCruiser.sprite.position);
 						} else {
 							playSoundEffect('hit', 0.4);
 						}
@@ -993,10 +1011,12 @@
 					if (checkCollision(shot, asteroid)) {
 						shotsToRemove.add(shot);
 						asteroid.health -= 1;
+						particleSystem.spawnImpact(shot.sprite.position);
 						if (asteroid.health <= 0) {
 							asteroidsToRemove.add(asteroid);
 							score += asteroid.scoreValue;
 							playSoundEffect('explosion', 0.5);
+							particleSystem.spawnExplosion(asteroid.sprite.position);
 							// Spawn 3 smaller asteroids
 							const spawns = AsteroidSpawn.createSpawnsFromAsteroid(asteroid, canvas.width, canvas.height);
 							asteroidSpawns.push(...spawns);
@@ -1016,6 +1036,8 @@
 						asteroidSpawnsToRemove.add(asteroidSpawn);
 						score += asteroidSpawn.scoreValue;
 						playSoundEffect('explosion', 0.3);
+						particleSystem.spawnImpact(shot.sprite.position);
+						particleSystem.spawnExplosion(asteroidSpawn.sprite.position, "255, 150, 50");
 					}
 				}
 			}
@@ -1027,6 +1049,8 @@
 					player.health -= alien.health; // Damage player by alien's health value
 					console.log(`Player hit! Health: ${player.health}`);
 					playSoundEffect('hit', 0.6);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(alien.sprite.position);
 				}
 			}
 
@@ -1037,6 +1061,8 @@
 					player.health -= alienScout.health; // Damage player by alien scout's health value
 					console.log(`Player hit by alien scout! Health: ${player.health}`);
 					playSoundEffect('hit', 0.6);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(alienScout.sprite.position);
 				}
 			}
 
@@ -1047,6 +1073,8 @@
 					player.health -= alienFighter.health; // Damage player by alien fighter's health value
 					console.log(`Player hit by alien fighter! Health: ${player.health}`);
 					playSoundEffect('hit', 0.6);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(alienFighter.sprite.position);
 				}
 			}
 
@@ -1057,6 +1085,8 @@
 					player.health -= missileCruiser.health; // Damage player by missile cruiser's health value
 					console.log(`Player hit by missile cruiser! Health: ${player.health}`);
 					playSoundEffect('hit', 0.7);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(missileCruiser.sprite.position);
 				}
 			}
 
@@ -1067,6 +1097,8 @@
 					player.health -= 50; // Asteroids deal fixed damage
 					console.log(`Player hit by asteroid! Health: ${player.health}`);
 					playSoundEffect('hit', 0.6);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(asteroid.sprite.position);
 				}
 			}
 
@@ -1077,6 +1109,8 @@
 					player.health -= 25; // Small asteroids deal less damage
 					console.log(`Player hit by small asteroid! Health: ${player.health}`);
 					playSoundEffect('hit', 0.4);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(asteroidSpawn.sprite.position, "255, 150, 50");
 				}
 			}
 
@@ -1087,6 +1121,7 @@
 					player.health -= 25; // Alien shots deal 25 damage
 					console.log(`Player hit by alien shot! Health: ${player.health}`);
 					playSoundEffect('hit', 0.5);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
 				}
 			}
 
@@ -1097,6 +1132,8 @@
 					player.health -= missile.damage; // Missiles deal 50 damage
 					console.log(`Player hit by missile! Health: ${player.health}`);
 					playSoundEffect('explosion', 0.6);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(missile.sprite.position, "255, 100, 50");
 				}
 			}
 
