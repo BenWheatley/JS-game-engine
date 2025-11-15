@@ -505,6 +505,15 @@
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
 							saveHighScore(name, score);
+							showHighScoresMenu();
+						}
+					},
+					{
+						type: 'button',
+						label: 'New Game',
+						action: () => {
+							const name = playerName.trim() || 'Anonymous';
+							saveHighScore(name, score);
 							startGame();
 						}
 					},
