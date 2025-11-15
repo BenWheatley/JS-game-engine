@@ -297,6 +297,9 @@
 
 		// Menu configuration functions
 		function showMainMenu() {
+			// Remove pause class (show background image)
+			document.getElementById('menuOverlay').classList.remove('pause');
+
 			// Restore title image if it was replaced by text
 			const titleElement = document.getElementById('menuTitle');
 			if (!titleElement.querySelector('img')) {
@@ -397,6 +400,9 @@
 		}
 
 		function showHighScoresMenu() {
+			// Remove pause class (show background image)
+			document.getElementById('menuOverlay').classList.remove('pause');
+
 			const allScores = getHighScores();
 
 			// Find the most recent score by date
@@ -467,6 +473,9 @@
 		}
 
 		function showGameOverMenu() {
+			// Remove pause class (show background image)
+			document.getElementById('menuOverlay').classList.remove('pause');
+
 			let playerName = '';
 
 			menuSystem.showMenu({
@@ -529,6 +538,9 @@
 		}
 
 		function showPauseMenu() {
+			// Add pause class for transparent overlay (no background image)
+			document.getElementById('menuOverlay').classList.add('pause');
+
 			menuSystem.showMenu({
 				title: 'PAUSED',
 				items: [
@@ -615,7 +627,7 @@
 		}
 
 		function renderMenu() {
-			// Clear screen - menu is now HTML overlay
+			// Clear screen - menu background is handled by CSS
 			context.fillStyle = '#000000';
 			context.fillRect(0, 0, canvas.width, canvas.height);
 		}
@@ -718,7 +730,7 @@
 		}
 
 		function renderGameOver() {
-			// Clear screen - game over menu is now HTML overlay
+			// Clear screen - menu background is handled by CSS
 			context.fillStyle = '#000000';
 			context.fillRect(0, 0, canvas.width, canvas.height);
 		}

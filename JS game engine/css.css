@@ -28,7 +28,10 @@ canvas.hide-cursor {
 	left: 0;
 	width: 800px;
 	height: 600px;
-	background: rgba(0, 0, 0, 0.5);
+	background-image: url('background.png');
+	background-size: 1536px 1024px;
+	background-position: center;
+	background-repeat: repeat;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -38,6 +41,12 @@ canvas.hide-cursor {
 
 #menuOverlay.hidden {
 	display: none;
+}
+
+/* Pause menu: no background image, show transparent overlay over game */
+#menuOverlay.pause {
+	background-image: none;
+	background-color: rgba(0, 0, 0, 0.5);
 }
 
 .menu-title {
