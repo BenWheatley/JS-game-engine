@@ -1,6 +1,6 @@
 class NPC extends GameEntity {
-  static imageUrl = 'alien-ship.png';
-  static size = new Vector2D(50, 50);
+  static imageUrl = 'player-ship.png'; // placeholder image; if you see this in the game, should be clear it's not the player
+  static size = new Vector2D(42, 43);
   static health = 100;
 
   constructor(position) {
