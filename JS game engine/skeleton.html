@@ -234,12 +234,36 @@
 			return baseWave;
 		}
 
-		function getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight) {
+		function getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight, npcWidth, npcHeight) {
 			// Get random angle around player
 			const angle = Math.random() * Math.PI * 2;
 
-			// Get random distance (on minimap but outside screen)
-			const minDist = GameConfig.SPAWNING.SPAWN_MIN_DISTANCE;
+			// Calculate exact minimum distance for this specific NPC size and angle
+			// NPC is off-screen when its bounding box doesn't overlap the screen rectangle
+			const screenHalfWidth = canvasWidth / 2;
+			const screenHalfHeight = canvasHeight / 2;
+			const npcHalfWidth = npcWidth / 2;
+			const npcHalfHeight = npcHeight / 2;
+
+			// Expanded screen bounds (screen + NPC size)
+			const boundX = screenHalfWidth + npcHalfWidth;
+			const boundY = screenHalfHeight + npcHalfHeight;
+
+			// Calculate minimum distance for this angle
+			// Ray exits expanded rectangle at distance = min(boundX/|cos(θ)|, boundY/|sin(θ)|)
+			const cosTheta = Math.abs(Math.cos(angle));
+			const sinTheta = Math.abs(Math.sin(angle));
+
+			let minDist;
+			if (cosTheta < 0.0001) {  // Avoid division by zero
+				minDist = boundY / sinTheta;
+			} else if (sinTheta < 0.0001) {
+				minDist = boundX / cosTheta;
+			} else {
+				minDist = Math.min(boundX / cosTheta, boundY / sinTheta);
+			}
+
+			// Spawn uniformly between minDist and maxDist
 			const maxDist = GameConfig.SPAWNING.SPAWN_MAX_DISTANCE;
 			const distance = minDist + Math.random() * (maxDist - minDist);
 
@@ -258,7 +282,8 @@
 
 			// Spawn alien scouts
 			for (let i = 0; i < wave.alienScouts; i++) {
-				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height,
+					GameConfig.ALIEN_SCOUT.WIDTH, GameConfig.ALIEN_SCOUT.HEIGHT);
 				const scout = new AlienScout(playerPos, canvas.width, canvas.height);
 				scout.sprite.position = position;
 				alienScouts.push(scout);
@@ -266,7 +291,8 @@
 
 			// Spawn alien fighters
 			for (let i = 0; i < wave.alienFighters; i++) {
-				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height,
+					GameConfig.ALIEN_FIGHTER.WIDTH, GameConfig.ALIEN_FIGHTER.HEIGHT);
 				const fighter = new AlienFighter(playerPos, canvas.width, canvas.height);
 				fighter.sprite.position = position;
 				alienFighters.push(fighter);
@@ -274,7 +300,8 @@
 
 			// Spawn missile cruisers
 			for (let i = 0; i < wave.missileCruisers; i++) {
-				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height,
+					GameConfig.MISSILE_CRUISER.WIDTH, GameConfig.MISSILE_CRUISER.HEIGHT);
 				const cruiser = new MissileCruiser(playerPos, canvas.width, canvas.height);
 				cruiser.sprite.position = position;
 				missileCruisers.push(cruiser);
@@ -282,7 +309,8 @@
 
 			// Spawn asteroids
 			for (let i = 0; i < wave.asteroids; i++) {
-				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height);
+				const position = getOffscreenSpawnPosition(playerPos, canvas.width, canvas.height,
+					GameConfig.ASTEROID_BIG.WIDTH, GameConfig.ASTEROID_BIG.HEIGHT);
 				const asteroid = new Asteroid(playerPos, canvas.width, canvas.height);
 				asteroid.sprite.position = position;
 				asteroids.push(asteroid);
