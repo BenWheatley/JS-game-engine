@@ -30,8 +30,8 @@ class AlienFighter extends NPC {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
 
-    // Shooting state
-    this.lastShotTime = Date.now();
+    // Shooting state (uses game time, not wall-clock time)
+    this.lastShotTime = 0;
     this.shots = []; // Track shots fired by this fighter
 
     // Pick initial target
@@ -124,10 +124,9 @@ class AlienFighter extends NPC {
     }
   }
 
-  tryShoot() {
-    const now = Date.now();
-    if (now - this.lastShotTime > AlienFighter.shotCooldown) {
-      this.lastShotTime = now;
+  tryShoot(gameTime) {
+    if (gameTime - this.lastShotTime > AlienFighter.shotCooldown) {
+      this.lastShotTime = gameTime;
 
       // Fire shot directly forward
       const shotVelocity = Vector2D.fromRadial(this.sprite.rotation, Shot.speed);

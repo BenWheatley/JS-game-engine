@@ -109,10 +109,13 @@
 		let asteroids = [];
 		let asteroidSpawns = []; // Smaller asteroids spawned from destroyed asteroids
 		let shots = [];
-		let lastShotTime = Date.now();
+		let lastShotTime = 0; // Changed to use gameTime instead of Date.now()
 
 		// Wave-based spawning
 		let currentLevel = 1;
+
+		// Game time tracking (accumulated deltaTime, doesn't advance when paused)
+		let gameTime = 0;
 
 		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
@@ -186,7 +189,8 @@
 			asteroidSpawns = [];
 			shots = [];
 			score = 0;
-			lastShotTime = Date.now();
+			lastShotTime = 0; // Reset to gameTime zero
+			gameTime = 0; // Reset game time
 			currentLevel = 1;
 			spawnWave(currentLevel); // Spawn first wave
 		}
@@ -697,6 +701,9 @@
 		}
 
 		function updateGame(deltaTime) {
+			// Accumulate game time (only advances during gameplay, not when paused)
+			gameTime += deltaTime;
+
 			if (engine.keyDown["ArrowLeft"]) {
 				player.turnLeft(deltaTime);
 			}
@@ -710,8 +717,8 @@
 				player.reverseThrust(deltaTime);
 			}
 			if (engine.keyDown[" "]) {
-				if (Date.now() > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
-					lastShotTime = Date.now();
+				if (gameTime > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
+					lastShotTime = gameTime;
 					const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
 					const newShot = new Shot(
 						new Vector2D(
@@ -733,7 +740,7 @@
 			for (const alienFighter of alienFighters) {
 				alienFighter.update(deltaTime, player.sprite.position);
 				// Check if fighter wants to shoot
-				const newShot = alienFighter.tryShoot();
+				const newShot = alienFighter.tryShoot(gameTime);
 				if (newShot) {
 					alienFighterShots.push(newShot);
 					playSoundEffect('shoot', 0.2); // Quieter than player shots
@@ -742,7 +749,7 @@
 			for (const missileCruiser of missileCruisers) {
 				missileCruiser.update(deltaTime, player.sprite.position);
 				// Check if cruiser wants to shoot
-				const newMissile = missileCruiser.tryShoot();
+				const newMissile = missileCruiser.tryShoot(gameTime);
 				if (newMissile) {
 					cruiserMissiles.push(newMissile);
 					playSoundEffect('missile_launcher', 0.3);
@@ -1132,8 +1139,8 @@
 
 				// Button 0 (A/Cross): Shoot
 				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
-					if (Date.now() > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
-						lastShotTime = Date.now();
+					if (gameTime > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
+						lastShotTime = gameTime;
 						const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
 						const newShot = new Shot(
 							new Vector2D(

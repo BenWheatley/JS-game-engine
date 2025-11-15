@@ -30,8 +30,8 @@ class MissileCruiser extends NPC {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
 
-    // Shooting state
-    this.lastShotTime = Date.now();
+    // Shooting state (uses game time, not wall-clock time)
+    this.lastShotTime = 0;
     this.missiles = []; // Track missiles fired by this cruiser
 
     // Pick initial target
@@ -124,10 +124,9 @@ class MissileCruiser extends NPC {
     }
   }
 
-  tryShoot() {
-    const now = Date.now();
-    if (now - this.lastShotTime > MissileCruiser.shotCooldown) {
-      this.lastShotTime = now;
+  tryShoot(gameTime) {
+    if (gameTime - this.lastShotTime > MissileCruiser.shotCooldown) {
+      this.lastShotTime = gameTime;
 
       // Fire missile directly forward
       const missileVelocity = Vector2D.fromRadial(this.sprite.rotation, Missile.speed);
