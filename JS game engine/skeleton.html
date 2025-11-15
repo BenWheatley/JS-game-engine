@@ -235,43 +235,49 @@
 		}
 
 		function getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight, npcWidth, npcHeight) {
-			// Get random angle around player
-			const angle = Math.random() * Math.PI * 2;
-
-			// Calculate exact minimum distance for this specific NPC size and angle
-			// NPC is off-screen when its bounding box doesn't overlap the screen rectangle
+			// Spawn uniformly in rectangular region: outside screen, inside warp boundary
 			const screenHalfWidth = canvasWidth / 2;
 			const screenHalfHeight = canvasHeight / 2;
 			const npcHalfWidth = npcWidth / 2;
 			const npcHalfHeight = npcHeight / 2;
 
-			// Expanded screen bounds (screen + NPC size)
-			const boundX = screenHalfWidth + npcHalfWidth;
-			const boundY = screenHalfHeight + npcHalfHeight;
+			// Inner bounds (screen + NPC size)
+			const innerX = screenHalfWidth + npcHalfWidth;
+			const innerY = screenHalfHeight + npcHalfHeight;
 
-			// Calculate minimum distance for this angle
-			// Ray exits expanded rectangle at distance = min(boundX/|cos(θ)|, boundY/|sin(θ)|)
-			const cosTheta = Math.abs(Math.cos(angle));
-			const sinTheta = Math.abs(Math.sin(angle));
+			// Outer bounds (warp boundary)
+			const outerBound = GameConfig.SPAWNING.SPAWN_MAX_DISTANCE;
 
-			let minDist;
-			if (cosTheta < 0.0001) {  // Avoid division by zero
-				minDist = boundY / sinTheta;
-			} else if (sinTheta < 0.0001) {
-				minDist = boundX / cosTheta;
+			// Define 4 rectangular strips: top, bottom, left, right
+			const topArea = (2 * outerBound) * (outerBound - innerY);
+			const bottomArea = topArea;
+			const leftArea = (outerBound - innerX) * (2 * innerY);
+			const rightArea = leftArea;
+			const totalArea = topArea + bottomArea + leftArea + rightArea;
+
+			// Pick strip based on area
+			const r = Math.random() * totalArea;
+			let x, y;
+
+			if (r < topArea) {
+				// Top strip
+				x = -outerBound + Math.random() * (2 * outerBound);
+				y = innerY + Math.random() * (outerBound - innerY);
+			} else if (r < topArea + bottomArea) {
+				// Bottom strip
+				x = -outerBound + Math.random() * (2 * outerBound);
+				y = -outerBound + Math.random() * (outerBound - innerY);
+			} else if (r < topArea + bottomArea + leftArea) {
+				// Left strip
+				x = -outerBound + Math.random() * (outerBound - innerX);
+				y = -innerY + Math.random() * (2 * innerY);
 			} else {
-				minDist = Math.min(boundX / cosTheta, boundY / sinTheta);
+				// Right strip
+				x = innerX + Math.random() * (outerBound - innerX);
+				y = -innerY + Math.random() * (2 * innerY);
 			}
 
-			// Spawn uniformly between minDist and maxDist
-			const maxDist = GameConfig.SPAWNING.SPAWN_MAX_DISTANCE;
-			const distance = minDist + Math.random() * (maxDist - minDist);
-
-			// Calculate position
-			return new Vector2D(
-				playerPos.x + Math.cos(angle) * distance,
-				playerPos.y + Math.sin(angle) * distance
-			);
+			return new Vector2D(playerPos.x + x, playerPos.y + y);
 		}
 
 		function spawnWave(level) {
