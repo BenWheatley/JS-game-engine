@@ -181,6 +181,8 @@ class MenuSystem {
           const date = new Date(entry.date);
           const dateStr = date.toLocaleDateString();
           const timeStr = date.toLocaleTimeString();
+          // SECURITY: Use textContent (not innerHTML) to prevent XSS attacks
+          // Even though names are sanitized on input, this provides defense-in-depth
           nameAndScore.textContent = `${entry.name} - ${entry.score} (${dateStr} ${timeStr})`;
 
           // Highlight recent score
