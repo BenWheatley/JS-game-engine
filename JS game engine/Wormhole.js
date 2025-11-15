@@ -1,18 +1,10 @@
 class Wormhole {
-	constructor(playerPosition) {
+	constructor(position) {
 		// Size is 27x28 multiplied by 3
 		this.size = new Vector2D(27 * 3, 28 * 3);
 
-		// Spawn at random position outside visible area but within minimap range
-		const angle = Math.random() * Math.PI * 2;
-		const minDist = GameConfig.SPAWNING.SPAWN_MIN_DISTANCE;
-		const maxDist = GameConfig.SPAWNING.SPAWN_MAX_DISTANCE;
-		const distance = minDist + Math.random() * (maxDist - minDist);
-
-		this.position = new Vector2D(
-			playerPosition.x + Math.cos(angle) * distance,
-			playerPosition.y + Math.sin(angle) * distance
-		);
+		// Use provided spawn position
+		this.position = position;
 
 		// Create sprite for main game view
 		this.sprite = new Sprite('wormhole.png', this.position, this.size);

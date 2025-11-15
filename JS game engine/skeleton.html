@@ -1031,7 +1031,15 @@
 			// Wave-based spawning: Check if all NPCs are cleared
 			if (countNPCs() === 0 && !wormhole) {
 				console.log(`Wave ${currentLevel} cleared! Wormhole spawning...`);
-				wormhole = new Wormhole(player.sprite.position);
+				const wormholeSize = 27 * 3; // Wormhole is 27x28 * 3
+				const position = getOffscreenSpawnPosition(
+					player.sprite.position,
+					canvas.width,
+					canvas.height,
+					wormholeSize,
+					28 * 3
+				);
+				wormhole = new Wormhole(position);
 			}
 
 			// Collision detection
