@@ -25,6 +25,7 @@
 	<script type="text/javascript" src="AlienFighter.js"></script>
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="AsteroidSpawn.js"></script>
+	<script type="text/javascript" src="Wormhole.js"></script>
 	<script type="text/javascript" src="Projectile.js"></script>
 	<script type="text/javascript" src="Laser.js"></script>
 	<script type="text/javascript" src="Plasma.js"></script>
@@ -154,6 +155,7 @@
 		let player = new Player();
 		let minimap = new Minimap(canvas.width, canvas.height);
 		let particleSystem = new ParticleSystem();
+		let wormhole = null; // Spawns when wave is cleared
 
 		function loading() {
 			return Sprite.stillLoading();
@@ -196,6 +198,7 @@
 			asteroidSpawns = [];
 			shots = [];
 			particleSystem.clear();
+			wormhole = null;
 			score = 0;
 			lastShotTime = 0; // Reset to gameTime zero
 			gameTime = 0; // Reset game time
@@ -768,6 +771,11 @@
 			// Draw particles (no camera offset needed - context is already translated)
 			particleSystem.draw(context);
 
+			// Draw wormhole if it exists
+			if (wormhole) {
+				wormhole.draw();
+			}
+
 			context.restore();
 
 			// HUD - render in screen space
@@ -798,6 +806,46 @@
 			context.textAlign = 'left';
 			context.fillText(`Score: ${score}`, 10, 60);
 
+			// Wormhole message and arrow
+			if (wormhole) {
+				// Draw message
+				context.fillStyle = '#00FFFF'; // Cyan
+				context.font = 'bold 24px Arial';
+				context.textAlign = 'center';
+				context.fillText('Wormhole detected!', canvas.width / 2, 50);
+
+				// Calculate direction to wormhole
+				const dx = wormhole.position.x - player.sprite.position.x;
+				const dy = wormhole.position.y - player.sprite.position.y;
+				const angle = Math.atan2(dy, dx);
+
+				// Draw arrow at screen edge pointing to wormhole
+				const arrowDistance = 50; // Distance from screen edge
+				const centerX = canvas.width / 2;
+				const centerY = canvas.height / 2;
+
+				// Calculate arrow position at edge of screen
+				let arrowX = centerX + Math.cos(angle) * (canvas.width / 2 - arrowDistance);
+				let arrowY = centerY + Math.sin(angle) * (canvas.height / 2 - arrowDistance);
+
+				// Clamp to screen bounds
+				arrowX = Math.max(arrowDistance, Math.min(canvas.width - arrowDistance, arrowX));
+				arrowY = Math.max(arrowDistance, Math.min(canvas.height - arrowDistance, arrowY));
+
+				// Draw arrow
+				context.save();
+				context.translate(arrowX, arrowY);
+				context.rotate(angle);
+				context.fillStyle = '#00FFFF'; // Cyan
+				context.beginPath();
+				context.moveTo(15, 0);
+				context.lineTo(-10, -10);
+				context.lineTo(-10, 10);
+				context.closePath();
+				context.fill();
+				context.restore();
+			}
+
 			// Mini-map
 			minimap.draw(context, {
 				asteroids: asteroids,
@@ -805,7 +853,8 @@
 				aliens: aliens,
 				alienScouts: alienScouts,
 				alienFighters: alienFighters,
-				missileCruisers: missileCruisers
+				missileCruisers: missileCruisers,
+				wormhole: wormhole
 			}, player.sprite.position);
 		}
 
@@ -927,11 +976,16 @@
 			// Update particles
 			particleSystem.update(deltaTime);
 
+			// Update wormhole if it exists
+			if (wormhole) {
+				wormhole.update(deltaTime);
+				wormhole.wrap(player.sprite.position);
+			}
+
 			// Wave-based spawning: Check if all NPCs are cleared
-			if (countNPCs() === 0) {
-				currentLevel++;
-				console.log(`Wave ${currentLevel - 1} cleared! Spawning wave ${currentLevel}`);
-				spawnWave(currentLevel);
+			if (countNPCs() === 0 && !wormhole) {
+				console.log(`Wave ${currentLevel} cleared! Wormhole spawning...`);
+				wormhole = new Wormhole(player.sprite.position);
 			}
 
 			// Collision detection
@@ -1135,6 +1189,15 @@
 					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
 					particleSystem.spawnExplosion(missile.sprite.position, "255, 100, 50");
 				}
+			}
+
+			// Check player-wormhole collision (level advancement)
+			if (wormhole && wormhole.checkCollision(player)) {
+				currentLevel++;
+				console.log(`Entered wormhole! Advancing to wave ${currentLevel}`);
+				wormhole = null; // Remove wormhole
+				spawnWave(currentLevel);
+				playSoundEffect('achievement', 0.5); // Play a sound effect
 			}
 
 			// Remove collided entities

@@ -135,6 +135,25 @@ class Minimap {
   }
 
   /**
+   * Draws the wormhole on the minimap
+   * @param {CanvasRenderingContext2D} context - Canvas rendering context
+   * @param {Wormhole} wormhole - The wormhole entity
+   * @param {Vector2D} playerPos - Player position
+   */
+  drawWormhole(context, wormhole, playerPos) {
+    if (!wormhole) return;
+
+    const pos = this.worldToMinimap(wormhole.position, playerPos);
+    if (this.isOnMinimap(pos)) {
+      context.strokeStyle = '#FFFFFF'; // White
+      context.lineWidth = 1;
+      context.beginPath();
+      context.arc(pos.x, pos.y, 4, 0, Math.PI * 2); // 8px diameter = 4px radius
+      context.stroke();
+    }
+  }
+
+  /**
    * Draws the complete minimap
    * @param {CanvasRenderingContext2D} context - Canvas rendering context
    * @param {Object} entities - Object containing all entity arrays
@@ -145,6 +164,7 @@ class Minimap {
     this.drawAsteroids(context, entities.asteroids, entities.asteroidSpawns, playerPos);
     this.drawEnemies(context, entities.aliens, entities.alienScouts,
                     entities.alienFighters, entities.missileCruisers, playerPos);
+    this.drawWormhole(context, entities.wormhole, playerPos);
     this.drawPlayer(context);
   }
 }
