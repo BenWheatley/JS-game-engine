@@ -1,6 +1,7 @@
 class Wormhole {
 	constructor(playerPosition) {
-		this.size = new Vector2D(64, 64);
+		// Size is 27x28 multiplied by 3
+		this.size = new Vector2D(27 * 3, 28 * 3);
 
 		// Spawn at random position outside visible area but within minimap range
 		const angle = Math.random() * Math.PI * 2;
@@ -18,16 +19,12 @@ class Wormhole {
 
 		// Animation properties
 		this.rotation = 0;
-		this.pulsePhase = 0;
 	}
 
 	update(deltaTime) {
-		// Rotate slowly
-		this.rotation += 0.001 * deltaTime;
+		// Rotate at 0.5 Hz (0.5 rotations per second = π radians per second)
+		this.rotation += Math.PI * deltaTime / 1000;
 		this.sprite.rotation = this.rotation;
-
-		// Pulse animation
-		this.pulsePhase += 0.002 * deltaTime;
 	}
 
 	// Wrap at minimap boundaries (same as NPCs)
@@ -53,15 +50,8 @@ class Wormhole {
 	}
 
 	draw() {
-		// Draw the sprite with pulsing scale
-		const pulseScale = 1 + Math.sin(this.pulsePhase) * 0.1;
-		const originalSize = this.sprite.size;
-		this.sprite.size = new Vector2D(
-			originalSize.x * pulseScale,
-			originalSize.y * pulseScale
-		);
+		// Draw the continuously spinning sprite
 		this.sprite.draw();
-		this.sprite.size = originalSize; // Restore original size
 	}
 
 	// Check collision with player
