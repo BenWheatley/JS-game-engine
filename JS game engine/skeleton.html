@@ -322,6 +322,11 @@
 					},
 					{
 						type: 'button',
+						label: 'Options',
+						action: () => showOptionsMenu()
+					},
+					{
+						type: 'button',
 						label: 'Achievements',
 						action: () => alert('Achievements - Coming Soon!')
 					}
@@ -610,6 +615,64 @@
 								returnToMenu();
 							}
 						}
+					}
+				],
+				instructions: ''
+			});
+		}
+
+		function showOptionsMenu() {
+			// Remove pause class (show background image)
+			document.getElementById('menuOverlay').classList.remove('pause');
+
+			menuSystem.showMenu({
+				title: 'OPTIONS',
+				items: [
+					{
+						type: 'slider',
+						label: 'Sound Effects Volume',
+						min: 0,
+						max: 100,
+						value: soundEffectsVolume,
+						suffix: '%',
+						onChange: (value) => {
+							soundEffectsVolume = parseInt(value);
+							const prefs = getPreferences();
+							prefs.volume_effects = soundEffectsVolume;
+							savePreferences(prefs);
+						}
+					},
+					{
+						type: 'slider',
+						label: 'Music Volume',
+						min: 0,
+						max: 100,
+						value: musicVolume,
+						suffix: '%',
+						onChange: (value) => {
+							musicVolume = parseInt(value);
+							Note.setVolume(musicVolume / 100); // Convert percentage to 0.0-1.0
+							const prefs = getPreferences();
+							prefs.volume_music = musicVolume;
+							savePreferences(prefs);
+						}
+					},
+					{
+						type: 'checkbox',
+						label: 'Fullscreen',
+						checked: GPTEngine.instance.isFullScreen,
+						onChange: (checked) => {
+							if (checked && !GPTEngine.instance.isFullScreen) {
+								GPTEngine.instance.enterFullScreen();
+							} else if (!checked && GPTEngine.instance.isFullScreen) {
+								GPTEngine.instance.exitFullScreen();
+							}
+						}
+					},
+					{
+						type: 'button',
+						label: 'Back',
+						action: () => showMainMenu()
 					}
 				],
 				instructions: ''
