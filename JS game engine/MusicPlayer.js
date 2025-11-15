@@ -67,6 +67,7 @@ class MusicPlayer {
     if (this.shouldLoop && this.isPlaying) {
       // Clear timeouts and restart
       this.scheduledTimeouts = [];
+      this.isPlaying = false; // Reset flag before calling play()
       this.play();
     } else {
       this.isPlaying = false;
@@ -75,7 +76,6 @@ class MusicPlayer {
 
   stop() {
     this.isPlaying = false;
-    this.shouldLoop = false;
 
     // Clear all scheduled timeouts
     this.scheduledTimeouts.forEach(timeout => clearTimeout(timeout));
