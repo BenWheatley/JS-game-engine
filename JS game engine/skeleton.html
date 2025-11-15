@@ -24,7 +24,8 @@
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="AsteroidSpawn.js"></script>
 	<script type="text/javascript" src="Projectile.js"></script>
-	<script type="text/javascript" src="Shot.js"></script>
+	<script type="text/javascript" src="Laser.js"></script>
+	<script type="text/javascript" src="Plasma.js"></script>
 	<script type="text/javascript" src="Missile.js"></script>
 	<script type="text/javascript" src="MissileCruiser.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
@@ -127,7 +128,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'title.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'energy-blast.png', 'missile.png']
+				['background.png', 'title.png', 'player-ship.png', 'alien-ship.png', 'alien-scout.png', 'alien-fighter.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'laser.png', 'plasma.png', 'missile.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
@@ -792,8 +793,8 @@
 			if (engine.keyDown[" "]) {
 				if (gameTime > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
 					lastShotTime = gameTime;
-					const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
-					const newShot = new Shot(
+					const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Laser.speed);
+					const newShot = new Laser(
 						new Vector2D(
 							player.sprite.position.x,
 							player.sprite.position.y
@@ -1214,8 +1215,8 @@
 				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
 					if (gameTime > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
 						lastShotTime = gameTime;
-						const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Shot.speed);
-						const newShot = new Shot(
+						const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Laser.speed);
+						const newShot = new Laser(
 							new Vector2D(
 								player.sprite.position.x,
 								player.sprite.position.y

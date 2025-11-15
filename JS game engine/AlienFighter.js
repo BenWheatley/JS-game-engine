@@ -123,8 +123,8 @@ class AlienFighter extends NPC {
       this.lastShotTime = gameTime;
 
       // Fire shot directly forward
-      const shotVelocity = Vector2D.fromRadial(this.sprite.rotation, Shot.speed);
-      const newShot = new Shot(
+      const shotVelocity = Vector2D.fromRadial(this.sprite.rotation, Plasma.speed);
+      const newShot = new Plasma(
         new Vector2D(
           this.sprite.position.x,
           this.sprite.position.y
