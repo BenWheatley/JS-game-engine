@@ -174,8 +174,8 @@
 
 		// Game state management functions
 		function startGame() {
-			currentState = GameState.PLAYING;
 			resetGame();
+			currentState = GameState.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			canvas.classList.add('hide-cursor');
