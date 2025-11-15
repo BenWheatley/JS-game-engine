@@ -26,8 +26,8 @@ canvas.hide-cursor {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 800px;
-	height: 600px;
+	right: 0;
+	bottom: 0;
 	background-image: url('background.png');
 	background-size: 1536px 1024px;
 	background-position: center;
@@ -37,6 +37,11 @@ canvas.hide-cursor {
 	justify-content: center;
 	align-items: center;
 	z-index: 10;
+}
+
+/* When canvas is in fullscreen mode (position: fixed), make menu overlay also fixed */
+canvas[style*="position: fixed"] ~ #menuOverlay {
+	position: fixed;
 }
 
 #menuOverlay.hidden {
