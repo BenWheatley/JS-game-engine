@@ -57,14 +57,6 @@ class AlienScout extends NPC {
     return new Vector2D(x, y);
   }
 
-  pickNewTarget(playerPosition) {
-    this.targetPosition = NPCAIUtils.pickTargetNearPlayer(
-      playerPosition,
-      this.canvasWidth,
-      this.canvasHeight
-    );
-  }
-
   hasReachedTarget() {
     return NPCAIUtils.hasReachedTarget(this.sprite.position, this.targetPosition);
   }

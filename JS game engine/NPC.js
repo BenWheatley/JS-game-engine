@@ -7,4 +7,12 @@ class NPC extends GameEntity {
     super(position, 0, new Vector2D(0, 0), NPC.size, NPC.imageUrl);
     this.health = NPC.health;
   }
+
+  pickNewTarget(playerPosition) {
+    this.targetPosition = NPCAIUtils.pickTargetNearPlayer(
+      playerPosition,
+      this.canvasWidth,
+      this.canvasHeight
+    );
+  }
 }
