@@ -738,8 +738,18 @@
 				}
 			}
 
-			player.draw();
+			// Z-order: Shots first (bottom layer)
+			for (const shot of shots) {
+				shot.draw();
+			}
+			for (const alienShot of alienFighterShots) {
+				alienShot.draw();
+			}
+			for (const missile of cruiserMissiles) {
+				missile.draw();
+			}
 
+			// NPCs second (middle layer)
 			for (const alien of aliens) {
 				alien.draw();
 			}
@@ -758,23 +768,17 @@
 			for (const asteroidSpawn of asteroidSpawns) {
 				asteroidSpawn.draw();
 			}
-			for (const shot of shots) {
-				shot.draw();
-			}
-			for (const alienShot of alienFighterShots) {
-				alienShot.draw();
-			}
-			for (const missile of cruiserMissiles) {
-				missile.draw();
-			}
 
-			// Draw particles (no camera offset needed - context is already translated)
-			particleSystem.draw(context);
-
-			// Draw wormhole if it exists
+			// Wormhole
 			if (wormhole) {
 				wormhole.draw();
 			}
+
+			// Particles
+			particleSystem.draw(context);
+
+			// Player last (top layer)
+			player.draw();
 
 			context.restore();
 

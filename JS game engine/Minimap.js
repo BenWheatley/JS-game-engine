@@ -160,11 +160,20 @@ class Minimap {
    * @param {Vector2D} playerPos - Player position
    */
   draw(context, entities, playerPos) {
-    this.drawBackground(context);
+    // Draw background (without border)
+    context.fillStyle = GameConfig.MINIMAP.BACKGROUND_COLOR;
+    context.fillRect(this.x, this.y, this.size, this.size);
+
+    // Draw entities
     this.drawAsteroids(context, entities.asteroids, entities.asteroidSpawns, playerPos);
     this.drawEnemies(context, entities.aliens, entities.alienScouts,
                     entities.alienFighters, entities.missileCruisers, playerPos);
     this.drawWormhole(context, entities.wormhole, playerPos);
     this.drawPlayer(context);
+
+    // Draw border last (on top)
+    context.strokeStyle = GameConfig.MINIMAP.BORDER_COLOR;
+    context.lineWidth = GameConfig.MINIMAP.BORDER_WIDTH;
+    context.strokeRect(this.x, this.y, this.size, this.size);
   }
 }
