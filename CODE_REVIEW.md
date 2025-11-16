@@ -10,15 +10,14 @@
 **File:** skeleton.html (~1000 lines)
 **Status:** IN PROGRESS
 
-Game loop, state management, collision detection, rendering, and configuration still mixed in one HTML file.
+Game loop, collision detection, rendering, and configuration still mixed in one HTML file.
 
-**Recommendation:** Continue extraction (HighScoreManager and SpawnSystem completed):
+**Recommendation:** Continue extraction (HighScoreManager, SpawnSystem, and GameState completed):
 
 **Next Priority Extractions:**
 1. **CollisionSystem.js** - All collision detection and damage handling
 2. **Renderer.js** - Draw loops, camera transforms, HUD rendering
-3. **GameState.js** - Encapsulate player, npcs, projectiles, score, level, etc.
-4. **InputHandler.js** - Keyboard and gamepad input processing
+3. **InputHandler.js** - Keyboard and gamepad input processing
 
 ---
 

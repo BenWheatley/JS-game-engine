@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="ParticleSystem.js"></script>
 	<script type="text/javascript" src="NPCAIUtils.js"></script>
 	<script type="text/javascript" src="SpawnSystem.js"></script>
+	<script type="text/javascript" src="GameState.js"></script>
     <script type="text/javascript" src="GameEntity.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
 	<script type="text/javascript" src="NPC.js"></script>
@@ -89,16 +90,6 @@
 			localStorage.setItem('preferences', JSON.stringify(preferences));
 		}
 
-		// Game state management
-		const GameState = {
-			MENU: 'menu',
-			PLAYING: 'playing',
-			PAUSED: 'paused',
-			GAME_OVER: 'game_over'
-		};
-		let currentState = GameState.MENU;
-		let score = 0;
-
 		// Audio settings - load from preferences
 		const preferences = getPreferences();
 		let soundEffectsVolume = preferences.volume_effects;
@@ -112,17 +103,6 @@
 		const alienSize = 48;
 		const alienSpeed = 1000/1000.0; // pixels per millisecond
 		let backgroundSprite;
-		// Unified arrays for cleaner code and easier maintenance
-		let npcs = []; // All NPCs: aliens, scouts, fighters, cruisers, asteroids, asteroid spawns
-		let playerProjectiles = []; // Shots fired by player
-		let npcProjectiles = []; // All NPC projectiles: fighter shots, cruiser missiles
-		let lastShotTime = 0; // Changed to use gameTime instead of Date.now()
-
-		// Wave-based spawning
-		let currentLevel = 1;
-
-		// Game time tracking (accumulated deltaTime, doesn't advance when paused)
-		let gameTime = 0;
 
 		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
@@ -152,10 +132,9 @@
 			new Vector2D(0, 0),
 			backgroundTileSize
 		);
-		let player = new Player();
-		let minimap = new Minimap(canvas.width, canvas.height);
-		let particleSystem = new ParticleSystem();
-		let wormhole = null; // Spawns when wave is cleared
+
+		// Initialize game state
+		const gameState = new GameState(canvas);
 
 		function loading() {
 			return Sprite.stillLoading();
@@ -179,41 +158,22 @@
 
 		// Game state management functions
 		function startGame() {
-			resetGame();
-			currentState = GameState.PLAYING;
+			gameState.reset();
+			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			canvas.classList.add('hide-cursor');
 		}
 
-		function resetGame() {
-			player = new Player();
-			npcs = [];
-			playerProjectiles = [];
-			npcProjectiles = [];
-			particleSystem.clear();
-			wormhole = null;
-			score = 0;
-			lastShotTime = 0; // Reset to gameTime zero
-			gameTime = 0; // Reset game time
-			currentLevel = 1;
-			SpawnSystem.spawnWave(currentLevel, player.sprite.position, canvas.width, canvas.height, npcs);
-		}
-
-		// Wave spawning system
-		function countNPCs() {
-			return npcs.length;
-		}
-
 		function gameOver() {
-			currentState = GameState.GAME_OVER;
+			gameState.currentState = GameState.States.GAME_OVER;
 			musicPlayer.stop();
 			canvas.classList.remove('hide-cursor');
 			showGameOverMenu();
 		}
 
 		function returnToMenu() {
-			currentState = GameState.MENU;
+			gameState.currentState = GameState.States.MENU;
 			musicPlayer.stop();
 			canvas.classList.remove('hide-cursor');
 			showMainMenu();
@@ -284,7 +244,7 @@
 						label: 'Submit Score',
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
-							highScoreManager.saveHighScore(name, score);
+							highScoreManager.saveHighScore(name, gameState.score);
 							highScoreManager.showHighScoresMenu();
 						}
 					},
@@ -293,7 +253,7 @@
 						label: 'New Game',
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
-							highScoreManager.saveHighScore(name, score);
+							highScoreManager.saveHighScore(name, gameState.score);
 							startGame();
 						}
 					},
@@ -302,18 +262,18 @@
 						label: 'Main Menu',
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
-							highScoreManager.saveHighScore(name, score);
+							highScoreManager.saveHighScore(name, gameState.score);
 							returnToMenu();
 						}
 					}
 				],
-				instructions: `Final Score: ${score}`
+				instructions: `Final Score: ${gameState.score}`
 			});
 		}
 
 		function pauseGame() {
-			if (currentState === GameState.PLAYING) {
-				currentState = GameState.PAUSED;
+			if (gameState.currentState === GameState.States.PLAYING) {
+				gameState.currentState = GameState.States.PAUSED;
 				musicPlayer.pause();
 				canvas.classList.remove('hide-cursor');
 				showPauseMenu();
@@ -321,7 +281,7 @@
 		}
 
 		function resumeGame() {
-			currentState = GameState.PLAYING;
+			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			canvas.classList.add('hide-cursor');
@@ -384,7 +344,7 @@
 						type: 'button',
 						label: 'Quit',
 						action: () => {
-							if (score > 0) {
+							if (gameState.score > 0) {
 								gameOver();
 							} else {
 								returnToMenu();
@@ -458,17 +418,17 @@
 		function render() {
 			if (loading()) { return; }
 
-			switch (currentState) {
-				case GameState.MENU:
+			switch (gameState.currentState) {
+				case GameState.States.MENU:
 					renderMenu();
 					break;
-				case GameState.PLAYING:
+				case GameState.States.PLAYING:
 					renderGame();
 					break;
-				case GameState.PAUSED:
+				case GameState.States.PAUSED:
 					renderGame(); // Keep showing game behind pause menu
 					break;
-				case GameState.GAME_OVER:
+				case GameState.States.GAME_OVER:
 					renderGameOver();
 					break;
 			}
@@ -483,8 +443,8 @@
 		function renderGame() {
 			context.save();
 			context.translate(
-				canvas.width/2-player.sprite.position.x,
-				canvas.height/2-player.sprite.position.y
+				canvas.width/2-gameState.player.sprite.position.x,
+				canvas.height/2-gameState.player.sprite.position.y
 			);
 
 			// Draw tiled background
@@ -492,10 +452,10 @@
 			const tileHeight = backgroundTileSize.y;
 
 			// Calculate which tiles are visible
-			const startX = Math.floor((player.sprite.position.x - canvas.width) / tileWidth) * tileWidth;
-			const startY = Math.floor((player.sprite.position.y - canvas.height) / tileHeight) * tileHeight;
-			const endX = Math.ceil((player.sprite.position.x + canvas.width) / tileWidth) * tileWidth;
-			const endY = Math.ceil((player.sprite.position.y + canvas.height) / tileHeight) * tileHeight;
+			const startX = Math.floor((gameState.player.sprite.position.x - canvas.width) / tileWidth) * tileWidth;
+			const startY = Math.floor((gameState.player.sprite.position.y - canvas.height) / tileHeight) * tileHeight;
+			const endX = Math.ceil((gameState.player.sprite.position.x + canvas.width) / tileWidth) * tileWidth;
+			const endY = Math.ceil((gameState.player.sprite.position.y + canvas.height) / tileHeight) * tileHeight;
 
 			// Draw tiles
 			for (let x = startX; x <= endX; x += tileWidth) {
@@ -507,28 +467,28 @@
 			}
 
 			// Z-order: Shots first (bottom layer)
-			for (const projectile of playerProjectiles) {
+			for (const projectile of gameState.playerProjectiles) {
 				projectile.draw();
 			}
-			for (const projectile of npcProjectiles) {
+			for (const projectile of gameState.npcProjectiles) {
 				projectile.draw();
 			}
 
 			// NPCs second (middle layer)
-			for (const npc of npcs) {
+			for (const npc of gameState.npcs) {
 				npc.draw();
 			}
 
 			// Wormhole
-			if (wormhole) {
-				wormhole.draw();
+			if (gameState.wormhole) {
+				gameState.wormhole.draw();
 			}
 
 			// Particles
-			particleSystem.draw(context);
+			gameState.particleSystem.draw(context);
 
 			// Player last (top layer)
-			player.draw();
+			gameState.player.draw();
 
 			context.restore();
 
@@ -544,7 +504,7 @@
 			context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
 			// Draw health bar foreground (green - shows current health)
-			const healthPercentage = Math.max(0, Math.min(1, player.health / player.maxHealth));
+			const healthPercentage = Math.max(0, Math.min(1, gameState.player.health / gameState.player.maxHealth));
 			const currentHealthWidth = healthBarWidth * healthPercentage;
 			context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
 			context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
@@ -558,10 +518,10 @@
 			context.fillStyle = '#FFFFFF';
 			context.font = '20px Arial';
 			context.textAlign = 'left';
-			context.fillText(`Score: ${score}`, 10, 60);
+			context.fillText(`Score: ${gameState.score}`, 10, 60);
 
 			// Wormhole message and arrow
-			if (wormhole) {
+			if (gameState.wormhole) {
 				// Draw message
 				context.fillStyle = '#00FFFF'; // Cyan
 				context.font = 'bold 24px Arial';
@@ -569,8 +529,8 @@
 				context.fillText('Wormhole detected!', canvas.width / 2, 50);
 
 				// Calculate direction to wormhole
-				const dx = wormhole.position.x - player.sprite.position.x;
-				const dy = wormhole.position.y - player.sprite.position.y;
+				const dx = gameState.wormhole.position.x - gameState.player.sprite.position.x;
+				const dy = gameState.wormhole.position.y - gameState.player.sprite.position.y;
 				const angle = Math.atan2(dy, dx);
 
 				// Check if wormhole is on-screen
@@ -609,10 +569,10 @@
 			}
 
 			// Mini-map
-			minimap.draw(context, {
-				npcs: npcs,
-				wormhole: wormhole
-			}, player.sprite.position);
+			gameState.minimap.draw(context, {
+				npcs: gameState.npcs,
+				wormhole: gameState.wormhole
+			}, gameState.player.sprite.position);
 		}
 
 		function renderGameOver() {
@@ -628,24 +588,24 @@
 			// Handle ESC key for pause/resume
 			if (engine.keyDown["Escape"]) {
 				engine.keyDown["Escape"] = false;
-				if (currentState === GameState.PLAYING) {
+				if (gameState.currentState === GameState.States.PLAYING) {
 					pauseGame();
-				} else if (currentState === GameState.PAUSED) {
+				} else if (gameState.currentState === GameState.States.PAUSED) {
 					resumeGame();
 				}
 			}
 
-			switch (currentState) {
-				case GameState.MENU:
+			switch (gameState.currentState) {
+				case GameState.States.MENU:
 					updateMenu();
 					break;
-				case GameState.PLAYING:
+				case GameState.States.PLAYING:
 					updateGame(deltaTime);
 					break;
-				case GameState.PAUSED:
+				case GameState.States.PAUSED:
 					// Don't update game state while paused
 					break;
-				case GameState.GAME_OVER:
+				case GameState.States.GAME_OVER:
 					updateGameOver();
 					break;
 			}
@@ -661,93 +621,82 @@
 
 		function updateGame(deltaTime) {
 			// Accumulate game time (only advances during gameplay, not when paused)
-			gameTime += deltaTime;
+			gameState.gameTime += deltaTime;
 
 			if (engine.keyDown["ArrowLeft"]) {
-				player.turnLeft(deltaTime);
+				gameState.player.turnLeft(deltaTime);
 			}
 			if (engine.keyDown["ArrowRight"]) {
-				player.turnRight(deltaTime);
+				gameState.player.turnRight(deltaTime);
 			}
 			if (engine.keyDown["ArrowUp"]) {
-				player.accelerate(deltaTime);
+				gameState.player.accelerate(deltaTime);
 			}
 			if (engine.keyDown["ArrowDown"]) {
-				player.reverseThrust(deltaTime);
+				gameState.player.reverseThrust(deltaTime);
 			}
 			if (engine.keyDown[" "]) {
-				if (gameTime > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
-					lastShotTime = gameTime;
-					const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Laser.speed);
+				if (gameState.gameTime > gameState.lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
+					gameState.lastShotTime = gameState.gameTime;
+					const shotVelocity = Vector2D.fromRadial(gameState.player.sprite.rotation, Laser.speed);
 					const newShot = new Laser(
 						new Vector2D(
-							player.sprite.position.x,
-							player.sprite.position.y
+							gameState.player.sprite.position.x,
+							gameState.player.sprite.position.y
 						),
 						shotVelocity
 					);
-					playerProjectiles.push(newShot);
+					gameState.playerProjectiles.push(newShot);
 					playSoundEffect('shoot', 0.3);
 				}
 			}
 
-			player.update(deltaTime);
+			gameState.player.update(deltaTime);
 
 			// Update all NPCs with unified loop
-			for (const npc of npcs) {
+			for (const npc of gameState.npcs) {
 				// Asteroids don't need player position
 				if (npc instanceof Asteroid) {
 					npc.update(deltaTime);
 				} else {
-					npc.update(deltaTime, player.sprite.position);
+					npc.update(deltaTime, gameState.player.sprite.position);
 				}
 
 				// Handle NPC shooting
 				if (npc instanceof AlienFighter) {
-					const newShot = npc.tryShoot(gameTime);
+					const newShot = npc.tryShoot(gameState.gameTime);
 					if (newShot) {
-						npcProjectiles.push(newShot);
+						gameState.npcProjectiles.push(newShot);
 						playSoundEffect('shoot', 0.2); // Quieter than player shots
 					}
 				} else if (npc instanceof MissileCruiser) {
-					const newMissile = npc.tryShoot(gameTime);
+					const newMissile = npc.tryShoot(gameState.gameTime);
 					if (newMissile) {
-						npcProjectiles.push(newMissile);
+						gameState.npcProjectiles.push(newMissile);
 						playSoundEffect('missile_launcher', 0.3);
 					}
 				}
 			}
 
 			// Update all projectiles
-			for (const projectile of playerProjectiles) {
+			for (const projectile of gameState.playerProjectiles) {
 				projectile.update();
 			}
-			for (const projectile of npcProjectiles) {
+			for (const projectile of gameState.npcProjectiles) {
 				projectile.update();
 			}
 
 			// Update particles
-			particleSystem.update(deltaTime);
+			gameState.particleSystem.update(deltaTime);
 
 			// Update wormhole if it exists
-			if (wormhole) {
-				wormhole.update(deltaTime);
-				wormhole.wrap(player.sprite.position);
+			if (gameState.wormhole) {
+				gameState.wormhole.update(deltaTime);
+				gameState.wormhole.wrap(gameState.player.sprite.position);
 			}
 
-			// Wave-based spawning: Check if all NPCs are cleared
-			if (countNPCs() === 0 && !wormhole) {
-				console.log(`Wave ${currentLevel} cleared! Wormhole spawning...`);
-				const wormholeSize = 27 * 3; // Wormhole is 27x28 * 3
-				const position = SpawnSystem.getOffscreenSpawnPosition(
-					player.sprite.position,
-					canvas.width,
-					canvas.height,
-					wormholeSize,
-					28 * 3
-				);
-				wormhole = new Wormhole(position);
-			}
+			// Wave-based spawning: Spawn wormhole when wave cleared
+			gameState.trySpawnWormhole();
 
 			// Collision detection
 			const npcsToRemove = new Set();
@@ -755,11 +704,11 @@
 			const npcProjectilesToRemove = new Set();
 
 			// Check player shot collisions with all NPCs (unified loop)
-			for (const shot of playerProjectiles) {
-				for (const npc of npcs) {
+			for (const shot of gameState.playerProjectiles) {
+				for (const npc of gameState.npcs) {
 					if (checkCollision(shot, npc)) {
 						playerProjectilesToRemove.add(shot);
-						particleSystem.spawnImpact(shot.sprite.position);
+						gameState.particleSystem.spawnImpact(shot.sprite.position);
 
 						// Handle different NPC types
 						if (npc instanceof MissileCruiser) {
@@ -767,9 +716,9 @@
 							npc.health -= shot.damage;
 							if (npc.health <= 0) {
 								npcsToRemove.add(npc);
-								score += npc.scoreValue;
+								gameState.score += npc.scoreValue;
 								playSoundEffect('explosion', 0.6);
-								particleSystem.spawnExplosion(npc.sprite.position);
+								gameState.particleSystem.spawnExplosion(npc.sprite.position);
 							} else {
 								playSoundEffect('hit', 0.4);
 							}
@@ -778,38 +727,38 @@
 							npc.health -= 1;
 							if (npc.health <= 0) {
 								npcsToRemove.add(npc);
-								score += npc.scoreValue;
+								gameState.score += npc.scoreValue;
 								playSoundEffect('explosion', 0.5);
-								particleSystem.spawnExplosion(npc.sprite.position);
+								gameState.particleSystem.spawnExplosion(npc.sprite.position);
 								// Spawn 3 smaller asteroids
 								const spawns = AsteroidSpawn.createSpawnsFromAsteroid(npc, canvas.width, canvas.height);
-								npcs.push(...spawns);
+								gameState.npcs.push(...spawns);
 							} else {
 								playSoundEffect('hit', 0.4);
 							}
 						} else if (npc instanceof AsteroidSpawn) {
 							// Single-hit asteroid spawn (different particle color)
 							npcsToRemove.add(npc);
-							score += npc.scoreValue;
+							gameState.score += npc.scoreValue;
 							playSoundEffect('explosion', 0.3);
-							particleSystem.spawnExplosion(npc.sprite.position, "255, 150, 50");
+							gameState.particleSystem.spawnExplosion(npc.sprite.position, "255, 150, 50");
 						} else {
 							// Single-hit enemies (AlienScout, AlienFighter, etc.)
 							npcsToRemove.add(npc);
-							score += npc.scoreValue;
+							gameState.score += npc.scoreValue;
 							playSoundEffect('explosion', 0.5);
-							particleSystem.spawnExplosion(npc.sprite.position);
+							gameState.particleSystem.spawnExplosion(npc.sprite.position);
 						}
 					}
 				}
 			}
 
 			// Check player-NPC collisions (unified loop)
-			for (const npc of npcs) {
-				if (checkCollision(player, npc)) {
+			for (const npc of gameState.npcs) {
+				if (checkCollision(gameState.player, npc)) {
 					npcsToRemove.add(npc);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(npc.sprite.position,
+					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
+					gameState.particleSystem.spawnExplosion(npc.sprite.position,
 						npc instanceof AsteroidSpawn ? "255, 150, 50" : undefined);
 
 					// Damage calculation based on NPC type
@@ -820,67 +769,64 @@
 						damage = 50;
 						soundEffect = 'hit';
 						soundVolume = 0.6;
-						console.log(`Player hit by asteroid! Health: ${player.health - damage}`);
+						console.log(`Player hit by asteroid! Health: ${gameState.player.health - damage}`);
 					} else if (npc instanceof AsteroidSpawn) {
 						damage = 25;
 						soundEffect = 'hit';
 						soundVolume = 0.4;
-						console.log(`Player hit by small asteroid! Health: ${player.health - damage}`);
+						console.log(`Player hit by small asteroid! Health: ${gameState.player.health - damage}`);
 					} else if (npc instanceof MissileCruiser) {
 						damage = npc.health;
 						soundEffect = 'hit';
 						soundVolume = 0.7;
-						console.log(`Player hit by missile cruiser! Health: ${player.health - damage}`);
+						console.log(`Player hit by missile cruiser! Health: ${gameState.player.health - damage}`);
 					} else {
 						// AlienScout, AlienFighter, etc.
 						damage = npc.health;
 						soundEffect = 'hit';
 						soundVolume = 0.6;
-						console.log(`Player hit! Health: ${player.health - damage}`);
+						console.log(`Player hit! Health: ${gameState.player.health - damage}`);
 					}
 
-					player.health -= damage;
+					gameState.player.health -= damage;
 					playSoundEffect(soundEffect, soundVolume);
 				}
 			}
 
 			// Check NPC projectile-player collisions (unified loop)
-			for (const projectile of npcProjectiles) {
-				if (checkCollision(player, projectile)) {
+			for (const projectile of gameState.npcProjectiles) {
+				if (checkCollision(gameState.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
 
 					// Damage depends on projectile type
 					if (projectile instanceof Missile) {
-						player.health -= projectile.damage; // 50 damage
-						console.log(`Player hit by missile! Health: ${player.health}`);
+						gameState.player.health -= projectile.damage; // 50 damage
+						console.log(`Player hit by missile! Health: ${gameState.player.health}`);
 						playSoundEffect('explosion', 0.6);
-						particleSystem.spawnExplosion(projectile.sprite.position, "255, 100, 50");
+						gameState.particleSystem.spawnExplosion(projectile.sprite.position, "255, 100, 50");
 					} else {
 						// Plasma shots deal 25 damage
-						player.health -= 25;
-						console.log(`Player hit by alien shot! Health: ${player.health}`);
+						gameState.player.health -= 25;
+						console.log(`Player hit by alien shot! Health: ${gameState.player.health}`);
 						playSoundEffect('hit', 0.5);
 					}
 				}
 			}
 
 			// Check player-wormhole collision (level advancement)
-			if (wormhole && wormhole.checkCollision(player)) {
-				currentLevel++;
-				console.log(`Entered wormhole! Advancing to wave ${currentLevel}`);
-				wormhole = null; // Remove wormhole
-				SpawnSystem.spawnWave(currentLevel, player.sprite.position, canvas.width, canvas.height, npcs);
+			if (gameState.wormhole && gameState.wormhole.checkCollision(gameState.player)) {
+				gameState.advanceLevel();
 				playSoundEffect('achievement', 0.5); // Play a sound effect
 			}
 
 			// Remove collided entities (unified filtering)
-			npcs = npcs.filter(npc => !npcsToRemove.has(npc));
-			playerProjectiles = playerProjectiles.filter(projectile => !playerProjectilesToRemove.has(projectile));
-			npcProjectiles = npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
+			gameState.npcs = gameState.npcs.filter(npc => !npcsToRemove.has(npc));
+			gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile => !playerProjectilesToRemove.has(projectile));
+			gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
 
 			// Check for game over
-			if (player.health <= 0) {
+			if (gameState.player.health <= 0) {
 				gameOver();
 				return;
 			}
@@ -890,30 +836,30 @@
 			const despawnDistance = Math.max(canvas.width, canvas.height) * GameConfig.WORLD.PROJECTILE_DESPAWN_MULTIPLIER; // Despawn projectiles
 
 			// Wrap all NPCs around minimap edges (unified loop)
-			for (const npc of npcs) {
-				const offsetX = npc.sprite.position.x - player.sprite.position.x;
-				const offsetY = npc.sprite.position.y - player.sprite.position.y;
+			for (const npc of gameState.npcs) {
+				const offsetX = npc.sprite.position.x - gameState.player.sprite.position.x;
+				const offsetY = npc.sprite.position.y - gameState.player.sprite.position.y;
 
 				if (offsetX > wrapDistance) {
-					npc.sprite.position.x = player.sprite.position.x - wrapDistance;
+					npc.sprite.position.x = gameState.player.sprite.position.x - wrapDistance;
 				} else if (offsetX < -wrapDistance) {
-					npc.sprite.position.x = player.sprite.position.x + wrapDistance;
+					npc.sprite.position.x = gameState.player.sprite.position.x + wrapDistance;
 				}
 
 				if (offsetY > wrapDistance) {
-					npc.sprite.position.y = player.sprite.position.y - wrapDistance;
+					npc.sprite.position.y = gameState.player.sprite.position.y - wrapDistance;
 				} else if (offsetY < -wrapDistance) {
-					npc.sprite.position.y = player.sprite.position.y + wrapDistance;
+					npc.sprite.position.y = gameState.player.sprite.position.y + wrapDistance;
 				}
 			}
 
 			// Despawn projectiles that are too far from player (unified filtering)
-			playerProjectiles = playerProjectiles.filter(projectile => {
-				const distance = projectile.sprite.position.dist(player.sprite.position);
+			gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile => {
+				const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
 				return distance < despawnDistance;
 			});
-			npcProjectiles = npcProjectiles.filter(projectile => {
-				const distance = projectile.sprite.position.dist(player.sprite.position);
+			gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile => {
+				const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
 				return distance < despawnDistance;
 			});
 
@@ -931,9 +877,9 @@
 				const leftStickX = gamepad.axes[0];
 				if (Math.abs(leftStickX) > deadzone) {
 					if (leftStickX < 0) {
-						player.turnLeft(deltaTime * Math.abs(leftStickX));
+						gameState.player.turnLeft(deltaTime * Math.abs(leftStickX));
 					} else {
-						player.turnRight(deltaTime * leftStickX);
+						gameState.player.turnRight(deltaTime * leftStickX);
 					}
 				}
 
@@ -941,37 +887,37 @@
 				const rightStickY = gamepad.axes[3];
 				if (rightStickY < -deadzone) {
 					// Right stick pushed up: forward thrust
-					player.accelerate(deltaTime * Math.abs(rightStickY));
+					gameState.player.accelerate(deltaTime * Math.abs(rightStickY));
 				} else if (rightStickY > deadzone) {
 					// Right stick pulled down: reverse thrust
-					player.reverseThrust(deltaTime * rightStickY);
+					gameState.player.reverseThrust(deltaTime * rightStickY);
 				}
 
 				// Button 7 (RT/R2): Forward thrust
 				if (gamepad.buttons[7] && gamepad.buttons[7].pressed) {
 					const triggerValue = gamepad.buttons[7].value || 1.0;
-					player.accelerate(deltaTime * triggerValue);
+					gameState.player.accelerate(deltaTime * triggerValue);
 				}
 
 				// Button 6 (LT/L2): Reverse thrust
 				if (gamepad.buttons[6] && gamepad.buttons[6].pressed) {
 					const triggerValue = gamepad.buttons[6].value || 1.0;
-					player.reverseThrust(deltaTime * triggerValue);
+					gameState.player.reverseThrust(deltaTime * triggerValue);
 				}
 
 				// Button 0 (A/Cross): Shoot
 				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
-					if (gameTime > lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
-						lastShotTime = gameTime;
-						const shotVelocity = Vector2D.fromRadial(player.sprite.rotation, Laser.speed);
+					if (gameState.gameTime > gameState.lastShotTime + GameConfig.PLAYER.FIRE_RATE) {
+						gameState.lastShotTime = gameState.gameTime;
+						const shotVelocity = Vector2D.fromRadial(gameState.player.sprite.rotation, Laser.speed);
 						const newShot = new Laser(
 							new Vector2D(
-								player.sprite.position.x,
-								player.sprite.position.y
+								gameState.player.sprite.position.x,
+								gameState.player.sprite.position.y
 							),
 							shotVelocity
 						);
-						shots.push(newShot);
+						gameState.playerProjectiles.push(newShot);
 						playSoundEffect('shoot', 0.3);
 					}
 				}
