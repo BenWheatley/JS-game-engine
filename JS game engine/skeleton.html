@@ -647,6 +647,13 @@
 						gameState.npcProjectiles.push(newMissile);
 						playSoundEffect('missile_launcher', 0.3);
 					}
+				} else if (npc instanceof AlienSaucer) {
+					const newShots = npc.tryShoot(gameState.gameTime);
+					if (newShots) {
+						// Saucer fires a ring of 8 shots
+						gameState.npcProjectiles.push(...newShots);
+						playSoundEffect('shoot', 0.3);
+					}
 				}
 			}
 

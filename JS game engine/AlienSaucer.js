@@ -42,9 +42,13 @@ class AlienSaucer extends NPC {
     this.movementDuration = config.MOVEMENT_DURATION;
     this.stopDuration = config.STOP_DURATION;
     this.stoppedElapsed = 0;
+    this.hasFiredThisCycle = false; // Track if we've fired during this stop
 
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
+
+    // Continuous spin rate: 2 Hz = 2 rotations/second = 4π radians/second
+    this.spinRate = (2 * Math.PI * 2) / 1000; // radians per millisecond
 
     // Pick initial target
     this.pickNewTarget(playerPosition);
@@ -102,9 +106,49 @@ class AlienSaucer extends NPC {
     this.movementStartTime = 0; // Will be set on first update in MOVING state
     this.state = AlienSaucer.States.MOVING;
     this.stoppedElapsed = 0;
+    this.hasFiredThisCycle = false; // Reset firing flag for new cycle
+  }
+
+  /**
+   * Fires a ring of 8 plasma bolts in cardinal and diagonal directions
+   * @returns {Array} Array of Plasma projectiles
+   */
+  fireRing() {
+    const shots = [];
+    // Fire in 8 directions: 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI / 4); // 0, π/4, π/2, 3π/4, π, 5π/4, 3π/2, 7π/4
+      const velocity = Vector2D.fromRadial(angle, Plasma.speed);
+      const shot = new Plasma(
+        new Vector2D(this.sprite.position.x, this.sprite.position.y),
+        velocity
+      );
+      shots.push(shot);
+    }
+    return shots;
+  }
+
+  /**
+   * Check if saucer should fire this frame
+   * Fires a ring of 8 plasma bolts 1 second after stopping
+   * @param {number} gameTime - Current game time
+   * @returns {Array|null} Array of Plasma shots, or null if not firing
+   */
+  tryShoot(gameTime) {
+    // Fire 1 second after stopping (only once per cycle)
+    if (this.state === AlienSaucer.States.STOPPED &&
+        !this.hasFiredThisCycle &&
+        this.stoppedElapsed >= 1000) {
+      this.hasFiredThisCycle = true;
+      return this.fireRing();
+    }
+    return null;
   }
 
   update(deltaTime, playerPosition) {
+    // Continuous spin at 2 Hz regardless of state
+    this.sprite.rotation += this.spinRate * deltaTime;
+
     if (this.state === AlienSaucer.States.MOVING) {
       // Initialize movement start time on first frame of movement
       if (this.movementStartTime === 0) {
@@ -124,12 +168,6 @@ class AlienSaucer extends NPC {
 
       this.sprite.position.x = this.startPosition.x + dx * smoothProgress;
       this.sprite.position.y = this.startPosition.y + dy * smoothProgress;
-
-      // Update rotation to face direction of movement
-      if (progress < 1.0) {
-        const angle = Math.atan2(dy, dx);
-        this.sprite.rotation = angle + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
-      }
 
       // Check if movement complete
       if (progress >= 1.0) {
