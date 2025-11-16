@@ -911,22 +911,10 @@
 				}
 			}
 		}
-		
-		// Game loop
-		var lastCallTime = Date.now();
-		function loop() {
-			var currentTime = Date.now();
-			var deltaTime = currentTime - lastCallTime;
-			lastCallTime = currentTime;
-			update(deltaTime);
-			render();
-			// Call the loop function again
-			window.requestAnimationFrame(loop);
-		}
 
 		// Show main menu and start game loop
 		showMainMenu();
-		loop();
+		engine.start(update, render);
 	</script>
 </body>
 </html>

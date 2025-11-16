@@ -110,7 +110,32 @@ class VibeEngine {
 			this.enterFullScreen();
 		}
 	}
-	
+
+	/**
+	 * Starts the game loop with provided update and render callbacks
+	 * @param {Function} updateCallback - Called each frame with deltaTime (ms)
+	 * @param {Function} renderCallback - Called each frame to render
+	 */
+	start(updateCallback, renderCallback) {
+		this._updateCallback = updateCallback;
+		this._renderCallback = renderCallback;
+		this._lastCallTime = Date.now();
+		this._loop();
+	}
+
+	_loop() {
+		const currentTime = Date.now();
+		const deltaTime = currentTime - this._lastCallTime;
+		this._lastCallTime = currentTime;
+
+		// Call update and render callbacks
+		this._updateCallback(deltaTime);
+		this._renderCallback();
+
+		// Continue the loop
+		window.requestAnimationFrame(() => this._loop());
+	}
+
 	static begin(document, canvasName) {
 		return new VibeEngine(document, canvasName);
 	}
