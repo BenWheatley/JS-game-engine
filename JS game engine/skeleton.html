@@ -545,11 +545,8 @@
 			}, gameState.player.sprite.position);
 		}
 
-		// Update loop; deltaTime is milliseconds
-		function update(deltaTime) {
-			if (loading()) { return; }
-
-			// Handle ESC key for pause/resume (only during gameplay)
+		// Handle ESC key for pause/resume (checked every frame)
+		function handlePauseInput() {
 			if (engine.keyDown["Escape"]) {
 				engine.keyDown["Escape"] = false;
 				if (gameState.currentState === GameState.States.PLAYING) {
@@ -558,15 +555,17 @@
 					resumeGame();
 				}
 			}
-
-			// Only update game logic during active gameplay
-			if (gameState.currentState === GameState.States.PLAYING) {
-				updateGame(deltaTime);
-			}
-			// Don't update when paused or in menus
 		}
 
-		function updateGame(deltaTime) {
+		// Update loop; deltaTime is milliseconds
+		function update(deltaTime) {
+			// Handle pause input regardless of game state
+			handlePauseInput();
+
+			// Only update game logic during active gameplay
+			if (gameState.currentState !== GameState.States.PLAYING) {
+				return;
+			}
 			// Accumulate game time (only advances during gameplay, not when paused)
 			gameState.gameTime += deltaTime;
 
