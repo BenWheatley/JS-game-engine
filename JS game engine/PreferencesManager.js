@@ -41,7 +41,7 @@ class PreferencesManager {
         // Merge with defaults to ensure all keys exist
         return { ...PreferencesManager.DEFAULTS, ...parsed };
       } catch (e) {
-        console.error('Failed to parse preferences from localStorage:', e);
+        DebugLogger.error('Failed to parse preferences from localStorage:', e);
         return { ...PreferencesManager.DEFAULTS };
       }
     }
@@ -56,7 +56,7 @@ class PreferencesManager {
     try {
       localStorage.setItem(PreferencesManager.STORAGE_KEY, JSON.stringify(this.preferences));
     } catch (e) {
-      console.error('Failed to save preferences to localStorage:', e);
+      DebugLogger.error('Failed to save preferences to localStorage:', e);
     }
   }
 

@@ -50,7 +50,7 @@ class AssetLoader {
    * @returns {Promise<void>} Promise that resolves when all assets are loaded
    */
   static async loadAll(soundManager, musicPlayer) {
-    console.log('Loading assets...');
+    DebugLogger.log('Loading assets...');
 
     // Load all asset types in parallel
     await Promise.all([
@@ -59,7 +59,7 @@ class AssetLoader {
       AssetLoader.loadMusic(musicPlayer)
     ]);
 
-    console.log('All assets loaded successfully!');
+    DebugLogger.log('All assets loaded successfully!');
   }
 
   /**
@@ -68,7 +68,7 @@ class AssetLoader {
    */
   static async loadSprites() {
     await Sprite.preloadSprites(AssetLoader.SPRITES);
-    console.log(`Loaded ${AssetLoader.SPRITES.length} sprites`);
+    DebugLogger.log(`Loaded ${AssetLoader.SPRITES.length} sprites`);
   }
 
   /**
@@ -78,7 +78,7 @@ class AssetLoader {
    */
   static async loadSounds(soundManager) {
     await soundManager.loadSounds(AssetLoader.SOUNDS);
-    console.log(`Loaded ${Object.keys(AssetLoader.SOUNDS).length} sound effects`);
+    DebugLogger.log(`Loaded ${Object.keys(AssetLoader.SOUNDS).length} sound effects`);
   }
 
   /**
@@ -88,6 +88,6 @@ class AssetLoader {
    */
   static async loadMusic(musicPlayer) {
     await musicPlayer.loadMusic(AssetLoader.MUSIC);
-    console.log('Music loaded');
+    DebugLogger.log('Music loaded');
   }
 }

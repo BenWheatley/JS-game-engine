@@ -100,7 +100,7 @@ class SpawnSystem {
   static spawnWave(level, playerPos, canvasWidth, canvasHeight, npcsArray) {
     const wave = SpawnSystem.getWaveDefinition(level);
 
-    console.log(`Spawning Wave ${level}:`, wave);
+    DebugLogger.log(`Spawning Wave ${level}:`, wave);
 
     // Spawn alien scouts
     for (let i = 0; i < wave.alienScouts; i++) {

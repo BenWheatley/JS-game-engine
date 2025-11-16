@@ -23,9 +23,9 @@ class SoundManager {
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await SoundManager.audioContext.decodeAudioData(arrayBuffer);
       SoundManager.sounds[name] = audioBuffer;
-      console.log(`Loaded sound: ${name}`);
+      DebugLogger.log(`Loaded sound: ${name}`);
     } catch (error) {
-      console.error(`Failed to load sound ${name}:`, error);
+      DebugLogger.error(`Failed to load sound ${name}:`, error);
     }
   }
 
@@ -39,7 +39,7 @@ class SoundManager {
   async play(name, volume = 1.0) {
     const audioBuffer = SoundManager.sounds[name];
     if (!audioBuffer) {
-      console.warn(`Sound not loaded: ${name}`);
+      DebugLogger.warn(`Sound not loaded: ${name}`);
       return;
     }
 
@@ -48,7 +48,7 @@ class SoundManager {
       try {
         await SoundManager.audioContext.resume();
       } catch (error) {
-        console.error('Failed to resume audio context:', error);
+        DebugLogger.error('Failed to resume audio context:', error);
         return;
       }
     }

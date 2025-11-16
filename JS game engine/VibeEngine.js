@@ -26,11 +26,11 @@ class VibeEngine {
 		});
 		this._document.addEventListener("gamepadconnected", function(e) {
 			const gamepad = e.gamepad;
-			console.log("Gamepad connected:", gamepad.id);
+			DebugLogger.log("Gamepad connected:", gamepad.id);
 		});
 		this._document.addEventListener("gamepaddisconnected", function(e) {
 			const gamepad = e.gamepad;
-			console.log("Gamepad disconnected:", gamepad.id);
+			DebugLogger.log("Gamepad disconnected:", gamepad.id);
 		});
 
 		// Listen for fullscreen changes to restore canvas style

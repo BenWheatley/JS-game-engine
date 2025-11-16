@@ -12,6 +12,11 @@
 	<title>Game Engine</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link id="css" rel="stylesheet" href="css.css"/ >
+	<script type="text/javascript" src="DebugLogger.js"></script>
+	<script>
+		// Enable debug logging - set to true to see debug messages in console
+		DebugLogger.debug = false;
+	</script>
 	<script type="text/javascript" src="GameConfig.js"></script>
 	<script type="text/javascript" src="AssetLoader.js"></script>
 	<script type="text/javascript" src="CollisionDetection.js"></script>
@@ -321,7 +326,7 @@
 						label: `Weapon Upgrade (Level ${gameState.player.weaponLevel} → ${gameState.player.weaponLevel + 1})`,
 						action: () => {
 							gameState.player.weaponLevel++;
-							console.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
+							DebugLogger.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
 							resumeFromUpgrade();
 						}
 					},
@@ -330,7 +335,7 @@
 						label: `Engine Upgrade (Level ${gameState.player.engineLevel} → ${gameState.player.engineLevel + 1})`,
 						action: () => {
 							gameState.player.engineLevel++;
-							console.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
+							DebugLogger.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
 							resumeFromUpgrade();
 						}
 					},
@@ -339,7 +344,7 @@
 						label: `Shield Upgrade (Level ${gameState.player.shieldLevel} → ${gameState.player.shieldLevel + 1})`,
 						action: () => {
 							gameState.player.shieldLevel++;
-							console.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
+							DebugLogger.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
 							resumeFromUpgrade();
 						}
 					}
@@ -722,23 +727,23 @@
 						damage = 50;
 						soundEffect = 'hit';
 						soundVolume = 0.6;
-						console.log(`Player hit by asteroid! Health: ${gameState.player.health - damage}`);
+						DebugLogger.log(`Player hit by asteroid! Health: ${gameState.player.health - damage}`);
 					} else if (npc instanceof AsteroidSpawn) {
 						damage = 25;
 						soundEffect = 'hit';
 						soundVolume = 0.4;
-						console.log(`Player hit by small asteroid! Health: ${gameState.player.health - damage}`);
+						DebugLogger.log(`Player hit by small asteroid! Health: ${gameState.player.health - damage}`);
 					} else if (npc instanceof MissileCruiser) {
 						damage = npc.health;
 						soundEffect = 'hit';
 						soundVolume = 0.7;
-						console.log(`Player hit by missile cruiser! Health: ${gameState.player.health - damage}`);
+						DebugLogger.log(`Player hit by missile cruiser! Health: ${gameState.player.health - damage}`);
 					} else {
 						// AlienScout, AlienFighter, etc.
 						damage = npc.health;
 						soundEffect = 'hit';
 						soundVolume = 0.6;
-						console.log(`Player hit! Health: ${gameState.player.health - damage}`);
+						DebugLogger.log(`Player hit! Health: ${gameState.player.health - damage}`);
 					}
 
 					gameState.player.health -= damage;
@@ -755,13 +760,13 @@
 					// Damage depends on projectile type
 					if (projectile instanceof Missile) {
 						gameState.player.health -= projectile.damage; // 50 damage
-						console.log(`Player hit by missile! Health: ${gameState.player.health}`);
+						DebugLogger.log(`Player hit by missile! Health: ${gameState.player.health}`);
 						playSoundEffect('explosion', 0.6);
 						gameState.particleSystem.spawnExplosion(projectile.sprite.position, "255, 100, 50");
 					} else {
 						// Plasma shots deal 25 damage
 						gameState.player.health -= 25;
-						console.log(`Player hit by alien shot! Health: ${gameState.player.health}`);
+						DebugLogger.log(`Player hit by alien shot! Health: ${gameState.player.health}`);
 						playSoundEffect('hit', 0.5);
 					}
 				}

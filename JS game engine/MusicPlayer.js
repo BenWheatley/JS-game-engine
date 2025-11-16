@@ -12,10 +12,10 @@ class MusicPlayer {
       const response = await fetch(url);
       const data = await response.json();
       this.musicData = data[0].notes;
-      console.log(`Loaded ${this.musicData.length} notes from music file`);
+      DebugLogger.log(`Loaded ${this.musicData.length} notes from music file`);
       return true;
     } catch (error) {
-      console.error('Failed to load music:', error);
+      DebugLogger.error('Failed to load music:', error);
       return false;
     }
   }

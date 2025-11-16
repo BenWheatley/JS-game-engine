@@ -87,7 +87,7 @@ class GameState {
    */
   trySpawnWormhole() {
     if (this.countNPCs() === 0 && !this.wormhole) {
-      console.log(`Wave ${this.currentLevel} cleared! Wormhole spawning...`);
+      DebugLogger.log(`Wave ${this.currentLevel} cleared! Wormhole spawning...`);
       const wormholeSize = 27 * 3;
       const position = SpawnSystem.getOffscreenSpawnPosition(
         this.player.sprite.position,
@@ -106,7 +106,7 @@ class GameState {
    */
   advanceLevel() {
     this.currentLevel++;
-    console.log(`Entered wormhole! Advancing to wave ${this.currentLevel}`);
+    DebugLogger.log(`Entered wormhole! Advancing to wave ${this.currentLevel}`);
     this.wormhole = null;
     SpawnSystem.spawnWave(
       this.currentLevel,

@@ -61,7 +61,7 @@ class Note {
 
   async start() {
     if (!Note.audioContext) {
-      console.error('AudioContext not available - SoundManager may not be initialized');
+      DebugLogger.error('AudioContext not available - SoundManager may not be initialized');
       return;
     }
 
@@ -70,7 +70,7 @@ class Note {
       try {
         await Note.audioContext.resume();
       } catch (error) {
-        console.error('Failed to resume audio context for music:', error);
+        DebugLogger.error('Failed to resume audio context for music:', error);
         return;
       }
     }
