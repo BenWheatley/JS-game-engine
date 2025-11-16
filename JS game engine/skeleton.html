@@ -13,6 +13,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link id="css" rel="stylesheet" href="css.css"/ >
 	<script type="text/javascript" src="GameConfig.js"></script>
+	<script type="text/javascript" src="AssetLoader.js"></script>
 	<script type="text/javascript" src="GPTEngine.js"></script>
 	<script type="text/javascript" src="Vector2D.js"></script>
 	<script type="text/javascript" src="Particle.js"></script>
@@ -111,16 +112,7 @@
 
 		// Preload assets
 		(async () => {
-			await Sprite.preloadSprites(
-				['background.png', 'title.png', 'player-ship.png', 'alien-scout.png', 'alien-fighter.png', 'alien-saucer.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'laser.png', 'plasma.png', 'missile.png', 'wormhole.png']
-			);
-			await soundManager.loadSounds({
-				'shoot': 'laser_1.2.m4a',
-				'explosion': 'explosion_medium.m4a',
-				'hit': 'explosion_small.m4a',
-				'missile_launcher': 'missile_launcher.m4a'
-			});
-			await musicPlayer.loadMusic('slow_guitar.json');
+			await AssetLoader.loadAll(soundManager, musicPlayer);
 
 			// Initialize music volume after Note class is available
 			Note.setVolume(musicVolume / 100);
