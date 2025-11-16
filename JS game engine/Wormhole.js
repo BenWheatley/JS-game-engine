@@ -45,13 +45,4 @@ class Wormhole {
 		// Draw the continuously spinning sprite
 		this.sprite.draw();
 	}
-
-	// Check collision with player
-	checkCollision(player) {
-		const dx = this.position.x - player.sprite.position.x;
-		const dy = this.position.y - player.sprite.position.y;
-		const distance = Math.sqrt(dx * dx + dy * dy);
-		const collisionRadius = (this.size.x + player.sprite.size.x) / 3; // Combined radius
-		return distance < collisionRadius;
-	}
 }

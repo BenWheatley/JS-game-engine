@@ -14,6 +14,7 @@
 	<link id="css" rel="stylesheet" href="css.css"/ >
 	<script type="text/javascript" src="GameConfig.js"></script>
 	<script type="text/javascript" src="AssetLoader.js"></script>
+	<script type="text/javascript" src="CollisionDetection.js"></script>
 	<script type="text/javascript" src="GPTEngine.js"></script>
 	<script type="text/javascript" src="Vector2D.js"></script>
 	<script type="text/javascript" src="Particle.js"></script>
@@ -111,22 +112,6 @@
 
 		function loading() {
 			return Sprite.stillLoading();
-		}
-
-		// AABB collision detection
-		function checkCollision(entity1, entity2) {
-			const pos1 = entity1.sprite.position;
-			const size1 = entity1.sprite.size;
-			const pos2 = entity2.sprite.position;
-			const size2 = entity2.sprite.size;
-
-			// AABB collision: check if rectangles overlap
-			return (
-				pos1.x - size1.x/2 < pos2.x + size2.x/2 &&
-				pos1.x + size1.x/2 > pos2.x - size2.x/2 &&
-				pos1.y - size1.y/2 < pos2.y + size2.y/2 &&
-				pos1.y + size1.y/2 > pos2.y - size2.y/2
-			);
 		}
 
 		// Game state management functions
@@ -698,7 +683,7 @@
 			// Check player shot collisions with all NPCs (unified loop)
 			for (const shot of gameState.playerProjectiles) {
 				for (const npc of gameState.npcs) {
-					if (checkCollision(shot, npc)) {
+					if (CollisionDetection.checkAABB(shot, npc)) {
 						playerProjectilesToRemove.add(shot);
 						gameState.particleSystem.spawnImpact(shot.sprite.position);
 
@@ -747,7 +732,7 @@
 
 			// Check player-NPC collisions (unified loop)
 			for (const npc of gameState.npcs) {
-				if (checkCollision(gameState.player, npc)) {
+				if (CollisionDetection.checkAABB(gameState.player, npc)) {
 					npcsToRemove.add(npc);
 					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
 					gameState.particleSystem.spawnExplosion(npc.sprite.position,
@@ -787,7 +772,7 @@
 
 			// Check NPC projectile-player collisions (unified loop)
 			for (const projectile of gameState.npcProjectiles) {
-				if (checkCollision(gameState.player, projectile)) {
+				if (CollisionDetection.checkAABB(gameState.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
 					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
 
@@ -807,7 +792,7 @@
 			}
 
 			// Check player-wormhole collision (show upgrade menu)
-			if (gameState.wormhole && gameState.wormhole.checkCollision(gameState.player)) {
+			if (gameState.wormhole && CollisionDetection.checkCircle(gameState.wormhole, gameState.player)) {
 				showUpgradeMenu();
 				playSoundEffect('achievement', 0.5); // Play a sound effect
 			}
