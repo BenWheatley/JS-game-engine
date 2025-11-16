@@ -166,14 +166,14 @@
 		}
 
 		function gameOver() {
-			gameState.currentState = GameState.States.GAME_OVER;
+			gameState.currentState = null; // No longer in active gameplay
 			musicPlayer.stop();
 			canvas.classList.remove('hide-cursor');
 			showGameOverMenu();
 		}
 
 		function returnToMenu() {
-			gameState.currentState = GameState.States.MENU;
+			gameState.currentState = null; // No longer in active gameplay
 			musicPlayer.stop();
 			canvas.classList.remove('hide-cursor');
 			showMainMenu();
@@ -190,7 +190,7 @@
 				titleElement.innerHTML = '<img id="menuTitleImage" src="title.png" alt="SPACE SHOOTER" style="width: 325px; height: 28px;">';
 			}
 
-			menuSystem.showMenu({
+			menuSystem.showMenu(MenuSystem.MenuTypes.MAIN, {
 				title: 'SPACE SHOOTER',
 				items: [
 					{
@@ -225,7 +225,7 @@
 
 			let playerName = '';
 
-			menuSystem.showMenu({
+			menuSystem.showMenu(MenuSystem.MenuTypes.GAME_OVER, {
 				title: 'GAME OVER',
 				items: [
 					{
@@ -291,7 +291,7 @@
 			// Add pause class for transparent overlay (no background image)
 			document.getElementById('menuOverlay').classList.add('pause');
 
-			menuSystem.showMenu({
+			menuSystem.showMenu(MenuSystem.MenuTypes.PAUSE, {
 				title: 'PAUSED',
 				items: [
 					{
@@ -360,7 +360,7 @@
 			// Remove pause class (show background image)
 			document.getElementById('menuOverlay').classList.remove('pause');
 
-			menuSystem.showMenu({
+			menuSystem.showMenu(MenuSystem.MenuTypes.OPTIONS, {
 				title: 'OPTIONS',
 				items: [
 					{
@@ -418,23 +418,17 @@
 		function render() {
 			if (loading()) { return; }
 
-			switch (gameState.currentState) {
-				case GameState.States.MENU:
-					renderMenu();
-					break;
-				case GameState.States.PLAYING:
-					renderGame();
-					break;
-				case GameState.States.PAUSED:
-					renderGame(); // Keep showing game behind pause menu
-					break;
-				case GameState.States.GAME_OVER:
-					renderGameOver();
-					break;
+			if (gameState.currentState === GameState.States.PLAYING ||
+			    gameState.currentState === GameState.States.PAUSED) {
+				// Render game (visible during gameplay and behind pause menu)
+				renderGame();
+			} else {
+				// Render menu background
+				renderMenuBackground();
 			}
 		}
 
-		function renderMenu() {
+		function renderMenuBackground() {
 			// Clear screen - menu background is handled by CSS
 			context.fillStyle = '#000000';
 			context.fillRect(0, 0, canvas.width, canvas.height);
@@ -575,17 +569,11 @@
 			}, gameState.player.sprite.position);
 		}
 
-		function renderGameOver() {
-			// Clear screen - menu background is handled by CSS
-			context.fillStyle = '#000000';
-			context.fillRect(0, 0, canvas.width, canvas.height);
-		}
-		
 		// Update loop; deltaTime is milliseconds
 		function update(deltaTime) {
 			if (loading()) { return; }
 
-			// Handle ESC key for pause/resume
+			// Handle ESC key for pause/resume (only during gameplay)
 			if (engine.keyDown["Escape"]) {
 				engine.keyDown["Escape"] = false;
 				if (gameState.currentState === GameState.States.PLAYING) {
@@ -595,28 +583,11 @@
 				}
 			}
 
-			switch (gameState.currentState) {
-				case GameState.States.MENU:
-					updateMenu();
-					break;
-				case GameState.States.PLAYING:
-					updateGame(deltaTime);
-					break;
-				case GameState.States.PAUSED:
-					// Don't update game state while paused
-					break;
-				case GameState.States.GAME_OVER:
-					updateGameOver();
-					break;
+			// Only update game logic during active gameplay
+			if (gameState.currentState === GameState.States.PLAYING) {
+				updateGame(deltaTime);
 			}
-		}
-
-		function updateMenu() {
-			// Menu is now HTML-based, no keyboard input needed
-		}
-
-		function updateGameOver() {
-			// Game over menu is now HTML-based, no keyboard input needed
+			// Don't update when paused or in menus
 		}
 
 		function updateGame(deltaTime) {

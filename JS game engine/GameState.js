@@ -7,17 +7,16 @@
  * - Particle effects
  * - Wormhole
  * - Score, level, and timing
- * - Current game state (menu, playing, paused, game over)
+ * - Current gameplay state (playing, paused)
  */
 class GameState {
   /**
-   * Game state enum values
+   * Gameplay state enum values
+   * Note: Menu visibility is tracked by MenuSystem
    */
   static States = {
-    MENU: 'menu',
     PLAYING: 'playing',
-    PAUSED: 'paused',
-    GAME_OVER: 'gameOver'
+    PAUSED: 'paused'
   };
 
   /**
@@ -38,8 +37,8 @@ class GameState {
     this.particleSystem = new ParticleSystem();
     this.minimap = new Minimap(canvas.width, canvas.height);
 
-    // Game state
-    this.currentState = GameState.States.MENU;
+    // Gameplay state (null when in menus, PLAYING during gameplay, PAUSED when paused)
+    this.currentState = null;
     this.score = 0;
     this.currentLevel = 1;
 

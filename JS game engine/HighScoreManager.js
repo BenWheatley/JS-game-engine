@@ -153,7 +153,7 @@ class HighScoreManager {
       });
     }
 
-    this.menuSystem.showMenu({
+    this.menuSystem.showMenu(MenuSystem.MenuTypes.HIGH_SCORES, {
       title: 'HIGH SCORES',
       items: [
         {

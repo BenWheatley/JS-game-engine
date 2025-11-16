@@ -1,13 +1,26 @@
 class MenuSystem {
+  /**
+   * Menu type enum values
+   */
+  static MenuTypes = {
+    MAIN: 'main',
+    PAUSE: 'pause',
+    OPTIONS: 'options',
+    GAME_OVER: 'gameOver',
+    HIGH_SCORES: 'highScores'
+  };
+
   constructor(overlayElement, titleElement, buttonsElement, instructionsElement) {
     this.overlayElement = overlayElement;
     this.titleElement = titleElement;
     this.buttonsElement = buttonsElement;
     this.instructionsElement = instructionsElement;
     this.currentMenu = null;
+    this.currentMenuType = null;
   }
 
-  showMenu(menuConfig) {
+  showMenu(menuType, menuConfig) {
+    this.currentMenuType = menuType;
     this.currentMenu = menuConfig;
 
     // Set title - only set text if there's no image child (preserves title.png on main menu)
@@ -211,6 +224,7 @@ class MenuSystem {
   hideMenu() {
     this.overlayElement.classList.add('hidden');
     this.currentMenu = null;
+    this.currentMenuType = null;
   }
 
   isVisible() {
