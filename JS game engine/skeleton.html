@@ -411,11 +411,6 @@
 
 		// Render loop
 		function render() {
-			// Always render game - menus overlay via CSS
-			renderGame();
-		}
-
-		function renderGame() {
 			context.save();
 			context.translate(
 				canvas.width/2-gameState.player.sprite.position.x,
