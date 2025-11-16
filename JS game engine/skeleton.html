@@ -678,38 +678,14 @@
 				if (CollisionDetection.checkAABB(gameState.player, npc)) {
 					npcsToRemove.add(npc);
 					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
-					gameState.particleSystem.spawnExplosion(npc.sprite.position,
-						npc instanceof AsteroidSpawn ? "255, 150, 50" : undefined);
 
-					// Damage calculation based on NPC type
-					let damage;
-					let soundEffect;
-					let soundVolume;
-					if (npc instanceof Asteroid) {
-						damage = 50;
-						soundEffect = 'hit';
-						soundVolume = 0.6;
-						DebugLogger.log(`Player hit by asteroid! Health: ${gameState.player.health - damage}`);
-					} else if (npc instanceof AsteroidSpawn) {
-						damage = 25;
-						soundEffect = 'hit';
-						soundVolume = 0.4;
-						DebugLogger.log(`Player hit by small asteroid! Health: ${gameState.player.health - damage}`);
-					} else if (npc instanceof MissileCruiser) {
-						damage = npc.health;
-						soundEffect = 'hit';
-						soundVolume = 0.7;
-						DebugLogger.log(`Player hit by missile cruiser! Health: ${gameState.player.health - damage}`);
-					} else {
-						// AlienScout, AlienFighter, etc.
-						damage = npc.health;
-						soundEffect = 'hit';
-						soundVolume = 0.6;
-						DebugLogger.log(`Player hit! Health: ${gameState.player.health - damage}`);
+					const collisionResult = npc.onCollideWithPlayer();
+					gameState.particleSystem.spawnExplosion(npc.sprite.position, collisionResult.particleColor);
+					gameState.player.health -= collisionResult.damage;
+					DebugLogger.log(`Player hit! Health: ${gameState.player.health}`);
+					if (collisionResult.sound) {
+						playSoundEffect(collisionResult.sound, collisionResult.volume);
 					}
-
-					gameState.player.health -= damage;
-					playSoundEffect(soundEffect, soundVolume);
 				}
 			}
 

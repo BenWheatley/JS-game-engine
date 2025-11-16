@@ -27,6 +27,15 @@ class AsteroidSpawn extends GameEntity {
     };
   }
 
+  onCollideWithPlayer() {
+    return {
+      damage: this.health,
+      sound: GameConfig.ASTEROID_SPAWN.COLLISION_SOUND,
+      volume: GameConfig.ASTEROID_SPAWN.COLLISION_VOLUME,
+      particleColor: GameConfig.ASTEROID_SPAWN.PARTICLE_COLOR
+    };
+  }
+
   update(deltaTime) {
     super.update(deltaTime);
     // Add rotation for visual effect (faster than parent asteroid)

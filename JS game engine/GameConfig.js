@@ -108,7 +108,9 @@ const GameConfig = {
     ROTATIONAL_SPEED: Math.PI / 1200,   // Slightly slower rotation than player
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null                // Particle color (null = default)
+    PARTICLE_COLOR: null,               // Particle color (null = default)
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
 
   // Alien Fighter - Aggressive enemy that shoots plasma
@@ -126,7 +128,9 @@ const GameConfig = {
     SHOOT_VOLUME: 0.2,                  // Volume for shoot sound (0.0 - 1.0)
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null                // Particle color (null = default)
+    PARTICLE_COLOR: null,               // Particle color (null = default)
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
 
   // Missile Cruiser - Heavy enemy that fires homing missiles
@@ -146,7 +150,9 @@ const GameConfig = {
     HIT_VOLUME: 0.4,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.6,              // Volume for destruction sound
-    PARTICLE_COLOR: null                // Particle color (null = default)
+    PARTICLE_COLOR: null,               // Particle color (null = default)
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.7               // Volume for collision sound
   },
 
   // Alien Saucer - Flying saucer with ease-in-out movement
@@ -162,7 +168,9 @@ const GameConfig = {
     SHOOT_VOLUME: 0.3,                  // Volume for shoot sound (0.0 - 1.0)
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null                // Particle color (null = default)
+    PARTICLE_COLOR: null,               // Particle color (null = default)
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
 
   // Asteroid - Large destructible obstacle
@@ -177,7 +185,9 @@ const GameConfig = {
     HIT_VOLUME: 0.4,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null                // Particle color (null = default)
+    PARTICLE_COLOR: null,               // Particle color (null = default)
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
 
   // Asteroid Spawn - Small fragments from destroyed asteroids
@@ -189,7 +199,9 @@ const GameConfig = {
     SCORE_VALUE: 50,
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.3,              // Volume for destruction sound
-    PARTICLE_COLOR: '255, 150, 50'      // Orange particle color for small asteroids
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color for small asteroids
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.4               // Volume for collision sound
   },
 
   // Minimap display and configuration

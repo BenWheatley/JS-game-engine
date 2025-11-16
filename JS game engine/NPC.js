@@ -33,4 +33,19 @@ class NPC extends GameEntity {
       particleColor: null
     };
   }
+
+  /**
+   * Handle collision with player
+   * Override in subclasses for custom behavior
+   * @returns {Object} Collision result with {damage, sound, volume, particleColor}
+   */
+  onCollideWithPlayer() {
+    // Default behavior: use health as damage, no special effects
+    return {
+      damage: this.health,
+      sound: 'hit',
+      volume: 0.6,
+      particleColor: null
+    };
+  }
 }

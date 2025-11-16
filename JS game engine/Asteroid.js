@@ -91,6 +91,15 @@ class Asteroid extends GameEntity {
     }
   }
 
+  onCollideWithPlayer() {
+    return {
+      damage: this.health,
+      sound: GameConfig.ASTEROID_BIG.COLLISION_SOUND,
+      volume: GameConfig.ASTEROID_BIG.COLLISION_VOLUME,
+      particleColor: GameConfig.ASTEROID_BIG.PARTICLE_COLOR
+    };
+  }
+
   update(deltaTime) {
     super.update(deltaTime);
     // Add slow rotation for visual effect

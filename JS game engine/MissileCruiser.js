@@ -128,6 +128,15 @@ class MissileCruiser extends NPC {
     }
   }
 
+  onCollideWithPlayer() {
+    return {
+      damage: this.health,
+      sound: GameConfig.MISSILE_CRUISER.COLLISION_SOUND,
+      volume: GameConfig.MISSILE_CRUISER.COLLISION_VOLUME,
+      particleColor: GameConfig.MISSILE_CRUISER.PARTICLE_COLOR
+    };
+  }
+
   tryShoot(gameTime) {
     if (gameTime - this.lastShotTime > GameConfig.MISSILE_CRUISER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;

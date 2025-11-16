@@ -161,6 +161,15 @@ class AlienSaucer extends NPC {
     };
   }
 
+  onCollideWithPlayer() {
+    return {
+      damage: this.health,
+      sound: GameConfig.ALIEN_SAUCER.COLLISION_SOUND,
+      volume: GameConfig.ALIEN_SAUCER.COLLISION_VOLUME,
+      particleColor: GameConfig.ALIEN_SAUCER.PARTICLE_COLOR
+    };
+  }
+
   /**
    * Check if saucer should fire this frame
    * Fires a ring of 8 plasma bolts 1 second after stopping

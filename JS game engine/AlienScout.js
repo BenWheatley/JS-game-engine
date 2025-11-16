@@ -113,6 +113,15 @@ class AlienScout extends NPC {
     };
   }
 
+  onCollideWithPlayer() {
+    return {
+      damage: this.health,
+      sound: GameConfig.ALIEN_SCOUT.COLLISION_SOUND,
+      volume: GameConfig.ALIEN_SCOUT.COLLISION_VOLUME,
+      particleColor: GameConfig.ALIEN_SCOUT.PARTICLE_COLOR
+    };
+  }
+
   update(deltaTime, playerPosition) {
     // Check if we need a new target
     if (this.hasReachedTarget()) {
