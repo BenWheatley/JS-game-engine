@@ -383,13 +383,7 @@
 						maxLength: 15,
 						autofocus: true,
 						onChange: (value) => {
-							// Sanitize input in real-time to prevent XSS
-							playerName = sanitizeInput(value);
-							// Update the input field with sanitized value
-							const input = document.getElementById('playerNameInput');
-							if (input && input.value !== playerName) {
-								input.value = playerName;
-							}
+							playerName = value;
 						}
 					},
 					{
