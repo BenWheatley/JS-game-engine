@@ -115,10 +115,12 @@ class VibeEngine {
 	 * Starts the game loop with provided update and render callbacks
 	 * @param {Function} updateCallback - Called each frame with deltaTime (ms)
 	 * @param {Function} renderCallback - Called each frame to render
+	 * @param {Function} loadingCheckCallback - Optional callback that returns true if still loading
 	 */
-	start(updateCallback, renderCallback) {
+	start(updateCallback, renderCallback, loadingCheckCallback = null) {
 		this._updateCallback = updateCallback;
 		this._renderCallback = renderCallback;
+		this._loadingCheckCallback = loadingCheckCallback;
 		this._lastCallTime = Date.now();
 		this._loop();
 	}
@@ -127,6 +129,12 @@ class VibeEngine {
 		const currentTime = Date.now();
 		const deltaTime = currentTime - this._lastCallTime;
 		this._lastCallTime = currentTime;
+
+		// Skip update/render if still loading
+		if (this._loadingCheckCallback && this._loadingCheckCallback()) {
+			window.requestAnimationFrame(() => this._loop());
+			return;
+		}
 
 		// Call update and render callbacks
 		this._updateCallback(deltaTime);

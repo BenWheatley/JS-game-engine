@@ -110,10 +110,6 @@
 		// Initialize game state
 		const gameState = new GameState(canvas);
 
-		function loading() {
-			return Sprite.stillLoading();
-		}
-
 		// Game state management functions
 		function startGame() {
 			gameState.reset();
@@ -415,8 +411,6 @@
 
 		// Render loop
 		function render() {
-			if (loading()) { return; }
-
 			// Always render game - menus overlay via CSS
 			renderGame();
 		}
@@ -902,7 +896,7 @@
 
 		// Show main menu and start game loop
 		showMainMenu();
-		engine.start(update, render);
+		engine.start(update, render, () => Sprite.stillLoading());
 	</script>
 </body>
 </html>
