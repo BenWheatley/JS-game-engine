@@ -657,44 +657,17 @@
 						playerProjectilesToRemove.add(shot);
 						gameState.particleSystem.spawnImpact(shot.sprite.position);
 
-						// Handle different NPC types
-						if (npc instanceof MissileCruiser) {
-							// Multi-hit enemy
-							npc.health -= shot.damage;
-							if (npc.health <= 0) {
-								npcsToRemove.add(npc);
-								gameState.score += npc.scoreValue;
-								playSoundEffect('explosion', 0.6);
-								gameState.particleSystem.spawnExplosion(npc.sprite.position);
-							} else {
-								playSoundEffect('hit', 0.4);
-							}
-						} else if (npc instanceof Asteroid) {
-							// Multi-hit asteroid that spawns smaller versions
-							npc.health -= 1;
-							if (npc.health <= 0) {
-								npcsToRemove.add(npc);
-								gameState.score += npc.scoreValue;
-								playSoundEffect('explosion', 0.5);
-								gameState.particleSystem.spawnExplosion(npc.sprite.position);
-								// Spawn 3 smaller asteroids
-								const spawns = AsteroidSpawn.createSpawnsFromAsteroid(npc, canvas.width, canvas.height);
-								gameState.npcs.push(...spawns);
-							} else {
-								playSoundEffect('hit', 0.4);
-							}
-						} else if (npc instanceof AsteroidSpawn) {
-							// Single-hit asteroid spawn (different particle color)
+						const hitResult = npc.onHit(shot.damage);
+						if (hitResult.destroyed) {
 							npcsToRemove.add(npc);
 							gameState.score += npc.scoreValue;
-							playSoundEffect('explosion', 0.3);
-							gameState.particleSystem.spawnExplosion(npc.sprite.position, "255, 150, 50");
-						} else {
-							// Single-hit enemies (AlienScout, AlienFighter, etc.)
-							npcsToRemove.add(npc);
-							gameState.score += npc.scoreValue;
-							playSoundEffect('explosion', 0.5);
-							gameState.particleSystem.spawnExplosion(npc.sprite.position);
+							gameState.particleSystem.spawnExplosion(npc.sprite.position, hitResult.particleColor);
+							if (hitResult.spawns) {
+								gameState.npcs.push(...hitResult.spawns);
+							}
+						}
+						if (hitResult.sound) {
+							playSoundEffect(hitResult.sound, hitResult.volume);
 						}
 					}
 				}

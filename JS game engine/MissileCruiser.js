@@ -106,6 +106,28 @@ class MissileCruiser extends NPC {
     }
   }
 
+  onHit(damage) {
+    // Multi-hit enemy
+    this.health -= damage;
+    if (this.health <= 0) {
+      return {
+        destroyed: true,
+        sound: GameConfig.MISSILE_CRUISER.DESTROYED_SOUND,
+        volume: GameConfig.MISSILE_CRUISER.DESTROYED_VOLUME,
+        spawns: null,
+        particleColor: GameConfig.MISSILE_CRUISER.PARTICLE_COLOR
+      };
+    } else {
+      return {
+        destroyed: false,
+        sound: GameConfig.MISSILE_CRUISER.HIT_SOUND,
+        volume: GameConfig.MISSILE_CRUISER.HIT_VOLUME,
+        spawns: null,
+        particleColor: null
+      };
+    }
+  }
+
   tryShoot(gameTime) {
     if (gameTime - this.lastShotTime > GameConfig.MISSILE_CRUISER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;

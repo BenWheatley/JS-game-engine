@@ -105,7 +105,10 @@ const GameConfig = {
     SCORE_VALUE: 150,
     FORWARD_ACCELERATION: 0.0008,       // Slightly less than player
     MAX_SPEED: 0.05,                    // Slightly less than player
-    ROTATIONAL_SPEED: Math.PI / 1200    // Slightly slower rotation than player
+    ROTATIONAL_SPEED: Math.PI / 1200,   // Slightly slower rotation than player
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
+    PARTICLE_COLOR: null                // Particle color (null = default)
   },
 
   // Alien Fighter - Aggressive enemy that shoots plasma
@@ -120,7 +123,10 @@ const GameConfig = {
     ROTATIONAL_SPEED: Math.PI / 600,    // 2x AlienScout
     SHOT_COOLDOWN: 2000,                // Milliseconds between shots
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
-    SHOOT_VOLUME: 0.2                   // Volume for shoot sound (0.0 - 1.0)
+    SHOOT_VOLUME: 0.2,                  // Volume for shoot sound (0.0 - 1.0)
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
+    PARTICLE_COLOR: null                // Particle color (null = default)
   },
 
   // Missile Cruiser - Heavy enemy that fires homing missiles
@@ -135,7 +141,12 @@ const GameConfig = {
     ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
     SHOT_COOLDOWN: 4000,                // Milliseconds between missile launches
     SHOOT_SOUND: 'missile_launcher',    // Sound effect to play when shooting
-    SHOOT_VOLUME: 0.3                   // Volume for shoot sound (0.0 - 1.0)
+    SHOOT_VOLUME: 0.3,                  // Volume for shoot sound (0.0 - 1.0)
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.4,                    // Volume for hit sound
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.6,              // Volume for destruction sound
+    PARTICLE_COLOR: null                // Particle color (null = default)
   },
 
   // Alien Saucer - Flying saucer with ease-in-out movement
@@ -148,7 +159,10 @@ const GameConfig = {
     MOVEMENT_DURATION: 3000,            // Milliseconds to reach target (3 seconds)
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
-    SHOOT_VOLUME: 0.3                   // Volume for shoot sound (0.0 - 1.0)
+    SHOOT_VOLUME: 0.3,                  // Volume for shoot sound (0.0 - 1.0)
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
+    PARTICLE_COLOR: null                // Particle color (null = default)
   },
 
   // Asteroid - Large destructible obstacle
@@ -158,7 +172,12 @@ const GameConfig = {
     HEIGHT: 52,
     HEALTH: 3,
     SCORE_VALUE: 200,
-    SPEED: 0.04                         // Pixels per millisecond (similar to player max speed)
+    SPEED: 0.04,                        // Pixels per millisecond (similar to player max speed)
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.4,                    // Volume for hit sound
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
+    PARTICLE_COLOR: null                // Particle color (null = default)
   },
 
   // Asteroid Spawn - Small fragments from destroyed asteroids
@@ -167,7 +186,10 @@ const GameConfig = {
     WIDTH: 27,
     HEIGHT: 26,
     HEALTH: 1,
-    SCORE_VALUE: 50
+    SCORE_VALUE: 50,
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.3,              // Volume for destruction sound
+    PARTICLE_COLOR: '255, 150, 50'      // Orange particle color for small asteroids
   },
 
   // Minimap display and configuration

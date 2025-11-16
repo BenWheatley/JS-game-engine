@@ -16,6 +16,17 @@ class AsteroidSpawn extends GameEntity {
     return distance > despawnDistance;
   }
 
+  onHit(damage) {
+    // Single-hit asteroid fragment
+    return {
+      destroyed: true,
+      sound: GameConfig.ASTEROID_SPAWN.DESTROYED_SOUND,
+      volume: GameConfig.ASTEROID_SPAWN.DESTROYED_VOLUME,
+      spawns: null,
+      particleColor: GameConfig.ASTEROID_SPAWN.PARTICLE_COLOR
+    };
+  }
+
   update(deltaTime) {
     super.update(deltaTime);
     // Add rotation for visual effect (faster than parent asteroid)

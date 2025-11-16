@@ -6,6 +6,7 @@ class NPC extends GameEntity {
   constructor(position) {
     super(position, 0, new Vector2D(0, 0), NPC.size, NPC.imageUrl);
     this.health = NPC.health;
+    this.scoreValue = 0; // Set by subclasses
   }
 
   pickNewTarget(playerPosition) {
@@ -14,5 +15,22 @@ class NPC extends GameEntity {
       this.canvasWidth,
       this.canvasHeight
     );
+  }
+
+  /**
+   * Handle being hit by damage
+   * Override in subclasses for custom behavior
+   * @param {number} damage - Amount of damage taken
+   * @returns {Object} Hit result with {destroyed, sound, volume, spawns, particleColor}
+   */
+  onHit(damage) {
+    // Default behavior: single-hit enemy
+    return {
+      destroyed: true,
+      sound: null,
+      volume: 0,
+      spawns: null,
+      particleColor: null
+    };
   }
 }

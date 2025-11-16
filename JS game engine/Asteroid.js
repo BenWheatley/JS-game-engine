@@ -69,6 +69,28 @@ class Asteroid extends GameEntity {
     return distance > despawnDistance;
   }
 
+  onHit(damage) {
+    // Multi-hit asteroid that spawns fragments
+    this.health -= damage;
+    if (this.health <= 0) {
+      return {
+        destroyed: true,
+        sound: GameConfig.ASTEROID_BIG.DESTROYED_SOUND,
+        volume: GameConfig.ASTEROID_BIG.DESTROYED_VOLUME,
+        spawns: AsteroidSpawn.createSpawnsFromAsteroid(this, this.canvasWidth, this.canvasHeight),
+        particleColor: GameConfig.ASTEROID_BIG.PARTICLE_COLOR
+      };
+    } else {
+      return {
+        destroyed: false,
+        sound: GameConfig.ASTEROID_BIG.HIT_SOUND,
+        volume: GameConfig.ASTEROID_BIG.HIT_VOLUME,
+        spawns: null,
+        particleColor: null
+      };
+    }
+  }
+
   update(deltaTime) {
     super.update(deltaTime);
     // Add slow rotation for visual effect

@@ -106,6 +106,17 @@ class AlienFighter extends NPC {
     }
   }
 
+  onHit(damage) {
+    // Single-hit enemy
+    return {
+      destroyed: true,
+      sound: GameConfig.ALIEN_FIGHTER.DESTROYED_SOUND,
+      volume: GameConfig.ALIEN_FIGHTER.DESTROYED_VOLUME,
+      spawns: null,
+      particleColor: GameConfig.ALIEN_FIGHTER.PARTICLE_COLOR
+    };
+  }
+
   tryShoot(gameTime) {
     if (gameTime - this.lastShotTime > GameConfig.ALIEN_FIGHTER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;
