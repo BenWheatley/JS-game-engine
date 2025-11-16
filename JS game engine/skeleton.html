@@ -40,6 +40,7 @@
 	<script type="text/javascript" src="SimpleMusic.js"></script>
 	<script type="text/javascript" src="MusicPlayer.js"></script>
 	<script type="text/javascript" src="MenuSystem.js"></script>
+	<script type="text/javascript" src="PreferencesManager.js"></script>
 	<script type="text/javascript" src="HighScoreManager.js"></script>
 	<script type="text/javascript" src="Minimap.js"></script>
 </head>
@@ -76,30 +77,11 @@
 		const highScoreManager = new HighScoreManager(menuSystem);
 
 		// Preferences Management
-		function getPreferences() {
-			const stored = localStorage.getItem('preferences');
-			if (stored) {
-				return JSON.parse(stored);
-			}
-			// Default preferences
-			return {
-				volume_effects: 100,
-				volume_music: 100
-			};
-		}
-
-		function savePreferences(preferences) {
-			localStorage.setItem('preferences', JSON.stringify(preferences));
-		}
-
-		// Audio settings - load from preferences
-		const preferences = getPreferences();
-		let soundEffectsVolume = preferences.volume_effects;
-		let musicVolume = preferences.volume_music;
+		const preferencesManager = new PreferencesManager();
 
 		// Helper function to apply volume
 		function playSoundEffect(name, baseVolume) {
-			soundManager.play(name, baseVolume * (soundEffectsVolume / 100));
+			soundManager.play(name, baseVolume * (preferencesManager.soundEffectsVolume / 100));
 		}
 
 		let backgroundSprite;
@@ -113,7 +95,7 @@
 			await AssetLoader.loadAll(soundManager, musicPlayer);
 
 			// Initialize music volume after Note class is available
-			Note.setVolume(musicVolume / 100);
+			Note.setVolume(preferencesManager.musicVolume / 100);
 		})();
 
 		// Background will be tiled - store a single tile sprite
@@ -295,13 +277,10 @@
 						label: 'Sound Effects Volume',
 						min: 0,
 						max: 100,
-						value: soundEffectsVolume,
+						value: preferencesManager.soundEffectsVolume,
 						suffix: '%',
 						onChange: (value) => {
-							soundEffectsVolume = parseInt(value);
-							const prefs = getPreferences();
-							prefs.volume_effects = soundEffectsVolume;
-							savePreferences(prefs);
+							preferencesManager.soundEffectsVolume = parseInt(value);
 						}
 					},
 					{
@@ -309,14 +288,11 @@
 						label: 'Music Volume',
 						min: 0,
 						max: 100,
-						value: musicVolume,
+						value: preferencesManager.musicVolume,
 						suffix: '%',
 						onChange: (value) => {
-							musicVolume = parseInt(value);
-							Note.setVolume(musicVolume / 100); // Convert percentage to 0.0-1.0
-							const prefs = getPreferences();
-							prefs.volume_music = musicVolume;
-							savePreferences(prefs);
+							preferencesManager.musicVolume = parseInt(value);
+							Note.setVolume(preferencesManager.musicVolume / 100); // Convert percentage to 0.0-1.0
 						}
 					},
 					{
@@ -412,13 +388,10 @@
 						label: 'Sound Effects Volume',
 						min: 0,
 						max: 100,
-						value: soundEffectsVolume,
+						value: preferencesManager.soundEffectsVolume,
 						suffix: '%',
 						onChange: (value) => {
-							soundEffectsVolume = parseInt(value);
-							const prefs = getPreferences();
-							prefs.volume_effects = soundEffectsVolume;
-							savePreferences(prefs);
+							preferencesManager.soundEffectsVolume = parseInt(value);
 						}
 					},
 					{
@@ -426,14 +399,11 @@
 						label: 'Music Volume',
 						min: 0,
 						max: 100,
-						value: musicVolume,
+						value: preferencesManager.musicVolume,
 						suffix: '%',
 						onChange: (value) => {
-							musicVolume = parseInt(value);
-							Note.setVolume(musicVolume / 100); // Convert percentage to 0.0-1.0
-							const prefs = getPreferences();
-							prefs.volume_music = musicVolume;
-							savePreferences(prefs);
+							preferencesManager.musicVolume = parseInt(value);
+							Note.setVolume(preferencesManager.musicVolume / 100); // Convert percentage to 0.0-1.0
 						}
 					},
 					{
