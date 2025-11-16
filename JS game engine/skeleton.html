@@ -14,8 +14,8 @@
 	<link id="css" rel="stylesheet" href="css.css"/ >
 	<script type="text/javascript" src="DebugLogger.js"></script>
 	<script>
-		// Enable debug logging - set to true to see debug messages in console
-		DebugLogger.debug = false;
+		// Enable debug logging only when running on localhost
+		DebugLogger.debug = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 	</script>
 	<script type="text/javascript" src="GameConfig.js"></script>
 	<script type="text/javascript" src="AssetLoader.js"></script>
