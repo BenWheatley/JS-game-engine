@@ -25,6 +25,7 @@ class SpawnSystem {
         alienScouts: Math.floor(baseWave.alienScouts * scaleFactor),
         alienFighters: Math.floor(baseWave.alienFighters * scaleFactor),
         missileCruisers: Math.floor(baseWave.missileCruisers * scaleFactor),
+        alienSaucers: Math.floor((baseWave.alienSaucers || 0) * scaleFactor),
         asteroids: Math.floor(baseWave.asteroids * scaleFactor)
       };
     }
@@ -126,6 +127,15 @@ class SpawnSystem {
       const cruiser = new MissileCruiser(playerPos, canvasWidth, canvasHeight);
       cruiser.sprite.position = position;
       npcsArray.push(cruiser);
+    }
+
+    // Spawn alien saucers
+    for (let i = 0; i < (wave.alienSaucers || 0); i++) {
+      const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
+        GameConfig.ALIEN_SAUCER.WIDTH, GameConfig.ALIEN_SAUCER.HEIGHT);
+      const saucer = new AlienSaucer(playerPos, canvasWidth, canvasHeight);
+      saucer.sprite.position = position;
+      npcsArray.push(saucer);
     }
 
     // Spawn asteroids

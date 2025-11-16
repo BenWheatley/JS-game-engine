@@ -58,37 +58,37 @@ const GameConfig = {
   // Wave-based spawning system - defines enemy composition per level
   SPAWNING: {
     // Level progression - defines what spawns at each level
-    // Each level specifies counts for: scouts, fighters, cruisers, asteroids
+    // Each level specifies counts for: scouts, fighters, cruisers, saucers, asteroids
     WAVES: [
-      // Level 1: Tutorial - Easy start
-      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, asteroids: 2 },
+      // Level 1: Tutorial - Easy start (with test saucer)
+      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 1, asteroids: 2 },
 
       // Level 2: Introduce fighters
-      { alienScouts: 4, alienFighters: 2, missileCruisers: 0, asteroids: 3 },
+      { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, asteroids: 3 },
 
       // Level 3: More enemies
-      { alienScouts: 5, alienFighters: 3, missileCruisers: 0, asteroids: 4 },
+      { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, asteroids: 4 },
 
       // Level 4: Introduce missile cruisers
-      { alienScouts: 6, alienFighters: 4, missileCruisers: 1, asteroids: 4 },
+      { alienScouts: 6, alienFighters: 4, missileCruisers: 1, alienSaucers: 0, asteroids: 4 },
 
       // Level 5: Ramping up
-      { alienScouts: 7, alienFighters: 5, missileCruisers: 2, asteroids: 5 },
+      { alienScouts: 7, alienFighters: 5, missileCruisers: 2, alienSaucers: 0, asteroids: 5 },
 
       // Level 6: Heavy combat
-      { alienScouts: 8, alienFighters: 6, missileCruisers: 2, asteroids: 6 },
+      { alienScouts: 8, alienFighters: 6, missileCruisers: 2, alienSaucers: 0, asteroids: 6 },
 
       // Level 7: Elite wave
-      { alienScouts: 9, alienFighters: 7, missileCruisers: 3, asteroids: 6 },
+      { alienScouts: 9, alienFighters: 7, missileCruisers: 3, alienSaucers: 0, asteroids: 6 },
 
       // Level 8: Overwhelming force
-      { alienScouts: 10, alienFighters: 8, missileCruisers: 4, asteroids: 7 },
+      { alienScouts: 10, alienFighters: 8, missileCruisers: 4, alienSaucers: 0, asteroids: 7 },
 
       // Level 9: Near impossible
-      { alienScouts: 12, alienFighters: 10, missileCruisers: 5, asteroids: 8 },
+      { alienScouts: 12, alienFighters: 10, missileCruisers: 5, alienSaucers: 0, asteroids: 8 },
 
       // Level 10+: Repeating pattern with scaling
-      { alienScouts: 15, alienFighters: 12, missileCruisers: 6, asteroids: 10 }
+      { alienScouts: 15, alienFighters: 12, missileCruisers: 6, alienSaucers: 0, asteroids: 10 }
     ],
 
     // Scaling factor for levels beyond the wave definitions
@@ -132,6 +132,17 @@ const GameConfig = {
     MAX_SPEED: 0.04,                    // Slower than AlienScout
     ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
     SHOT_COOLDOWN: 4000                 // Milliseconds between missile launches
+  },
+
+  // Alien Saucer - Flying saucer with ease-in-out movement
+  ALIEN_SAUCER: {
+    IMAGE_URL: 'alien-saucer.png',
+    WIDTH: 64,
+    HEIGHT: 64,
+    HEALTH: 150,
+    SCORE_VALUE: 250,
+    MOVEMENT_DURATION: 3000,            // Milliseconds to reach target (3 seconds)
+    STOP_DURATION: 2000                 // Milliseconds to stay stopped (2 seconds)
   },
 
   // Asteroid - Large destructible obstacle

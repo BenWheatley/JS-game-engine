@@ -33,6 +33,7 @@
 	<script type="text/javascript" src="Plasma.js"></script>
 	<script type="text/javascript" src="Missile.js"></script>
 	<script type="text/javascript" src="MissileCruiser.js"></script>
+	<script type="text/javascript" src="AlienSaucer.js"></script>
 	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="SoundManager.js"></script>
 	<script type="text/javascript" src="SimpleMusic.js"></script>
@@ -111,7 +112,7 @@
 		// Preload assets
 		(async () => {
 			await Sprite.preloadSprites(
-				['background.png', 'title.png', 'player-ship.png', 'alien-scout.png', 'alien-fighter.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'laser.png', 'plasma.png', 'missile.png', 'wormhole.png']
+				['background.png', 'title.png', 'player-ship.png', 'alien-scout.png', 'alien-fighter.png', 'alien-saucer.png', 'missile_ship.png', 'asteroid-big.png', 'asteroid-medium.png', 'asteroid-small.png', 'laser.png', 'plasma.png', 'missile.png', 'wormhole.png']
 			);
 			await soundManager.loadSounds({
 				'shoot': 'laser_1.2.m4a',
