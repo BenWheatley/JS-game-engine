@@ -47,8 +47,12 @@ class AlienSaucer extends NPC {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
 
-    // Continuous spin rate: 2 Hz = 2 rotations/second = 4π radians/second
-    this.spinRate = (2 * Math.PI * 2) / 1000; // radians per millisecond
+    // Continuous spin rate: 0.5 Hz = 0.5 rotations/second = π radians/second
+    this.spinRate = Math.PI / 1000; // radians per millisecond (reduced by 4x)
+
+    // Curved path parameters (set when picking new target)
+    this.curveAmplitude = 0;
+    this.curvePerpendicular = new Vector2D(0, 0);
 
     // Pick initial target
     this.pickNewTarget(playerPosition);
@@ -103,6 +107,24 @@ class AlienSaucer extends NPC {
 
     this.targetPosition = new Vector2D(randomX, randomY);
     this.startPosition = new Vector2D(this.sprite.position.x, this.sprite.position.y);
+
+    // Calculate curved path parameters using Vector2D methods
+    const travelVector = this.targetPosition.sub(this.startPosition);
+    const distance = travelVector.mag();
+
+    // Amplitude: random between -0.1 and 0.1 of distance
+    const amplitudeScale = (Math.random() * 0.2) - 0.1; // Random in [-0.1, 0.1]
+    this.curveAmplitude = distance * amplitudeScale;
+
+    // Perpendicular direction (rotate travel direction by 90°)
+    // If travel direction is (dx, dy), perpendicular is (-dy, dx) normalized
+    if (distance > 0) {
+      const travelDir = travelVector.norm();
+      this.curvePerpendicular = new Vector2D(-travelDir.y, travelDir.x);
+    } else {
+      this.curvePerpendicular = new Vector2D(0, 0);
+    }
+
     this.movementStartTime = 0; // Will be set on first update in MOVING state
     this.state = AlienSaucer.States.MOVING;
     this.stoppedElapsed = 0;
@@ -162,12 +184,19 @@ class AlienSaucer extends NPC {
       // Apply smootherstep interpolation
       const smoothProgress = AlienSaucer.smootherstep(progress);
 
-      // Interpolate position
-      const dx = this.targetPosition.x - this.startPosition.x;
-      const dy = this.targetPosition.y - this.startPosition.y;
+      // Interpolate position along straight line using Vector2D methods
+      const travelVector = this.targetPosition.sub(this.startPosition);
+      const basePosition = this.startPosition.add(travelVector.mul(smoothProgress));
 
-      this.sprite.position.x = this.startPosition.x + dx * smoothProgress;
-      this.sprite.position.y = this.startPosition.y + dy * smoothProgress;
+      // Add curved offset perpendicular to travel direction
+      // Wavelength = 2x distance means we travel 0.5 wavelengths (π radians)
+      // Use sine so curve starts at 0, peaks at middle, returns to 0 at end
+      const curveOffset = this.curveAmplitude * Math.sin(progress * Math.PI);
+      const offsetVector = this.curvePerpendicular.mul(curveOffset);
+
+      const finalPosition = basePosition.add(offsetVector);
+      this.sprite.position.x = finalPosition.x;
+      this.sprite.position.y = finalPosition.y;
 
       // Check if movement complete
       if (progress >= 1.0) {
