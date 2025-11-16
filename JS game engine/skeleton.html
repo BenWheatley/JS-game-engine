@@ -563,6 +563,37 @@
 			}
 		}
 
+		// Player shooting function
+		function shoot() {
+			const weaponStats = gameState.player.getWeaponStats();
+			if (gameState.gameTime > gameState.lastShotTime + weaponStats.fireRate) {
+				gameState.lastShotTime = gameState.gameTime;
+
+				// Fire multiple shots with spread
+				const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
+				for (let i = 0; i < weaponStats.shotCount; i++) {
+					// Calculate angle for this shot
+					let shotAngle = gameState.player.sprite.rotation;
+					if (weaponStats.shotCount > 1) {
+						// Distribute shots evenly across the spread angle
+						const angleOffset = (i - (weaponStats.shotCount - 1) / 2) * spreadRadians;
+						shotAngle += angleOffset;
+					}
+
+					const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
+					const newShot = new Laser(
+						new Vector2D(
+							gameState.player.sprite.position.x,
+							gameState.player.sprite.position.y
+						),
+						shotVelocity
+					);
+					gameState.playerProjectiles.push(newShot);
+				}
+				playSoundEffect('shoot', 0.3);
+			}
+		}
+
 		// Update loop; deltaTime is milliseconds
 		function update(deltaTime) {
 			// Handle pause input regardless of game state
@@ -588,33 +619,7 @@
 				gameState.player.reverseThrust(deltaTime);
 			}
 			if (engine.keyDown[" "]) {
-				const weaponStats = gameState.player.getWeaponStats();
-				if (gameState.gameTime > gameState.lastShotTime + weaponStats.fireRate) {
-					gameState.lastShotTime = gameState.gameTime;
-
-					// Fire multiple shots with spread
-					const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
-					for (let i = 0; i < weaponStats.shotCount; i++) {
-						// Calculate angle for this shot
-						let shotAngle = gameState.player.sprite.rotation;
-						if (weaponStats.shotCount > 1) {
-							// Distribute shots evenly across the spread angle
-							const angleOffset = (i - (weaponStats.shotCount - 1) / 2) * spreadRadians;
-							shotAngle += angleOffset;
-						}
-
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
-						const newShot = new Laser(
-							new Vector2D(
-								gameState.player.sprite.position.x,
-								gameState.player.sprite.position.y
-							),
-							shotVelocity
-						);
-						gameState.playerProjectiles.push(newShot);
-					}
-					playSoundEffect('shoot', 0.3);
-				}
+				shoot();
 			}
 
 			gameState.player.update(deltaTime);
@@ -822,33 +827,7 @@
 
 				// Button 0 (A/Cross): Shoot
 				if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
-					const weaponStats = gameState.player.getWeaponStats();
-					if (gameState.gameTime > gameState.lastShotTime + weaponStats.fireRate) {
-						gameState.lastShotTime = gameState.gameTime;
-
-						// Fire multiple shots with spread
-						const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
-						for (let i = 0; i < weaponStats.shotCount; i++) {
-							// Calculate angle for this shot
-							let shotAngle = gameState.player.sprite.rotation;
-							if (weaponStats.shotCount > 1) {
-								// Distribute shots evenly across the spread angle
-								const angleOffset = (i - (weaponStats.shotCount - 1) / 2) * spreadRadians;
-								shotAngle += angleOffset;
-							}
-
-							const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
-							const newShot = new Laser(
-								new Vector2D(
-									gameState.player.sprite.position.x,
-									gameState.player.sprite.position.y
-								),
-								shotVelocity
-							);
-							gameState.playerProjectiles.push(newShot);
-						}
-						playSoundEffect('shoot', 0.3);
-					}
+					shoot();
 				}
 
 				// Button 9 (Start/Options): Pause game
