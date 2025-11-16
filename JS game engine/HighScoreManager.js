@@ -95,9 +95,8 @@ class HighScoreManager {
   /**
    * Displays the high scores menu
    * Shows top 10 scores, or top 8 + most recent if recent is outside top 10
-   * @param {Function} onBack - Optional callback for back button (defaults to showing main menu)
    */
-  showHighScoresMenu(onBack) {
+  showHighScoresMenu() {
     // Remove pause class (show background image)
     document.getElementById('menuOverlay').classList.remove('pause');
 
@@ -163,13 +162,12 @@ class HighScoreManager {
         },
         {
           type: 'button',
-          label: 'Back',
-          action: onBack || (() => {
-            // Default: return to main menu
+          label: 'Main Menu',
+          action: () => {
             if (typeof showMainMenu === 'function') {
               showMainMenu();
             }
-          })
+          }
         }
       ]
     });

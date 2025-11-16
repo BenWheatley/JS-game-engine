@@ -111,15 +111,10 @@
 		const alienSize = 48;
 		const alienSpeed = 1000/1000.0; // pixels per millisecond
 		let backgroundSprite;
-		let aliens = [];
-		let alienScouts = [];
-		let alienFighters = [];
-		let alienFighterShots = []; // Shots fired by alien fighters
-		let missileCruisers = [];
-		let cruiserMissiles = []; // Missiles fired by missile cruisers
-		let asteroids = [];
-		let asteroidSpawns = []; // Smaller asteroids spawned from destroyed asteroids
-		let shots = [];
+		// Unified arrays for cleaner code and easier maintenance
+		let npcs = []; // All NPCs: aliens, scouts, fighters, cruisers, asteroids, asteroid spawns
+		let playerProjectiles = []; // Shots fired by player
+		let npcProjectiles = []; // All NPC projectiles: fighter shots, cruiser missiles
 		let lastShotTime = 0; // Changed to use gameTime instead of Date.now()
 
 		// Wave-based spawning
@@ -192,15 +187,9 @@
 
 		function resetGame() {
 			player = new Player();
-			aliens = [];
-			alienScouts = [];
-			alienFighters = [];
-			alienFighterShots = [];
-			missileCruisers = [];
-			cruiserMissiles = [];
-			asteroids = [];
-			asteroidSpawns = [];
-			shots = [];
+			npcs = [];
+			playerProjectiles = [];
+			npcProjectiles = [];
 			particleSystem.clear();
 			wormhole = null;
 			score = 0;
@@ -212,11 +201,7 @@
 
 		// Wave spawning system
 		function countNPCs() {
-			return alienScouts.length +
-			       alienFighters.length +
-			       missileCruisers.length +
-			       asteroids.length +
-			       asteroidSpawns.length;
+			return npcs.length;
 		}
 
 		function getWaveDefinition(level) {
@@ -296,7 +281,7 @@
 					GameConfig.ALIEN_SCOUT.WIDTH, GameConfig.ALIEN_SCOUT.HEIGHT);
 				const scout = new AlienScout(playerPos, canvas.width, canvas.height);
 				scout.sprite.position = position;
-				alienScouts.push(scout);
+				npcs.push(scout);
 			}
 
 			// Spawn alien fighters
@@ -305,7 +290,7 @@
 					GameConfig.ALIEN_FIGHTER.WIDTH, GameConfig.ALIEN_FIGHTER.HEIGHT);
 				const fighter = new AlienFighter(playerPos, canvas.width, canvas.height);
 				fighter.sprite.position = position;
-				alienFighters.push(fighter);
+				npcs.push(fighter);
 			}
 
 			// Spawn missile cruisers
@@ -314,7 +299,7 @@
 					GameConfig.MISSILE_CRUISER.WIDTH, GameConfig.MISSILE_CRUISER.HEIGHT);
 				const cruiser = new MissileCruiser(playerPos, canvas.width, canvas.height);
 				cruiser.sprite.position = position;
-				missileCruisers.push(cruiser);
+				npcs.push(cruiser);
 			}
 
 			// Spawn asteroids
@@ -323,7 +308,7 @@
 					GameConfig.ASTEROID_BIG.WIDTH, GameConfig.ASTEROID_BIG.HEIGHT);
 				const asteroid = new Asteroid(playerPos, canvas.width, canvas.height);
 				asteroid.sprite.position = position;
-				asteroids.push(asteroid);
+				npcs.push(asteroid);
 			}
 		}
 
@@ -363,7 +348,7 @@
 					{
 						type: 'button',
 						label: 'High Scores',
-						action: () => highScoreManager.showHighScoresMenu(() => showMainMenu())
+						action: () => highScoreManager.showHighScoresMenu()
 					},
 					{
 						type: 'button',
@@ -413,7 +398,7 @@
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
 							highScoreManager.saveHighScore(name, score);
-							highScoreManager.showHighScoresMenu(() => showGameOverMenu());
+							highScoreManager.showHighScoresMenu();
 						}
 					},
 					{
@@ -635,34 +620,16 @@
 			}
 
 			// Z-order: Shots first (bottom layer)
-			for (const shot of shots) {
-				shot.draw();
+			for (const projectile of playerProjectiles) {
+				projectile.draw();
 			}
-			for (const alienShot of alienFighterShots) {
-				alienShot.draw();
-			}
-			for (const missile of cruiserMissiles) {
-				missile.draw();
+			for (const projectile of npcProjectiles) {
+				projectile.draw();
 			}
 
 			// NPCs second (middle layer)
-			for (const alien of aliens) {
-				alien.draw();
-			}
-			for (const alienScout of alienScouts) {
-				alienScout.draw();
-			}
-			for (const alienFighter of alienFighters) {
-				alienFighter.draw();
-			}
-			for (const missileCruiser of missileCruisers) {
-				missileCruiser.draw();
-			}
-			for (const asteroid of asteroids) {
-				asteroid.draw();
-			}
-			for (const asteroidSpawn of asteroidSpawns) {
-				asteroidSpawn.draw();
+			for (const npc of npcs) {
+				npc.draw();
 			}
 
 			// Wormhole
@@ -756,12 +723,7 @@
 
 			// Mini-map
 			minimap.draw(context, {
-				asteroids: asteroids,
-				asteroidSpawns: asteroidSpawns,
-				aliens: aliens,
-				alienScouts: alienScouts,
-				alienFighters: alienFighters,
-				missileCruisers: missileCruisers,
+				npcs: npcs,
 				wormhole: wormhole
 			}, player.sprite.position);
 		}
@@ -837,48 +799,44 @@
 						),
 						shotVelocity
 					);
-					shots.push(newShot);
+					playerProjectiles.push(newShot);
 					playSoundEffect('shoot', 0.3);
 				}
 			}
 
 			player.update(deltaTime);
 
-			for (const alienScout of alienScouts) {
-				alienScout.update(deltaTime, player.sprite.position);
-			}
-			for (const alienFighter of alienFighters) {
-				alienFighter.update(deltaTime, player.sprite.position);
-				// Check if fighter wants to shoot
-				const newShot = alienFighter.tryShoot(gameTime);
-				if (newShot) {
-					alienFighterShots.push(newShot);
-					playSoundEffect('shoot', 0.2); // Quieter than player shots
+			// Update all NPCs with unified loop
+			for (const npc of npcs) {
+				// Asteroids don't need player position
+				if (npc instanceof Asteroid) {
+					npc.update(deltaTime);
+				} else {
+					npc.update(deltaTime, player.sprite.position);
+				}
+
+				// Handle NPC shooting
+				if (npc instanceof AlienFighter) {
+					const newShot = npc.tryShoot(gameTime);
+					if (newShot) {
+						npcProjectiles.push(newShot);
+						playSoundEffect('shoot', 0.2); // Quieter than player shots
+					}
+				} else if (npc instanceof MissileCruiser) {
+					const newMissile = npc.tryShoot(gameTime);
+					if (newMissile) {
+						npcProjectiles.push(newMissile);
+						playSoundEffect('missile_launcher', 0.3);
+					}
 				}
 			}
-			for (const missileCruiser of missileCruisers) {
-				missileCruiser.update(deltaTime, player.sprite.position);
-				// Check if cruiser wants to shoot
-				const newMissile = missileCruiser.tryShoot(gameTime);
-				if (newMissile) {
-					cruiserMissiles.push(newMissile);
-					playSoundEffect('missile_launcher', 0.3);
-				}
+
+			// Update all projectiles
+			for (const projectile of playerProjectiles) {
+				projectile.update();
 			}
-			for (const asteroid of asteroids) {
-				asteroid.update(deltaTime);
-			}
-			for (const asteroidSpawn of asteroidSpawns) {
-				asteroidSpawn.update(deltaTime);
-			}
-			for (const shot of shots) {
-				shot.update();
-			}
-			for (const alienShot of alienFighterShots) {
-				alienShot.update();
-			}
-			for (const missile of cruiserMissiles) {
-				missile.update();
+			for (const projectile of npcProjectiles) {
+				projectile.update();
 			}
 
 			// Update particles
@@ -905,205 +863,118 @@
 			}
 
 			// Collision detection
-			const aliensToRemove = new Set();
-			const alienScoutsToRemove = new Set();
-			const alienFightersToRemove = new Set();
-			const missileCruisersToRemove = new Set();
-			const shotsToRemove = new Set();
-			const alienShotsToRemove = new Set();
-			const missilesToRemove = new Set();
+			const npcsToRemove = new Set();
+			const playerProjectilesToRemove = new Set();
+			const npcProjectilesToRemove = new Set();
 
-			// Check shot-alien collisions
-			for (const shot of shots) {
-				for (const alien of aliens) {
-					if (checkCollision(shot, alien)) {
-						aliensToRemove.add(alien);
-						shotsToRemove.add(shot);
-						score += alien.scoreValue;
-						playSoundEffect('explosion', 0.5);
+			// Check player shot collisions with all NPCs (unified loop)
+			for (const shot of playerProjectiles) {
+				for (const npc of npcs) {
+					if (checkCollision(shot, npc)) {
+						playerProjectilesToRemove.add(shot);
 						particleSystem.spawnImpact(shot.sprite.position);
-						particleSystem.spawnExplosion(alien.sprite.position);
-					}
-				}
-			}
 
-			// Check shot-alienScout collisions
-			for (const shot of shots) {
-				for (const alienScout of alienScouts) {
-					if (checkCollision(shot, alienScout)) {
-						alienScoutsToRemove.add(alienScout);
-						shotsToRemove.add(shot);
-						score += alienScout.scoreValue;
-						playSoundEffect('explosion', 0.5);
-						particleSystem.spawnImpact(shot.sprite.position);
-						particleSystem.spawnExplosion(alienScout.sprite.position);
-					}
-				}
-			}
-
-			// Check shot-alienFighter collisions
-			for (const shot of shots) {
-				for (const alienFighter of alienFighters) {
-					if (checkCollision(shot, alienFighter)) {
-						alienFightersToRemove.add(alienFighter);
-						shotsToRemove.add(shot);
-						score += alienFighter.scoreValue;
-						playSoundEffect('explosion', 0.5);
-						particleSystem.spawnImpact(shot.sprite.position);
-						particleSystem.spawnExplosion(alienFighter.sprite.position);
-					}
-				}
-			}
-
-			// Check shot-missileCruiser collisions
-			for (const shot of shots) {
-				for (const missileCruiser of missileCruisers) {
-					if (checkCollision(shot, missileCruiser)) {
-						shotsToRemove.add(shot);
-						missileCruiser.health -= shot.damage;
-						particleSystem.spawnImpact(shot.sprite.position);
-						if (missileCruiser.health <= 0) {
-							missileCruisersToRemove.add(missileCruiser);
-							score += missileCruiser.scoreValue;
-							playSoundEffect('explosion', 0.6);
-							particleSystem.spawnExplosion(missileCruiser.sprite.position);
+						// Handle different NPC types
+						if (npc instanceof MissileCruiser) {
+							// Multi-hit enemy
+							npc.health -= shot.damage;
+							if (npc.health <= 0) {
+								npcsToRemove.add(npc);
+								score += npc.scoreValue;
+								playSoundEffect('explosion', 0.6);
+								particleSystem.spawnExplosion(npc.sprite.position);
+							} else {
+								playSoundEffect('hit', 0.4);
+							}
+						} else if (npc instanceof Asteroid) {
+							// Multi-hit asteroid that spawns smaller versions
+							npc.health -= 1;
+							if (npc.health <= 0) {
+								npcsToRemove.add(npc);
+								score += npc.scoreValue;
+								playSoundEffect('explosion', 0.5);
+								particleSystem.spawnExplosion(npc.sprite.position);
+								// Spawn 3 smaller asteroids
+								const spawns = AsteroidSpawn.createSpawnsFromAsteroid(npc, canvas.width, canvas.height);
+								npcs.push(...spawns);
+							} else {
+								playSoundEffect('hit', 0.4);
+							}
+						} else if (npc instanceof AsteroidSpawn) {
+							// Single-hit asteroid spawn (different particle color)
+							npcsToRemove.add(npc);
+							score += npc.scoreValue;
+							playSoundEffect('explosion', 0.3);
+							particleSystem.spawnExplosion(npc.sprite.position, "255, 150, 50");
 						} else {
-							playSoundEffect('hit', 0.4);
-						}
-					}
-				}
-			}
-
-			// Check shot-asteroid collisions
-			const asteroidsToRemove = new Set();
-			for (const shot of shots) {
-				for (const asteroid of asteroids) {
-					if (checkCollision(shot, asteroid)) {
-						shotsToRemove.add(shot);
-						asteroid.health -= 1;
-						particleSystem.spawnImpact(shot.sprite.position);
-						if (asteroid.health <= 0) {
-							asteroidsToRemove.add(asteroid);
-							score += asteroid.scoreValue;
+							// Single-hit enemies (AlienScout, AlienFighter, etc.)
+							npcsToRemove.add(npc);
+							score += npc.scoreValue;
 							playSoundEffect('explosion', 0.5);
-							particleSystem.spawnExplosion(asteroid.sprite.position);
-							// Spawn 3 smaller asteroids
-							const spawns = AsteroidSpawn.createSpawnsFromAsteroid(asteroid, canvas.width, canvas.height);
-							asteroidSpawns.push(...spawns);
-						} else {
-							playSoundEffect('hit', 0.4);
+							particleSystem.spawnExplosion(npc.sprite.position);
 						}
 					}
 				}
 			}
 
-			// Check shot-asteroidSpawn collisions
-			const asteroidSpawnsToRemove = new Set();
-			for (const shot of shots) {
-				for (const asteroidSpawn of asteroidSpawns) {
-					if (checkCollision(shot, asteroidSpawn)) {
-						shotsToRemove.add(shot);
-						asteroidSpawnsToRemove.add(asteroidSpawn);
-						score += asteroidSpawn.scoreValue;
-						playSoundEffect('explosion', 0.3);
-						particleSystem.spawnImpact(shot.sprite.position);
-						particleSystem.spawnExplosion(asteroidSpawn.sprite.position, "255, 150, 50");
+			// Check player-NPC collisions (unified loop)
+			for (const npc of npcs) {
+				if (checkCollision(player, npc)) {
+					npcsToRemove.add(npc);
+					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
+					particleSystem.spawnExplosion(npc.sprite.position,
+						npc instanceof AsteroidSpawn ? "255, 150, 50" : undefined);
+
+					// Damage calculation based on NPC type
+					let damage;
+					let soundEffect;
+					let soundVolume;
+					if (npc instanceof Asteroid) {
+						damage = 50;
+						soundEffect = 'hit';
+						soundVolume = 0.6;
+						console.log(`Player hit by asteroid! Health: ${player.health - damage}`);
+					} else if (npc instanceof AsteroidSpawn) {
+						damage = 25;
+						soundEffect = 'hit';
+						soundVolume = 0.4;
+						console.log(`Player hit by small asteroid! Health: ${player.health - damage}`);
+					} else if (npc instanceof MissileCruiser) {
+						damage = npc.health;
+						soundEffect = 'hit';
+						soundVolume = 0.7;
+						console.log(`Player hit by missile cruiser! Health: ${player.health - damage}`);
+					} else {
+						// AlienScout, AlienFighter, etc.
+						damage = npc.health;
+						soundEffect = 'hit';
+						soundVolume = 0.6;
+						console.log(`Player hit! Health: ${player.health - damage}`);
 					}
+
+					player.health -= damage;
+					playSoundEffect(soundEffect, soundVolume);
 				}
 			}
 
-			// Check player-alien collisions
-			for (const alien of aliens) {
-				if (checkCollision(player, alien)) {
-					aliensToRemove.add(alien);
-					player.health -= alien.health; // Damage player by alien's health value
-					console.log(`Player hit! Health: ${player.health}`);
-					playSoundEffect('hit', 0.6);
+			// Check NPC projectile-player collisions (unified loop)
+			for (const projectile of npcProjectiles) {
+				if (checkCollision(player, projectile)) {
+					npcProjectilesToRemove.add(projectile);
 					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(alien.sprite.position);
-				}
-			}
 
-			// Check player-alienScout collisions
-			for (const alienScout of alienScouts) {
-				if (checkCollision(player, alienScout)) {
-					alienScoutsToRemove.add(alienScout);
-					player.health -= alienScout.health; // Damage player by alien scout's health value
-					console.log(`Player hit by alien scout! Health: ${player.health}`);
-					playSoundEffect('hit', 0.6);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(alienScout.sprite.position);
-				}
-			}
-
-			// Check player-alienFighter collisions
-			for (const alienFighter of alienFighters) {
-				if (checkCollision(player, alienFighter)) {
-					alienFightersToRemove.add(alienFighter);
-					player.health -= alienFighter.health; // Damage player by alien fighter's health value
-					console.log(`Player hit by alien fighter! Health: ${player.health}`);
-					playSoundEffect('hit', 0.6);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(alienFighter.sprite.position);
-				}
-			}
-
-			// Check player-missileCruiser collisions
-			for (const missileCruiser of missileCruisers) {
-				if (checkCollision(player, missileCruiser)) {
-					missileCruisersToRemove.add(missileCruiser);
-					player.health -= missileCruiser.health; // Damage player by missile cruiser's health value
-					console.log(`Player hit by missile cruiser! Health: ${player.health}`);
-					playSoundEffect('hit', 0.7);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(missileCruiser.sprite.position);
-				}
-			}
-
-			// Check player-asteroid collisions
-			for (const asteroid of asteroids) {
-				if (checkCollision(player, asteroid)) {
-					asteroidsToRemove.add(asteroid);
-					player.health -= 50; // Asteroids deal fixed damage
-					console.log(`Player hit by asteroid! Health: ${player.health}`);
-					playSoundEffect('hit', 0.6);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(asteroid.sprite.position);
-				}
-			}
-
-			// Check player-asteroidSpawn collisions
-			for (const asteroidSpawn of asteroidSpawns) {
-				if (checkCollision(player, asteroidSpawn)) {
-					asteroidSpawnsToRemove.add(asteroidSpawn);
-					player.health -= 25; // Small asteroids deal less damage
-					console.log(`Player hit by small asteroid! Health: ${player.health}`);
-					playSoundEffect('hit', 0.4);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(asteroidSpawn.sprite.position, "255, 150, 50");
-				}
-			}
-
-			// Check alienFighterShots-player collisions
-			for (const alienShot of alienFighterShots) {
-				if (checkCollision(player, alienShot)) {
-					alienShotsToRemove.add(alienShot);
-					player.health -= 25; // Alien shots deal 25 damage
-					console.log(`Player hit by alien shot! Health: ${player.health}`);
-					playSoundEffect('hit', 0.5);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-				}
-			}
-
-			// Check missile-player collisions
-			for (const missile of cruiserMissiles) {
-				if (checkCollision(player, missile)) {
-					missilesToRemove.add(missile);
-					player.health -= missile.damage; // Missiles deal 50 damage
-					console.log(`Player hit by missile! Health: ${player.health}`);
-					playSoundEffect('explosion', 0.6);
-					particleSystem.spawnImpact(player.sprite.position, "200, 100, 255");
-					particleSystem.spawnExplosion(missile.sprite.position, "255, 100, 50");
+					// Damage depends on projectile type
+					if (projectile instanceof Missile) {
+						player.health -= projectile.damage; // 50 damage
+						console.log(`Player hit by missile! Health: ${player.health}`);
+						playSoundEffect('explosion', 0.6);
+						particleSystem.spawnExplosion(projectile.sprite.position, "255, 100, 50");
+					} else {
+						// Plasma shots deal 25 damage
+						player.health -= 25;
+						console.log(`Player hit by alien shot! Health: ${player.health}`);
+						playSoundEffect('hit', 0.5);
+					}
 				}
 			}
 
@@ -1116,16 +987,10 @@
 				playSoundEffect('achievement', 0.5); // Play a sound effect
 			}
 
-			// Remove collided entities
-			aliens = aliens.filter(alien => !aliensToRemove.has(alien));
-			alienScouts = alienScouts.filter(alienScout => !alienScoutsToRemove.has(alienScout));
-			alienFighters = alienFighters.filter(alienFighter => !alienFightersToRemove.has(alienFighter));
-			missileCruisers = missileCruisers.filter(missileCruiser => !missileCruisersToRemove.has(missileCruiser));
-			asteroids = asteroids.filter(asteroid => !asteroidsToRemove.has(asteroid));
-			asteroidSpawns = asteroidSpawns.filter(asteroidSpawn => !asteroidSpawnsToRemove.has(asteroidSpawn));
-			shots = shots.filter(shot => !shotsToRemove.has(shot));
-			alienFighterShots = alienFighterShots.filter(alienShot => !alienShotsToRemove.has(alienShot));
-			cruiserMissiles = cruiserMissiles.filter(missile => !missilesToRemove.has(missile));
+			// Remove collided entities (unified filtering)
+			npcs = npcs.filter(npc => !npcsToRemove.has(npc));
+			playerProjectiles = playerProjectiles.filter(projectile => !playerProjectilesToRemove.has(projectile));
+			npcProjectiles = npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
 
 			// Check for game over
 			if (player.health <= 0) {
@@ -1137,123 +1002,31 @@
 			const wrapDistance = GameConfig.WORLD.NPC_WRAP_DISTANCE; // Minimap range - wrap NPCs at this distance
 			const despawnDistance = Math.max(canvas.width, canvas.height) * GameConfig.WORLD.PROJECTILE_DESPAWN_MULTIPLIER; // Despawn projectiles
 
-			// Wrap aliens around minimap edges
-			for (const alien of aliens) {
-				const offsetX = alien.sprite.position.x - player.sprite.position.x;
-				const offsetY = alien.sprite.position.y - player.sprite.position.y;
+			// Wrap all NPCs around minimap edges (unified loop)
+			for (const npc of npcs) {
+				const offsetX = npc.sprite.position.x - player.sprite.position.x;
+				const offsetY = npc.sprite.position.y - player.sprite.position.y;
 
 				if (offsetX > wrapDistance) {
-					alien.sprite.position.x = player.sprite.position.x - wrapDistance;
+					npc.sprite.position.x = player.sprite.position.x - wrapDistance;
 				} else if (offsetX < -wrapDistance) {
-					alien.sprite.position.x = player.sprite.position.x + wrapDistance;
+					npc.sprite.position.x = player.sprite.position.x + wrapDistance;
 				}
 
 				if (offsetY > wrapDistance) {
-					alien.sprite.position.y = player.sprite.position.y - wrapDistance;
+					npc.sprite.position.y = player.sprite.position.y - wrapDistance;
 				} else if (offsetY < -wrapDistance) {
-					alien.sprite.position.y = player.sprite.position.y + wrapDistance;
+					npc.sprite.position.y = player.sprite.position.y + wrapDistance;
 				}
 			}
 
-			// Wrap alien scouts around minimap edges
-			for (const alienScout of alienScouts) {
-				const offsetX = alienScout.sprite.position.x - player.sprite.position.x;
-				const offsetY = alienScout.sprite.position.y - player.sprite.position.y;
-
-				if (offsetX > wrapDistance) {
-					alienScout.sprite.position.x = player.sprite.position.x - wrapDistance;
-				} else if (offsetX < -wrapDistance) {
-					alienScout.sprite.position.x = player.sprite.position.x + wrapDistance;
-				}
-
-				if (offsetY > wrapDistance) {
-					alienScout.sprite.position.y = player.sprite.position.y - wrapDistance;
-				} else if (offsetY < -wrapDistance) {
-					alienScout.sprite.position.y = player.sprite.position.y + wrapDistance;
-				}
-			}
-
-			// Wrap alien fighters around minimap edges
-			for (const alienFighter of alienFighters) {
-				const offsetX = alienFighter.sprite.position.x - player.sprite.position.x;
-				const offsetY = alienFighter.sprite.position.y - player.sprite.position.y;
-
-				if (offsetX > wrapDistance) {
-					alienFighter.sprite.position.x = player.sprite.position.x - wrapDistance;
-				} else if (offsetX < -wrapDistance) {
-					alienFighter.sprite.position.x = player.sprite.position.x + wrapDistance;
-				}
-
-				if (offsetY > wrapDistance) {
-					alienFighter.sprite.position.y = player.sprite.position.y - wrapDistance;
-				} else if (offsetY < -wrapDistance) {
-					alienFighter.sprite.position.y = player.sprite.position.y + wrapDistance;
-				}
-			}
-
-			// Wrap missile cruisers around minimap edges
-			for (const missileCruiser of missileCruisers) {
-				const offsetX = missileCruiser.sprite.position.x - player.sprite.position.x;
-				const offsetY = missileCruiser.sprite.position.y - player.sprite.position.y;
-
-				if (offsetX > wrapDistance) {
-					missileCruiser.sprite.position.x = player.sprite.position.x - wrapDistance;
-				} else if (offsetX < -wrapDistance) {
-					missileCruiser.sprite.position.x = player.sprite.position.x + wrapDistance;
-				}
-
-				if (offsetY > wrapDistance) {
-					missileCruiser.sprite.position.y = player.sprite.position.y - wrapDistance;
-				} else if (offsetY < -wrapDistance) {
-					missileCruiser.sprite.position.y = player.sprite.position.y + wrapDistance;
-				}
-			}
-
-			// Wrap asteroids around minimap edges
-			for (const asteroid of asteroids) {
-				const offsetX = asteroid.sprite.position.x - player.sprite.position.x;
-				const offsetY = asteroid.sprite.position.y - player.sprite.position.y;
-
-				if (offsetX > wrapDistance) {
-					asteroid.sprite.position.x = player.sprite.position.x - wrapDistance;
-				} else if (offsetX < -wrapDistance) {
-					asteroid.sprite.position.x = player.sprite.position.x + wrapDistance;
-				}
-
-				if (offsetY > wrapDistance) {
-					asteroid.sprite.position.y = player.sprite.position.y - wrapDistance;
-				} else if (offsetY < -wrapDistance) {
-					asteroid.sprite.position.y = player.sprite.position.y + wrapDistance;
-				}
-			}
-
-			// Wrap asteroid spawns around minimap edges
-			for (const asteroidSpawn of asteroidSpawns) {
-				const offsetX = asteroidSpawn.sprite.position.x - player.sprite.position.x;
-				const offsetY = asteroidSpawn.sprite.position.y - player.sprite.position.y;
-
-				if (offsetX > wrapDistance) {
-					asteroidSpawn.sprite.position.x = player.sprite.position.x - wrapDistance;
-				} else if (offsetX < -wrapDistance) {
-					asteroidSpawn.sprite.position.x = player.sprite.position.x + wrapDistance;
-				}
-
-				if (offsetY > wrapDistance) {
-					asteroidSpawn.sprite.position.y = player.sprite.position.y - wrapDistance;
-				} else if (offsetY < -wrapDistance) {
-					asteroidSpawn.sprite.position.y = player.sprite.position.y + wrapDistance;
-				}
-			}
-			shots = shots.filter(shot => {
-				const distance = shot.sprite.position.dist(player.sprite.position);
+			// Despawn projectiles that are too far from player (unified filtering)
+			playerProjectiles = playerProjectiles.filter(projectile => {
+				const distance = projectile.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
-			alienFighterShots = alienFighterShots.filter(alienShot => {
-				const distance = alienShot.sprite.position.dist(player.sprite.position);
-				return distance < despawnDistance;
-			});
-			cruiserMissiles = cruiserMissiles.filter(missile => {
-				const distance = missile.sprite.position.dist(player.sprite.position);
+			npcProjectiles = npcProjectiles.filter(projectile => {
+				const distance = projectile.sprite.position.dist(player.sprite.position);
 				return distance < despawnDistance;
 			});
 

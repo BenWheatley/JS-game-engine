@@ -62,32 +62,23 @@ class Minimap {
   /**
    * Draws asteroids on the minimap
    * @param {CanvasRenderingContext2D} context - Canvas rendering context
-   * @param {Array} asteroids - Array of Asteroid entities
-   * @param {Array} asteroidSpawns - Array of AsteroidSpawn entities
+   * @param {Array} npcs - Array of all NPCs (will filter for asteroids)
    * @param {Vector2D} playerPos - Player position
    */
-  drawAsteroids(context, asteroids, asteroidSpawns, playerPos) {
+  drawAsteroids(context, npcs, playerPos) {
     context.fillStyle = GameConfig.MINIMAP.ASTEROID_COLOR;
 
-    // Large asteroids
-    for (const asteroid of asteroids) {
-      const pos = this.worldToMinimap(asteroid.sprite.position, playerPos);
-      if (this.isOnMinimap(pos)) {
-        const halfSize = GameConfig.MINIMAP.ENEMY_SIZE_LARGE / 2;
-        context.fillRect(pos.x - halfSize, pos.y - halfSize,
-                        GameConfig.MINIMAP.ENEMY_SIZE_LARGE,
-                        GameConfig.MINIMAP.ENEMY_SIZE_LARGE);
-      }
-    }
-
-    // Small asteroid spawns
-    for (const asteroidSpawn of asteroidSpawns) {
-      const pos = this.worldToMinimap(asteroidSpawn.sprite.position, playerPos);
-      if (this.isOnMinimap(pos)) {
-        const halfSize = GameConfig.MINIMAP.ENEMY_SIZE_SMALL / 2;
-        context.fillRect(pos.x - halfSize, pos.y - halfSize,
-                        GameConfig.MINIMAP.ENEMY_SIZE_SMALL,
-                        GameConfig.MINIMAP.ENEMY_SIZE_SMALL);
+    for (const npc of npcs) {
+      // Only draw asteroids and asteroid spawns
+      if (npc instanceof Asteroid || npc instanceof AsteroidSpawn) {
+        const pos = this.worldToMinimap(npc.sprite.position, playerPos);
+        if (this.isOnMinimap(pos)) {
+          const size = npc instanceof Asteroid ?
+                      GameConfig.MINIMAP.ENEMY_SIZE_LARGE :
+                      GameConfig.MINIMAP.ENEMY_SIZE_SMALL;
+          const halfSize = size / 2;
+          context.fillRect(pos.x - halfSize, pos.y - halfSize, size, size);
+        }
       }
     }
   }
@@ -95,24 +86,22 @@ class Minimap {
   /**
    * Draws enemies on the minimap
    * @param {CanvasRenderingContext2D} context - Canvas rendering context
-   * @param {Array} aliens - Array of Alien entities
-   * @param {Array} alienScouts - Array of AlienScout entities
-   * @param {Array} alienFighters - Array of AlienFighter entities
-   * @param {Array} missileCruisers - Array of MissileCruiser entities
+   * @param {Array} npcs - Array of all NPCs (will filter for enemies)
    * @param {Vector2D} playerPos - Player position
    */
-  drawEnemies(context, aliens, alienScouts, alienFighters, missileCruisers, playerPos) {
+  drawEnemies(context, npcs, playerPos) {
     context.fillStyle = GameConfig.MINIMAP.ENEMY_COLOR;
     const halfSize = GameConfig.MINIMAP.ENEMY_SIZE_LARGE / 2;
 
-    // Draw all enemy types
-    const allEnemies = [...aliens, ...alienScouts, ...alienFighters, ...missileCruisers];
-    for (const enemy of allEnemies) {
-      const pos = this.worldToMinimap(enemy.sprite.position, playerPos);
-      if (this.isOnMinimap(pos)) {
-        context.fillRect(pos.x - halfSize, pos.y - halfSize,
-                        GameConfig.MINIMAP.ENEMY_SIZE_LARGE,
-                        GameConfig.MINIMAP.ENEMY_SIZE_LARGE);
+    for (const npc of npcs) {
+      // Only draw enemies (not asteroids)
+      if (npc instanceof AlienScout || npc instanceof AlienFighter || npc instanceof MissileCruiser) {
+        const pos = this.worldToMinimap(npc.sprite.position, playerPos);
+        if (this.isOnMinimap(pos)) {
+          context.fillRect(pos.x - halfSize, pos.y - halfSize,
+                          GameConfig.MINIMAP.ENEMY_SIZE_LARGE,
+                          GameConfig.MINIMAP.ENEMY_SIZE_LARGE);
+        }
       }
     }
   }
@@ -156,7 +145,7 @@ class Minimap {
   /**
    * Draws the complete minimap
    * @param {CanvasRenderingContext2D} context - Canvas rendering context
-   * @param {Object} entities - Object containing all entity arrays
+   * @param {Object} entities - Object containing npcs array and wormhole
    * @param {Vector2D} playerPos - Player position
    */
   draw(context, entities, playerPos) {
@@ -165,9 +154,8 @@ class Minimap {
     context.fillRect(this.x, this.y, this.size, this.size);
 
     // Draw entities
-    this.drawAsteroids(context, entities.asteroids, entities.asteroidSpawns, playerPos);
-    this.drawEnemies(context, entities.aliens, entities.alienScouts,
-                    entities.alienFighters, entities.missileCruisers, playerPos);
+    this.drawAsteroids(context, entities.npcs, playerPos);
+    this.drawEnemies(context, entities.npcs, playerPos);
     this.drawWormhole(context, entities.wormhole, playerPos);
     this.drawPlayer(context);
 
