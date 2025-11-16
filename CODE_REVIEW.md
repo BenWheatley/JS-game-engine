@@ -7,19 +7,18 @@
 ## High Priority Issues
 
 ### 1. Monolithic Main File
-**File:** skeleton.html (~1100 lines)
+**File:** skeleton.html (~1000 lines)
 **Status:** IN PROGRESS
 
 Game loop, state management, collision detection, rendering, and configuration still mixed in one HTML file.
 
-**Recommendation:** Continue extraction started with HighScoreManager:
+**Recommendation:** Continue extraction (HighScoreManager and SpawnSystem completed):
 
 **Next Priority Extractions:**
-1. **SpawnSystem.js** - getOffscreenSpawnPosition, spawnWave, getWaveDefinition
-2. **CollisionSystem.js** - All collision detection and damage handling
-3. **Renderer.js** - Draw loops, camera transforms, HUD rendering
-4. **GameState.js** - Encapsulate player, npcs, projectiles, score, level, etc.
-5. **InputHandler.js** - Keyboard and gamepad input processing
+1. **CollisionSystem.js** - All collision detection and damage handling
+2. **Renderer.js** - Draw loops, camera transforms, HUD rendering
+3. **GameState.js** - Encapsulate player, npcs, projectiles, score, level, etc.
+4. **InputHandler.js** - Keyboard and gamepad input processing
 
 ---
 
