@@ -417,20 +417,8 @@
 		function render() {
 			if (loading()) { return; }
 
-			if (gameState.currentState === GameState.States.PLAYING ||
-			    gameState.currentState === GameState.States.PAUSED) {
-				// Render game (visible during gameplay and behind pause menu)
-				renderGame();
-			} else {
-				// Render menu background
-				renderMenuBackground();
-			}
-		}
-
-		function renderMenuBackground() {
-			// Clear screen - menu background is handled by CSS
-			context.fillStyle = '#000000';
-			context.fillRect(0, 0, canvas.width, canvas.height);
+			// Always render game - menus overlay via CSS
+			renderGame();
 		}
 
 		function renderGame() {
