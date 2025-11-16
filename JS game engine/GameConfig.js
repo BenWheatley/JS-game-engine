@@ -118,7 +118,9 @@ const GameConfig = {
     FORWARD_ACCELERATION: 0.0016,       // 2x AlienScout
     MAX_SPEED: 0.10,                    // 2x AlienScout
     ROTATIONAL_SPEED: Math.PI / 600,    // 2x AlienScout
-    SHOT_COOLDOWN: 2000                 // Milliseconds between shots
+    SHOT_COOLDOWN: 2000,                // Milliseconds between shots
+    SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
+    SHOOT_VOLUME: 0.2                   // Volume for shoot sound (0.0 - 1.0)
   },
 
   // Missile Cruiser - Heavy enemy that fires homing missiles
@@ -131,7 +133,9 @@ const GameConfig = {
     FORWARD_ACCELERATION: 0.0004,       // Slower than AlienScout
     MAX_SPEED: 0.04,                    // Slower than AlienScout
     ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
-    SHOT_COOLDOWN: 4000                 // Milliseconds between missile launches
+    SHOT_COOLDOWN: 4000,                // Milliseconds between missile launches
+    SHOOT_SOUND: 'missile_launcher',    // Sound effect to play when shooting
+    SHOOT_VOLUME: 0.3                   // Volume for shoot sound (0.0 - 1.0)
   },
 
   // Alien Saucer - Flying saucer with ease-in-out movement
@@ -142,7 +146,9 @@ const GameConfig = {
     HEALTH: 150,
     SCORE_VALUE: 250,
     MOVEMENT_DURATION: 3000,            // Milliseconds to reach target (3 seconds)
-    STOP_DURATION: 2000                 // Milliseconds to stay stopped (2 seconds)
+    STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
+    SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
+    SHOOT_VOLUME: 0.3                   // Volume for shoot sound (0.0 - 1.0)
   },
 
   // Asteroid - Large destructible obstacle

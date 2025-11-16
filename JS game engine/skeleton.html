@@ -613,25 +613,14 @@
 					npc.update(deltaTime, gameState.player.sprite.position);
 				}
 
-				// Handle NPC shooting
-				if (npc instanceof AlienFighter) {
-					const newShot = npc.tryShoot(gameState.gameTime);
-					if (newShot) {
-						gameState.npcProjectiles.push(newShot);
-						playSoundEffect('shoot', 0.2); // Quieter than player shots
-					}
-				} else if (npc instanceof MissileCruiser) {
-					const newMissile = npc.tryShoot(gameState.gameTime);
-					if (newMissile) {
-						gameState.npcProjectiles.push(newMissile);
-						playSoundEffect('missile_launcher', 0.3);
-					}
-				} else if (npc instanceof AlienSaucer) {
-					const newShots = npc.tryShoot(gameState.gameTime);
-					if (newShots) {
-						// Saucer fires a ring of 8 shots
-						gameState.npcProjectiles.push(...newShots);
-						playSoundEffect('shoot', 0.3);
+				// Handle NPC shooting (unified)
+				if (npc.tryShoot) {
+					const shootResult = npc.tryShoot(gameState.gameTime);
+					if (shootResult) {
+						gameState.npcProjectiles.push(...shootResult.shots);
+						if (shootResult.sound) {
+							playSoundEffect(shootResult.sound, shootResult.volume);
+						}
 					}
 				}
 			}

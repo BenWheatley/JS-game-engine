@@ -154,7 +154,7 @@ class AlienSaucer extends NPC {
    * Check if saucer should fire this frame
    * Fires a ring of 8 plasma bolts 1 second after stopping
    * @param {number} gameTime - Current game time
-   * @returns {Array|null} Array of Plasma shots, or null if not firing
+   * @returns {Object|null} Object with sound, volume, and shots array, or null if not firing
    */
   tryShoot(gameTime) {
     // Fire 1 second after stopping (only once per cycle)
@@ -162,7 +162,11 @@ class AlienSaucer extends NPC {
         !this.hasFiredThisCycle &&
         this.stoppedElapsed >= 1000) {
       this.hasFiredThisCycle = true;
-      return this.fireRing();
+      return {
+        sound: GameConfig.ALIEN_SAUCER.SHOOT_SOUND,
+        volume: GameConfig.ALIEN_SAUCER.SHOOT_VOLUME,
+        shots: this.fireRing()
+      };
     }
     return null;
   }

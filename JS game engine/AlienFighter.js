@@ -120,7 +120,11 @@ class AlienFighter extends NPC {
         shotVelocity
       );
 
-      return newShot;
+      return {
+        sound: GameConfig.ALIEN_FIGHTER.SHOOT_SOUND,
+        volume: GameConfig.ALIEN_FIGHTER.SHOOT_VOLUME,
+        shots: [newShot]
+      };
     }
     return null;
   }

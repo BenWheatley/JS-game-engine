@@ -120,7 +120,11 @@ class MissileCruiser extends NPC {
         missileVelocity
       );
 
-      return newMissile;
+      return {
+        sound: GameConfig.MISSILE_CRUISER.SHOOT_SOUND,
+        volume: GameConfig.MISSILE_CRUISER.SHOOT_VOLUME,
+        shots: [newMissile]
+      };
     }
     return null;
   }
