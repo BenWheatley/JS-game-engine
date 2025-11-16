@@ -43,6 +43,57 @@ const GameConfig = {
     GAMEPAD_DEADZONE: 0.15              // Analog stick deadzone to prevent drift
   },
 
+  // Upgrade progression tables
+  UPGRADES: {
+    // Weapon upgrades - affects fire rate, projectile count, and spread
+    // Each level: { fireRate, shotCount, spreadAngle (in degrees) }
+    WEAPON: [
+      { fireRate: 500, shotCount: 1, spreadAngle: 0 },    // Level 0 (starting)
+      { fireRate: 400, shotCount: 1, spreadAngle: 0 },    // Level 1: Faster fire
+      { fireRate: 400, shotCount: 2, spreadAngle: 5 },    // Level 2: Dual shot
+      { fireRate: 300, shotCount: 2, spreadAngle: 5 },    // Level 3: Even faster
+      { fireRate: 300, shotCount: 3, spreadAngle: 10 },   // Level 4: Triple shot
+      { fireRate: 200, shotCount: 3, spreadAngle: 10 },   // Level 5: Rapid fire
+      { fireRate: 200, shotCount: 4, spreadAngle: 15 },   // Level 6: Quad shot
+      { fireRate: 150, shotCount: 4, spreadAngle: 15 },   // Level 7: Max fire rate
+      { fireRate: 150, shotCount: 5, spreadAngle: 20 },   // Level 8: Penta shot
+      { fireRate: 100, shotCount: 5, spreadAngle: 20 },   // Level 9: Ultra rapid
+      { fireRate: 100, shotCount: 5, spreadAngle: 25 }    // Level 10: Ultimate weapon
+    ],
+
+    // Engine upgrades - affects movement stats
+    // Each level: { maxSpeedMultiplier, accelerationMultiplier, rotationMultiplier }
+    ENGINE: [
+      { maxSpeedMultiplier: 1.0, accelerationMultiplier: 1.0, rotationMultiplier: 1.0 },     // Level 0
+      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.0, rotationMultiplier: 1.0 },     // Level 1: +20% speed
+      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.0, rotationMultiplier: 1.2 },     // Level 2: +20% turn
+      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.2, rotationMultiplier: 1.2 },     // Level 3: +20% accel
+      { maxSpeedMultiplier: 1.44, accelerationMultiplier: 1.2, rotationMultiplier: 1.2 },    // Level 4: +20% speed
+      { maxSpeedMultiplier: 1.44, accelerationMultiplier: 1.2, rotationMultiplier: 1.44 },   // Level 5: +20% turn
+      { maxSpeedMultiplier: 1.44, accelerationMultiplier: 1.44, rotationMultiplier: 1.44 },  // Level 6: +20% accel
+      { maxSpeedMultiplier: 1.728, accelerationMultiplier: 1.44, rotationMultiplier: 1.44 }, // Level 7: +20% speed
+      { maxSpeedMultiplier: 1.728, accelerationMultiplier: 1.44, rotationMultiplier: 1.728 },// Level 8: +20% turn
+      { maxSpeedMultiplier: 1.728, accelerationMultiplier: 1.728, rotationMultiplier: 1.728 },// Level 9: +20% accel
+      { maxSpeedMultiplier: 2.074, accelerationMultiplier: 2.074, rotationMultiplier: 2.074 } // Level 10: Final boost
+    ],
+
+    // Shield upgrades - affects max health and regeneration
+    // Each level: { maxHealth, regenRate (HP/sec), regenDelay (seconds) }
+    SHIELD: [
+      { maxHealth: 100, regenRate: 0, regenDelay: 0 },      // Level 0 (no regen)
+      { maxHealth: 150, regenRate: 0, regenDelay: 0 },      // Level 1: +50 max HP
+      { maxHealth: 150, regenRate: 1, regenDelay: 3 },      // Level 2: Health regen starts
+      { maxHealth: 200, regenRate: 1, regenDelay: 3 },      // Level 3: +50 max HP
+      { maxHealth: 200, regenRate: 2, regenDelay: 2.5 },    // Level 4: Better regen
+      { maxHealth: 250, regenRate: 2, regenDelay: 2.5 },    // Level 5: +50 max HP
+      { maxHealth: 250, regenRate: 3, regenDelay: 2 },      // Level 6: Better regen
+      { maxHealth: 300, regenRate: 3, regenDelay: 2 },      // Level 7: +50 max HP
+      { maxHealth: 300, regenRate: 4, regenDelay: 1.5 },    // Level 8: Better regen
+      { maxHealth: 350, regenRate: 4, regenDelay: 1.5 },    // Level 9: +50 max HP
+      { maxHealth: 400, regenRate: 5, regenDelay: 1 }       // Level 10: Ultimate shield
+    ]
+  },
+
   // HUD display configuration
   HUD: {
     HEALTH_BAR_WIDTH: 100,              // Health bar width in pixels
