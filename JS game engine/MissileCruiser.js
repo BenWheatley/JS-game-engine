@@ -141,23 +141,60 @@ class MissileCruiser extends NPC {
     if (gameTime - this.lastShotTime > GameConfig.MISSILE_CRUISER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;
 
-      // Fire missile directly forward
-      const missileVelocity = Vector2D.fromRadial(this.sprite.rotation, Missile.speed);
-      const newMissile = new Missile(
-        new Vector2D(
-          this.sprite.position.x,
-          this.sprite.position.y
-        ),
-        missileVelocity
-      );
+      try {
+        // Fire missile directly forward
+        const missileVelocity = Vector2D.fromRadial(this.sprite.rotation, Missile.speed);
+        const newMissile = new Missile(
+          new Vector2D(
+            this.sprite.position.x,
+            this.sprite.position.y
+          ),
+          missileVelocity
+        );
 
-      return {
-        sound: GameConfig.MISSILE_CRUISER.SHOOT_SOUND,
-        volume: GameConfig.MISSILE_CRUISER.SHOOT_VOLUME,
-        shots: [newMissile]
-      };
+        return {
+          sound: GameConfig.MISSILE_CRUISER.SHOOT_SOUND,
+          volume: GameConfig.MISSILE_CRUISER.SHOOT_VOLUME,
+          shots: [newMissile]
+        };
+      } catch (error) {
+        DebugLogger.error('MissileCruiser tryShoot error:', error);
+        return null;
+      }
     }
     return null;
+  }
+
+  draw() {
+    // Draw sprite first
+    super.draw();
+
+    // Draw health bar above the ship
+    const context = Sprite._context;
+    if (!context) return;
+
+    const maxHealth = GameConfig.MISSILE_CRUISER.HEALTH;
+    const healthPercentage = Math.max(0, Math.min(1, this.health / maxHealth));
+
+    // Health bar dimensions
+    const barWidth = 60;
+    const barHeight = 6;
+    const barX = this.sprite.position.x - barWidth / 2;
+    const barY = this.sprite.position.y - this.sprite.size.y / 2 - 12; // 12 pixels above sprite
+
+    // Draw background (red - shows damage)
+    context.fillStyle = GameConfig.HUD.HEALTH_BAR_BG_COLOR;
+    context.fillRect(barX, barY, barWidth, barHeight);
+
+    // Draw foreground (green - shows current health)
+    const currentHealthWidth = barWidth * healthPercentage;
+    context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
+    context.fillRect(barX, barY, currentHealthWidth, barHeight);
+
+    // Draw border (white)
+    context.strokeStyle = GameConfig.HUD.HEALTH_BAR_BORDER_COLOR;
+    context.lineWidth = 1;
+    context.strokeRect(barX, barY, barWidth, barHeight);
   }
 
   update(deltaTime, playerPosition) {

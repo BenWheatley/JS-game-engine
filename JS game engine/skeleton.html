@@ -616,7 +616,7 @@
 				// Handle NPC shooting (unified)
 				if (npc.tryShoot) {
 					const shootResult = npc.tryShoot(gameState.gameTime);
-					if (shootResult) {
+					if (shootResult && shootResult.shots) {
 						gameState.npcProjectiles.push(...shootResult.shots);
 						if (shootResult.sound) {
 							playSoundEffect(shootResult.sound, shootResult.volume);
