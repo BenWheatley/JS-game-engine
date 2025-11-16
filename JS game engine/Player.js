@@ -6,6 +6,11 @@ class Player extends GameEntity {
     super(new Vector2D(0, 0), 0, new Vector2D(), Player.size, Player.imageUrl);
     this.maxHealth = GameConfig.PLAYER.INITIAL_HEALTH; // Current maximum (can change with power-ups)
     this.health = this.maxHealth; // Current health
+
+    // Upgrade levels (start at 0, increase when player chooses upgrades)
+    this.weaponLevel = 0;
+    this.engineLevel = 0;
+    this.shieldLevel = 0;
   }
 
   accelerate(deltaTime) {

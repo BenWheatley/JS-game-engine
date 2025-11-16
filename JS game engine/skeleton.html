@@ -357,6 +357,59 @@
 			});
 		}
 
+		function showUpgradeMenu() {
+			// Pause game when showing upgrade menu
+			gameState.currentState = GameState.States.PAUSED;
+			musicPlayer.pause();
+			canvas.classList.remove('hide-cursor');
+
+			// Add pause class for transparent overlay (no background image)
+			document.getElementById('menuOverlay').classList.add('pause');
+
+			menuSystem.showMenu(MenuSystem.MenuTypes.UPGRADE, {
+				title: 'CHOOSE UPGRADE',
+				items: [
+					{
+						type: 'button',
+						label: `Weapon Upgrade (Level ${gameState.player.weaponLevel} → ${gameState.player.weaponLevel + 1})`,
+						action: () => {
+							gameState.player.weaponLevel++;
+							console.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
+							resumeFromUpgrade();
+						}
+					},
+					{
+						type: 'button',
+						label: `Engine Upgrade (Level ${gameState.player.engineLevel} → ${gameState.player.engineLevel + 1})`,
+						action: () => {
+							gameState.player.engineLevel++;
+							console.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
+							resumeFromUpgrade();
+						}
+					},
+					{
+						type: 'button',
+						label: `Shield Upgrade (Level ${gameState.player.shieldLevel} → ${gameState.player.shieldLevel + 1})`,
+						action: () => {
+							gameState.player.shieldLevel++;
+							console.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
+							resumeFromUpgrade();
+						}
+					}
+				],
+				instructions: 'Select one upgrade before entering the wormhole'
+			});
+		}
+
+		function resumeFromUpgrade() {
+			// Resume game and advance level
+			gameState.currentState = GameState.States.PLAYING;
+			menuSystem.hideMenu();
+			musicPlayer.play();
+			canvas.classList.add('hide-cursor');
+			gameState.advanceLevel();
+		}
+
 		function showOptionsMenu() {
 			// Remove pause class (show background image)
 			document.getElementById('menuOverlay').classList.remove('pause');
@@ -793,9 +846,9 @@
 				}
 			}
 
-			// Check player-wormhole collision (level advancement)
+			// Check player-wormhole collision (show upgrade menu)
 			if (gameState.wormhole && gameState.wormhole.checkCollision(gameState.player)) {
-				gameState.advanceLevel();
+				showUpgradeMenu();
 				playSoundEffect('achievement', 0.5); // Play a sound effect
 			}
 

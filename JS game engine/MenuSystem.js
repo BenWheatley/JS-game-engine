@@ -7,7 +7,8 @@ class MenuSystem {
     PAUSE: 'pause',
     OPTIONS: 'options',
     GAME_OVER: 'gameOver',
-    HIGH_SCORES: 'highScores'
+    HIGH_SCORES: 'highScores',
+    UPGRADE: 'upgrade'
   };
 
   constructor(overlayElement, titleElement, buttonsElement, instructionsElement) {
