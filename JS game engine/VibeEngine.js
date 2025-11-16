@@ -1,14 +1,14 @@
-class GPTEngine {
+class VibeEngine {
 	constructor(document, canvasName) {
-		if (!GPTEngine.instance) {
+		if (!VibeEngine.instance) {
 			this._document = document;
 			this._canvas = document.getElementById(canvasName);
 			this._configureUserInput();
-			
-			GPTEngine.instance = this;
+
+			VibeEngine.instance = this;
 		}
-		
-		return GPTEngine.instance;
+
+		return VibeEngine.instance;
 	}
 	
 	_configureUserInput() {
@@ -112,6 +112,6 @@ class GPTEngine {
 	}
 	
 	static begin(document, canvasName) {
-		return new GPTEngine(document, canvasName);
+		return new VibeEngine(document, canvasName);
 	}
 }

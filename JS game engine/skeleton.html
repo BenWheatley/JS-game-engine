@@ -15,7 +15,7 @@
 	<script type="text/javascript" src="GameConfig.js"></script>
 	<script type="text/javascript" src="AssetLoader.js"></script>
 	<script type="text/javascript" src="CollisionDetection.js"></script>
-	<script type="text/javascript" src="GPTEngine.js"></script>
+	<script type="text/javascript" src="VibeEngine.js"></script>
 	<script type="text/javascript" src="Vector2D.js"></script>
 	<script type="text/javascript" src="Particle.js"></script>
 	<script type="text/javascript" src="ParticleSystem.js"></script>
@@ -63,7 +63,7 @@
 		// Get the 2D context
 		const context = canvas.getContext("2d");
 		
-		const engine = GPTEngine.begin(document, canvasName);
+		const engine = VibeEngine.begin(document, canvasName);
 		Sprite.begin(context);
 
 		// Initialize menu system
@@ -283,12 +283,12 @@
 					{
 						type: 'checkbox',
 						label: 'Fullscreen',
-						checked: GPTEngine.instance.isFullScreen,
+						checked: VibeEngine.instance.isFullScreen,
 						onChange: (checked) => {
-							if (checked && !GPTEngine.instance.isFullScreen) {
-								GPTEngine.instance.enterFullScreen();
-							} else if (!checked && GPTEngine.instance.isFullScreen) {
-								GPTEngine.instance.exitFullScreen();
+							if (checked && !VibeEngine.instance.isFullScreen) {
+								VibeEngine.instance.enterFullScreen();
+							} else if (!checked && VibeEngine.instance.isFullScreen) {
+								VibeEngine.instance.exitFullScreen();
 							}
 						}
 					},
@@ -394,12 +394,12 @@
 					{
 						type: 'checkbox',
 						label: 'Fullscreen',
-						checked: GPTEngine.instance.isFullScreen,
+						checked: VibeEngine.instance.isFullScreen,
 						onChange: (checked) => {
-							if (checked && !GPTEngine.instance.isFullScreen) {
-								GPTEngine.instance.enterFullScreen();
-							} else if (!checked && GPTEngine.instance.isFullScreen) {
-								GPTEngine.instance.exitFullScreen();
+							if (checked && !VibeEngine.instance.isFullScreen) {
+								VibeEngine.instance.enterFullScreen();
+							} else if (!checked && VibeEngine.instance.isFullScreen) {
+								VibeEngine.instance.exitFullScreen();
 							}
 						}
 					},
