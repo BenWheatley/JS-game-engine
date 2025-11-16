@@ -1,9 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+* {
+	font-family: 'Press Start 2P', cursive;
+}
+
 body {
 	margin: 0;
 	padding: 0;
-	font-family: 'Press Start 2P', cursive;
 	background: #000;
 	display: flex;
 	justify-content: center;
@@ -76,7 +79,6 @@ canvas[style*="position: fixed"] ~ #menuOverlay {
 	color: #fff;
 	padding: 15px 60px;
 	font-size: 14px;
-	font-family: 'Press Start 2P', cursive;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	text-transform: uppercase;
@@ -209,7 +211,7 @@ canvas[style*="position: fixed"] ~ #menuOverlay {
 .menu-text-input {
 	width: 100%;
 	padding: 12px 15px;
-	font-size: 18px;
+	font-size: 14px;
 	background: #333;
 	border: 2px solid #666;
 	color: #fff;
