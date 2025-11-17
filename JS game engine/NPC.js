@@ -47,6 +47,20 @@ class NPC extends GameEntity {
     );
   }
 
+  turnTowards(targetAngle, deltaTime) {
+    // Calculate normalized angle difference using Vector2D utility
+    const angleDiff = Vector2D.normalizeAngleDiff(targetAngle, this.sprite.rotation);
+
+    // Turn in the direction of smallest angle difference
+    if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
+      if (angleDiff > 0) {
+        this.sprite.rotation += Math.min(this.rotationalSpeed * deltaTime, angleDiff);
+      } else {
+        this.sprite.rotation -= Math.min(this.rotationalSpeed * deltaTime, -angleDiff);
+      }
+    }
+  }
+
   /**
    * Handle being hit by damage
    * Multi-hit NPCs - reduce health and check if destroyed

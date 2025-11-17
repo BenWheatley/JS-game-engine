@@ -10,20 +10,6 @@ class AlienScout extends NPC {
     this.clampSpeed();
   }
 
-  turnTowards(targetAngle, deltaTime) {
-    // Calculate normalized angle difference using Vector2D utility
-    const angleDiff = Vector2D.normalizeAngleDiff(targetAngle, this.sprite.rotation);
-
-    // Turn in the direction of smallest angle difference
-    if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
-      if (angleDiff > 0) {
-        this.sprite.rotation += Math.min(this.rotationalSpeed * deltaTime, angleDiff);
-      } else {
-        this.sprite.rotation -= Math.min(this.rotationalSpeed * deltaTime, -angleDiff);
-      }
-    }
-  }
-
   clampSpeed() {
     const speed = this.velocity.mag();
     if (speed > GameConfig.ALIEN_SCOUT.MAX_SPEED) {
