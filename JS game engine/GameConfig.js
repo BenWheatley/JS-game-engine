@@ -278,6 +278,11 @@ const GameConfig = {
     PROJECTILE_DESPAWN_MULTIPLIER: 2    // Projectile despawn distance as multiple of screen size
   },
 
+  // Projectile types - Player weapons
+  LASER: {
+    DAMAGE: 10                          // Damage dealt to NPCs
+  },
+
   // Projectile types - NPC weapons
   PLASMA: {
     DAMAGE: 25,                         // Damage dealt to player

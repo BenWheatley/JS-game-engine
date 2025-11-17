@@ -176,8 +176,8 @@ class MissileCruiser extends NPC {
     const maxHealth = GameConfig.MISSILE_CRUISER.HEALTH;
     const healthPercentage = Math.max(0, Math.min(1, this.health / maxHealth));
 
-    // Health bar dimensions
-    const barWidth = 60;
+    // Health bar dimensions (width scales with max health)
+    const barWidth = Math.max(40, maxHealth * 0.3); // 0.3 pixels per HP, minimum 40px
     const barHeight = 6;
     const barX = this.sprite.position.x - barWidth / 2;
     const barY = this.sprite.position.y - this.sprite.size.y / 2 - 12; // 12 pixels above sprite
