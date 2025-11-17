@@ -18,7 +18,6 @@ class MissileCruiser extends NPC {
 
     // Shooting state (uses game time, not wall-clock time)
     this.lastShotTime = 0;
-    this.missiles = []; // Track missiles fired by this cruiser
 
     // Pick initial target
     this.pickNewTarget(playerPosition);
