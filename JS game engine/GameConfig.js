@@ -280,7 +280,10 @@ const GameConfig = {
 
   // Projectile types - Player weapons
   LASER: {
-    DAMAGE: 10                          // Damage dealt to NPCs
+    DAMAGE: 10,                         // Damage dealt to NPCs
+    HIT_SOUND: 'hit',                   // Sound when hitting NPC
+    HIT_VOLUME: 0.3,                    // Volume for hit sound
+    PARTICLE_COLOR: '255, 200, 100'     // Yellow/orange impact particles
   },
 
   // Projectile types - NPC weapons
