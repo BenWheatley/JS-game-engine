@@ -701,10 +701,11 @@
 						} else if (projectileType === 'missile') {
 							const shotVelocity = Vector2D.fromRadial(shotAngle, Missile.speed);
 							newShot = new Missile(shotPosition, shotVelocity);
-						} else {
-							// Default to laser
+						} else if (projectileType === 'laser') {
 							const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
 							newShot = new Laser(shotPosition, shotVelocity);
+						} else {
+							DebugLogger.log(`Unexpected projectileType: ${projectileType}`);
 						}
 
 						gameState.playerProjectiles.push(newShot);
