@@ -476,10 +476,15 @@
 
 			// Wormhole message and arrow
 			if (gameState.wormhole) {
-				// Draw message
-				context.fillStyle = '#00FFFF'; // Cyan
+				// Draw message with stroke
 				context.font = '16px "Press Start 2P"';
 				context.textAlign = 'center';
+				// Draw white stroke (outline)
+				context.strokeStyle = '#FFFFFF';
+				context.lineWidth = 1;
+				context.strokeText('Wormhole detected!', canvas.width / 2, 50);
+				// Draw cyan fill
+				context.fillStyle = '#00FFFF';
 				context.fillText('Wormhole detected!', canvas.width / 2, 50);
 
 				// Calculate direction to wormhole
@@ -511,7 +516,17 @@
 					context.save();
 					context.translate(arrowX, arrowY);
 					context.rotate(angle);
-					context.fillStyle = '#00FFFF'; // Cyan
+					// Draw white stroke (outline)
+					context.strokeStyle = '#FFFFFF';
+					context.lineWidth = 1;
+					context.beginPath();
+					context.moveTo(15, 0);
+					context.lineTo(-10, -10);
+					context.lineTo(-10, 10);
+					context.closePath();
+					context.stroke();
+					// Draw cyan fill
+					context.fillStyle = '#00FFFF';
 					context.beginPath();
 					context.moveTo(15, 0);
 					context.lineTo(-10, -10);
