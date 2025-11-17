@@ -517,7 +517,7 @@
 					context.translate(arrowX, arrowY);
 					context.rotate(angle);
 					// Draw white stroke (outline)
-					context.strokeStyle = '#FFFFFF';
+					context.strokeStyle = '#000000';
 					context.lineWidth = 2;
 					context.beginPath();
 					context.moveTo(15, 0);
@@ -668,7 +668,7 @@
 				// Calculate cooldown multiplier: missiles fire at half rate (2x cooldown)
 				let cooldownMultiplier = 1;
 				if (projectileType === 'missile') {
-					cooldownMultiplier = 2;
+					cooldownMultiplier = 3;
 				}
 				const effectiveCooldown = weaponStats.fireRate * cooldownMultiplier;
 
