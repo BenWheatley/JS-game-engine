@@ -659,12 +659,12 @@
 
 				// Fire multiple shots with spread
 				const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
-				for (let i = 0; i < weaponStats.shotCount; i++) {
+				for (let i = 0; i < weaponStats.projectileTypes.length; i++) {
 					// Calculate angle for this shot
 					let shotAngle = gameState.player.sprite.rotation;
-					if (weaponStats.shotCount > 1) {
+					if (weaponStats.projectileTypes.length > 1) {
 						// Distribute shots evenly across the spread angle
-						const angleOffset = (i - (weaponStats.shotCount - 1) / 2) * spreadRadians;
+						const angleOffset = (i - (weaponStats.projectileTypes.length - 1) / 2) * spreadRadians;
 						shotAngle += angleOffset;
 					}
 

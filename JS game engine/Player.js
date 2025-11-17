@@ -19,7 +19,7 @@ class Player extends GameEntity {
 
   /**
    * Get weapon stats for current upgrade level (with upper bounds check)
-   * @returns {Object} { fireRate, shotCount, spreadAngle }
+   * @returns {Object} { fireRate, spreadAngle }
    */
   getWeaponStats() {
     const level = Math.min(this.weaponLevel, GameConfig.UPGRADES.WEAPON.length - 1);
