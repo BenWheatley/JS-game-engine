@@ -279,39 +279,24 @@ const GameConfig = {
     PROJECTILE_DESPAWN_MULTIPLIER: 2    // Projectile despawn distance as multiple of screen size
   },
 
-  // Projectile types - Player weapons
+  // Projectile types
   LASER: {
-    DAMAGE: 10,                         // Damage dealt to NPCs
-    HIT_SOUND: 'hit',                   // Sound when hitting NPC
+    DAMAGE: 10,                         // Damage dealt
+    HIT_SOUND: 'hit',                   // Sound when hitting target
     HIT_VOLUME: 0.3,                    // Volume for hit sound
     PARTICLE_COLOR: '255, 200, 100'     // Yellow/orange impact particles
   },
 
-  PLAYER_PLASMA: {
-    DAMAGE: 30,                         // Damage dealt to NPCs (3x laser)
-    HIT_SOUND: 'hit',                   // Sound when hitting NPC
-    HIT_VOLUME: 0.4,                    // Volume for hit sound
-    PARTICLE_COLOR: '50, 255, 150'      // Green/cyan impact particles
-  },
-
-  PLAYER_MISSILE: {
-    DAMAGE: 60,                         // Damage dealt to NPCs (6x laser)
-    HIT_SOUND: 'explosion',             // Sound when hitting NPC
-    HIT_VOLUME: 0.5,                    // Volume for hit sound
-    PARTICLE_COLOR: '255, 150, 50'      // Orange impact particles
-  },
-
-  // Projectile types - NPC weapons
   PLASMA: {
-    DAMAGE: 25,                         // Damage dealt to player
-    HIT_SOUND: 'hit',                   // Sound when hitting player
+    DAMAGE: 25,                         // Damage dealt
+    HIT_SOUND: 'hit',                   // Sound when hitting target
     HIT_VOLUME: 0.5,                    // Volume for hit sound
     PARTICLE_COLOR: '50, 150, 255'      // Blue/cyan particles
   },
 
   MISSILE: {
-    DAMAGE: 50,                         // Damage dealt to player
-    HIT_SOUND: 'explosion',             // Sound when hitting player
+    DAMAGE: 50,                         // Damage dealt
+    HIT_SOUND: 'explosion',             // Sound when hitting target
     HIT_VOLUME: 0.6,                    // Volume for hit sound
     PARTICLE_COLOR: '255, 100, 50'      // Orange explosion particles
   }

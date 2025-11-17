@@ -663,10 +663,10 @@
 
 					if (projectileType === 'plasma') {
 						const shotVelocity = Vector2D.fromRadial(shotAngle, Plasma.speed);
-						newShot = new Plasma(shotPosition, shotVelocity, true);
+						newShot = new Plasma(shotPosition, shotVelocity);
 					} else if (projectileType === 'missile') {
 						const shotVelocity = Vector2D.fromRadial(shotAngle, Missile.speed);
-						newShot = new Missile(shotPosition, shotVelocity, true);
+						newShot = new Missile(shotPosition, shotVelocity);
 					} else {
 						// Default to laser
 						const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
