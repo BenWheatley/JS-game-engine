@@ -3,8 +3,15 @@ class Missile extends Projectile {
   static size = new Vector2D(16, 34);
   static speed = 3;
 
-  constructor(position, velocity) {
-    super(position, velocity, Missile.imageUrl, Missile.size, GameConfig.MISSILE.DAMAGE);
+  constructor(position, velocity, isPlayerWeapon = false) {
+    const config = isPlayerWeapon ? GameConfig.PLAYER_MISSILE : GameConfig.MISSILE;
+    super(position, velocity, Missile.imageUrl, Missile.size, config.DAMAGE);
+
+    if (isPlayerWeapon) {
+      this.hitSound = config.HIT_SOUND;
+      this.hitVolume = config.HIT_VOLUME;
+      this.particleColor = config.PARTICLE_COLOR;
+    }
   }
 
   onHitPlayer() {

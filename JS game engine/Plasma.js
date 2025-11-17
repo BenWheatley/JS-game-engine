@@ -3,8 +3,15 @@ class Plasma extends Projectile {
 	static size = new Vector2D(18, 31);
 	static speed = 5; // Speed magnitude (pixels per frame)
 
-	constructor(position, velocity) {
-		super(position, velocity, Plasma.imageUrl, Plasma.size, GameConfig.PLASMA.DAMAGE);
+	constructor(position, velocity, isPlayerWeapon = false) {
+		const config = isPlayerWeapon ? GameConfig.PLAYER_PLASMA : GameConfig.PLASMA;
+		super(position, velocity, Plasma.imageUrl, Plasma.size, config.DAMAGE);
+
+		if (isPlayerWeapon) {
+			this.hitSound = config.HIT_SOUND;
+			this.hitVolume = config.HIT_VOLUME;
+			this.particleColor = config.PARTICLE_COLOR;
+		}
 	}
 
 	onHitPlayer() {

@@ -45,20 +45,21 @@ const GameConfig = {
 
   // Upgrade progression tables
   UPGRADES: {
-    // Weapon upgrades - affects fire rate, projectile count, and spread
-    // Each level: { fireRate, shotCount, spreadAngle (in degrees) }
+    // Weapon upgrades - affects fire rate, projectile count, spread, and projectile types
+    // Each level: { fireRate, shotCount, spreadAngle (in degrees), projectileTypes (array) }
+    // projectileTypes: array of 'laser', 'plasma', or 'missile' for each shot (center outward)
     WEAPON: [
-      { fireRate: 500, shotCount: 1, spreadAngle: 0 },    // Level 0 (starting)
-      { fireRate: 400, shotCount: 1, spreadAngle: 0 },    // Level 1: Faster fire
-      { fireRate: 400, shotCount: 2, spreadAngle: 5 },    // Level 2: Dual shot
-      { fireRate: 300, shotCount: 2, spreadAngle: 5 },    // Level 3: Even faster
-      { fireRate: 300, shotCount: 3, spreadAngle: 10 },   // Level 4: Triple shot
-      { fireRate: 200, shotCount: 3, spreadAngle: 10 },   // Level 5: Rapid fire
-      { fireRate: 200, shotCount: 4, spreadAngle: 15 },   // Level 6: Quad shot
-      { fireRate: 150, shotCount: 4, spreadAngle: 15 },   // Level 7: Max fire rate
-      { fireRate: 150, shotCount: 5, spreadAngle: 20 },   // Level 8: Penta shot
-      { fireRate: 100, shotCount: 5, spreadAngle: 20 },   // Level 9: Ultra rapid
-      { fireRate: 100, shotCount: 5, spreadAngle: 25 }    // Level 10: Ultimate weapon
+      { fireRate: 500, shotCount: 1, spreadAngle: 0, projectileTypes: ['laser'] },                           // Level 0 (starting)
+      { fireRate: 400, shotCount: 1, spreadAngle: 0, projectileTypes: ['laser'] },                           // Level 1: Faster fire
+      { fireRate: 400, shotCount: 2, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },                  // Level 2: Dual shot
+      { fireRate: 300, shotCount: 2, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },                  // Level 3: Even faster
+      { fireRate: 300, shotCount: 3, spreadAngle: 10, projectileTypes: ['laser', 'laser', 'laser'] },        // Level 4: Triple shot
+      { fireRate: 400, shotCount: 3, spreadAngle: 10, projectileTypes: ['laser', 'plasma', 'laser'] },       // Level 5: Center plasma (2x fire rate for plasma)
+      { fireRate: 200, shotCount: 4, spreadAngle: 15, projectileTypes: ['laser', 'laser', 'laser', 'laser'] }, // Level 6: Quad shot
+      { fireRate: 150, shotCount: 4, spreadAngle: 15, projectileTypes: ['laser', 'laser', 'laser', 'laser'] }, // Level 7: Max fire rate
+      { fireRate: 150, shotCount: 5, spreadAngle: 20, projectileTypes: ['laser', 'laser', 'plasma', 'laser', 'laser'] }, // Level 8: Penta shot with center plasma
+      { fireRate: 100, shotCount: 5, spreadAngle: 20, projectileTypes: ['laser', 'laser', 'plasma', 'laser', 'laser'] }, // Level 9: Ultra rapid
+      { fireRate: 200, shotCount: 5, spreadAngle: 25, projectileTypes: ['missile', 'laser', 'plasma', 'laser', 'missile'] } // Level 10: Outer missiles (4x fire rate for missiles)
     ],
 
     // Engine upgrades - affects movement stats
@@ -284,6 +285,20 @@ const GameConfig = {
     HIT_SOUND: 'hit',                   // Sound when hitting NPC
     HIT_VOLUME: 0.3,                    // Volume for hit sound
     PARTICLE_COLOR: '255, 200, 100'     // Yellow/orange impact particles
+  },
+
+  PLAYER_PLASMA: {
+    DAMAGE: 30,                         // Damage dealt to NPCs (3x laser)
+    HIT_SOUND: 'hit',                   // Sound when hitting NPC
+    HIT_VOLUME: 0.4,                    // Volume for hit sound
+    PARTICLE_COLOR: '50, 255, 150'      // Green/cyan impact particles
+  },
+
+  PLAYER_MISSILE: {
+    DAMAGE: 60,                         // Damage dealt to NPCs (6x laser)
+    HIT_SOUND: 'explosion',             // Sound when hitting NPC
+    HIT_VOLUME: 0.5,                    // Volume for hit sound
+    PARTICLE_COLOR: '255, 150, 50'      // Orange impact particles
   },
 
   // Projectile types - NPC weapons
