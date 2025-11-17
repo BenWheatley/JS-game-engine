@@ -311,9 +311,14 @@ const GameConfig = {
   // Achievement definitions
   ACHIEVEMENTS: [
     {
+      id: 'demolition_derby',
+      name: 'Demolition Derby',
+      description: 'Destroy 30 aliens or asteroids by ramming them'
+    },
+    {
       id: 'centurion',
       name: 'Centurion',
-      description: 'Destroy 100 enemies in a single game'
+      description: 'Destroy 100 aliens in total'
     },
     {
       id: 'untouchable',
