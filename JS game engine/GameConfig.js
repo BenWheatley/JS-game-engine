@@ -80,17 +80,17 @@ const GameConfig = {
     // Shield upgrades - affects max health and regeneration
     // Each level: { maxHealth, regenRate (HP/sec), regenDelay (seconds) }
     SHIELD: [
-      { maxHealth: 100, regenRate: 0, regenDelay: 0 },      // Level 0 (no regen)
-      { maxHealth: 150, regenRate: 0, regenDelay: 0 },      // Level 1: +50 max HP
-      { maxHealth: 150, regenRate: 1, regenDelay: 3 },      // Level 2: Health regen starts
-      { maxHealth: 200, regenRate: 1, regenDelay: 3 },      // Level 3: +50 max HP
-      { maxHealth: 200, regenRate: 2, regenDelay: 2.5 },    // Level 4: Better regen
-      { maxHealth: 250, regenRate: 2, regenDelay: 2.5 },    // Level 5: +50 max HP
-      { maxHealth: 250, regenRate: 3, regenDelay: 2 },      // Level 6: Better regen
-      { maxHealth: 300, regenRate: 3, regenDelay: 2 },      // Level 7: +50 max HP
-      { maxHealth: 300, regenRate: 4, regenDelay: 1.5 },    // Level 8: Better regen
-      { maxHealth: 350, regenRate: 4, regenDelay: 1.5 },    // Level 9: +50 max HP
-      { maxHealth: 400, regenRate: 5, regenDelay: 1 }       // Level 10: Ultimate shield
+      { maxHealth: 100, regenRate: 0, regenDelay: 0 },
+      { maxHealth: 200, regenRate: 1, regenDelay: 4 },
+      { maxHealth: 200, regenRate: 2, regenDelay: 3 },
+      { maxHealth: 300, regenRate: 3, regenDelay: 3 },
+      { maxHealth: 300, regenRate: 4, regenDelay: 2.5 },
+      { maxHealth: 400, regenRate: 5, regenDelay: 2.5 },
+      { maxHealth: 400, regenRate: 6, regenDelay: 2 },
+      { maxHealth: 500, regenRate: 7, regenDelay: 2 },
+      { maxHealth: 500, regenRate: 8, regenDelay: 1.5 },
+      { maxHealth: 600, regenRate: 9, regenDelay: 1.5 },
+      { maxHealth: 700, regenRate: 10, regenDelay: 1 }
     ]
   },
 
