@@ -112,7 +112,7 @@
 		// Background will be tiled - store a single tile sprite
 		let backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
 		backgroundSprite = new Sprite(
-			'background.png',
+			'background-fuzzy-edge.png',
 			new Vector2D(0, 0),
 			backgroundTileSize
 		);
@@ -431,6 +431,10 @@
 				return; // Menu overlay will render on top
 			}
 
+			// Background
+			context.fillStyle = 'black';
+			context.fillRect(0, 0, canvas.width, canvas.height);
+
 			context.save();
 			context.translate(
 				canvas.width/2-gameState.player.sprite.position.x,
@@ -438,8 +442,8 @@
 			);
 
 			// Draw tiled background
-			const tileWidth = backgroundTileSize.x;
-			const tileHeight = backgroundTileSize.y;
+			const tileWidth = backgroundTileSize.x * 0.9;
+			const tileHeight = backgroundTileSize.y * 0.85;
 
 			// Calculate which tiles are visible
 			const startX = Math.floor((gameState.player.sprite.position.x - canvas.width) / tileWidth) * tileWidth;
@@ -448,6 +452,7 @@
 			const endY = Math.ceil((gameState.player.sprite.position.y + canvas.height) / tileHeight) * tileHeight;
 
 			// Draw tiles
+			context.globalCompositeOperation = 'lighten';
 			for (let x = startX; x <= endX; x += tileWidth) {
 				for (let y = startY; y <= endY; y += tileHeight) {
 					backgroundSprite.position.x = x + tileWidth / 2;
@@ -455,6 +460,8 @@
 					backgroundSprite.draw();
 				}
 			}
+			// Reset composition
+			context.globalCompositeOperation = 'source-over';
 
 			// Z-order: Wormhole first (bottom layer)
 			if (gameState.wormhole) {

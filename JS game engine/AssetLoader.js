@@ -11,7 +11,7 @@ class AssetLoader {
    * Sprite asset file names
    */
   static SPRITES = [
-    'background.png',
+    'background-fuzzy-edge.png',
     'title.png',
     'player-ship.png',
     'alien-scout.png',
