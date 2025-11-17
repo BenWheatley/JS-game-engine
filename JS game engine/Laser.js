@@ -4,6 +4,7 @@ class Laser extends Projectile {
 	static speed = 5.5; // Speed magnitude (pixels per frame) - 10% faster than plasma/missiles
 
 	constructor(position, velocity) {
+		DebugLogger.log(`Creating Laser: GameConfig.LASER=${GameConfig.LASER}, GameConfig.LASER.DAMAGE=${GameConfig.LASER ? GameConfig.LASER.DAMAGE : 'LASER undefined'}`);
 		super(position, velocity, Laser.imageUrl, Laser.size, GameConfig.LASER.DAMAGE);
 	}
 }

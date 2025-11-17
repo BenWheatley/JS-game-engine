@@ -10,6 +10,7 @@ class Asteroid extends GameEntity {
     super(position, 0, velocity, size, config.IMAGE_URL);
     this.health = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
+    DebugLogger.log(`Asteroid created with health: ${this.health}, config.HEALTH: ${config.HEALTH}`);
   }
 
   static getDirectionTowardPlayer(spawnPosition, playerPosition) {

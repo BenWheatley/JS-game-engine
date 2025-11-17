@@ -749,7 +749,9 @@
 						playerProjectilesToRemove.add(shot);
 						gameState.particleSystem.spawnImpact(shot.sprite.position);
 
+						DebugLogger.log(`Shot damage: ${shot.damage}, NPC type: ${npc.constructor.name}, NPC health before: ${npc.health}`);
 						const hitResult = npc.onHit(shot.damage);
+						DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);
 						if (hitResult.destroyed) {
 							npcsToRemove.add(npc);
 							gameState.score += npc.scoreValue;
@@ -771,10 +773,11 @@
 					npcsToRemove.add(npc);
 
 					const collisionResult = npc.onCollideWithPlayer();
+					DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, NPC health: ${npc.health}, collision damage: ${collisionResult.damage}, player health before: ${gameState.player.health}`);
 					gameState.particleSystem.spawnExplosion(npc.sprite.position, collisionResult.particleColor);
 					gameState.player.health -= collisionResult.damage;
 					gameState.player.onDamage(); // Reset shield regen timer
-					DebugLogger.log(`Player hit! Health: ${gameState.player.health}`);
+					DebugLogger.log(`Player health after: ${gameState.player.health}`);
 					if (collisionResult.sound) {
 						playSoundEffect(collisionResult.sound, collisionResult.volume);
 					}

@@ -6,6 +6,7 @@ class AsteroidSpawn extends GameEntity {
     super(position, 0, velocity, size, config.IMAGE_URL);
     this.health = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
+    DebugLogger.log(`AsteroidSpawn created with health: ${this.health}, config.HEALTH: ${config.HEALTH}`);
   }
 
   shouldDespawn(playerPosition, screenSize) {
