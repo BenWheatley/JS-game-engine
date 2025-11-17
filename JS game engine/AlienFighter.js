@@ -28,19 +28,6 @@ class AlienFighter extends NPC {
     return NPCAIUtils.hasReachedTarget(this.sprite.position, this.targetPosition);
   }
 
-  isOffScreen(playerPosition) {
-    const screenHalfWidth = this.canvasWidth / 2;
-    const screenHalfHeight = this.canvasHeight / 2;
-
-    const relativeX = this.sprite.position.x - playerPosition.x;
-    const relativeY = this.sprite.position.y - playerPosition.y;
-
-    return (
-      Math.abs(relativeX) > screenHalfWidth ||
-      Math.abs(relativeY) > screenHalfHeight
-    );
-  }
-
   accelerate(deltaTime) {
     const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.ALIEN_FIGHTER.FORWARD_ACCELERATION);
     const velocityChange = accelerationVector.mul(deltaTime);
