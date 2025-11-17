@@ -155,6 +155,8 @@ const GameConfig = {
     FORWARD_ACCELERATION: 0.0008,       // Slightly less than player
     MAX_SPEED: 0.05,                    // Slightly less than player
     ROTATIONAL_SPEED: Math.PI / 1200,   // Slightly slower rotation than player
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.3,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
@@ -175,6 +177,8 @@ const GameConfig = {
     SHOT_COOLDOWN: 2000,                // Milliseconds between shots
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
     SHOOT_VOLUME: 0.2,                  // Volume for shoot sound (0.0 - 1.0)
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.3,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
@@ -215,6 +219,8 @@ const GameConfig = {
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
     SHOOT_VOLUME: 0.3,                  // Volume for shoot sound (0.0 - 1.0)
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.4,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color

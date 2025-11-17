@@ -31,26 +31,6 @@ class AlienScout extends NPC {
     }
   }
 
-  onHit(damage) {
-    // Single-hit enemy
-    return {
-      destroyed: true,
-      sound: GameConfig.ALIEN_SCOUT.DESTROYED_SOUND,
-      volume: GameConfig.ALIEN_SCOUT.DESTROYED_VOLUME,
-      spawns: null,
-      particleColor: GameConfig.ALIEN_SCOUT.PARTICLE_COLOR
-    };
-  }
-
-  onCollideWithPlayer() {
-    return {
-      damage: this.health,
-      sound: GameConfig.ALIEN_SCOUT.COLLISION_SOUND,
-      volume: GameConfig.ALIEN_SCOUT.COLLISION_VOLUME,
-      particleColor: GameConfig.ALIEN_SCOUT.PARTICLE_COLOR
-    };
-  }
-
   update(deltaTime, playerPosition) {
     // Check if we need a new target
     if (this.hasReachedTarget()) {

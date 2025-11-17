@@ -12,6 +12,15 @@ class NPC extends GameEntity {
     this.health = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
 
+    // Store config for onHit/onCollideWithPlayer
+    this.hitSound = config.HIT_SOUND;
+    this.hitVolume = config.HIT_VOLUME;
+    this.destroyedSound = config.DESTROYED_SOUND;
+    this.destroyedVolume = config.DESTROYED_VOLUME;
+    this.particleColor = config.PARTICLE_COLOR;
+    this.collisionSound = config.COLLISION_SOUND;
+    this.collisionVolume = config.COLLISION_VOLUME;
+
     // AI state machine
     this.targetPosition = null;
     this.canvasWidth = canvasWidth;
@@ -35,33 +44,41 @@ class NPC extends GameEntity {
 
   /**
    * Handle being hit by damage
-   * Override in subclasses for custom behavior
+   * Multi-hit NPCs - reduce health and check if destroyed
    * @param {number} damage - Amount of damage taken
    * @returns {Object} Hit result with {destroyed, sound, volume, spawns, particleColor}
    */
   onHit(damage) {
-    // Default behavior: single-hit enemy
-    return {
-      destroyed: true,
-      sound: null,
-      volume: 0,
-      spawns: null,
-      particleColor: null
-    };
+    this.health -= damage;
+    if (this.health <= 0) {
+      return {
+        destroyed: true,
+        sound: this.destroyedSound,
+        volume: this.destroyedVolume,
+        spawns: null,
+        particleColor: this.particleColor
+      };
+    } else {
+      return {
+        destroyed: false,
+        sound: this.hitSound,
+        volume: this.hitVolume,
+        spawns: null,
+        particleColor: null
+      };
+    }
   }
 
   /**
    * Handle collision with player
-   * Override in subclasses for custom behavior
    * @returns {Object} Collision result with {damage, sound, volume, particleColor}
    */
   onCollideWithPlayer() {
-    // Default behavior: use health as damage, no special effects
     return {
       damage: this.health,
-      sound: 'hit',
-      volume: 0.6,
-      particleColor: null
+      sound: this.collisionSound,
+      volume: this.collisionVolume,
+      particleColor: this.particleColor
     };
   }
 
