@@ -715,7 +715,6 @@
 			for (const npc of gameState.npcs) {
 				if (CollisionDetection.checkAABB(gameState.player, npc)) {
 					npcsToRemove.add(npc);
-					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
 
 					const collisionResult = npc.onCollideWithPlayer();
 					gameState.particleSystem.spawnExplosion(npc.sprite.position, collisionResult.particleColor);
@@ -732,7 +731,6 @@
 			for (const projectile of gameState.npcProjectiles) {
 				if (CollisionDetection.checkAABB(gameState.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
-					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
 
 					const hitResult = projectile.onHitPlayer();
 					gameState.player.health -= hitResult.damage;
