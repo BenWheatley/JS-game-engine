@@ -46,7 +46,11 @@ class GameState {
 
     // Timing
     this.gameTime = 0; // Accumulated deltaTime (pauses when game paused)
-    this.lastShotTime = 0; // Game time of last shot
+    this.lastShotTime = {
+      laser: 0,
+      plasma: 0,
+      missile: 0
+    }; // Game time of last shot per projectile type
   }
 
   /**
@@ -63,7 +67,11 @@ class GameState {
     this.score = 0;
     this.currentLevel = 1;
     this.gameTime = 0;
-    this.lastShotTime = 0;
+    this.lastShotTime = {
+      laser: 0,
+      plasma: 0,
+      missile: 0
+    };
 
     // Spawn first wave
     SpawnSystem.spawnWave(

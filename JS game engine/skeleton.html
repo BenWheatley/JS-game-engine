@@ -654,42 +654,69 @@
 		// Player shooting function
 		function shoot() {
 			const weaponStats = gameState.player.getWeaponStats();
-			if (gameState.gameTime > gameState.lastShotTime + weaponStats.fireRate) {
-				gameState.lastShotTime = gameState.gameTime;
+			const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
+			const shotPosition = new Vector2D(
+				gameState.player.sprite.position.x,
+				gameState.player.sprite.position.y
+			);
 
-				// Fire multiple shots with spread
-				const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
-				for (let i = 0; i < weaponStats.projectileTypes.length; i++) {
-					// Calculate angle for this shot
-					let shotAngle = gameState.player.sprite.rotation;
-					if (weaponStats.projectileTypes.length > 1) {
-						// Distribute shots evenly across the spread angle
-						const angleOffset = (i - (weaponStats.projectileTypes.length - 1) / 2) * spreadRadians;
-						shotAngle += angleOffset;
-					}
+			// Determine which weapon types are ready to fire
+			const weaponTypesReady = new Set();
+			for (let i = 0; i < weaponStats.projectileTypes.length; i++) {
+				const projectileType = weaponStats.projectileTypes[i];
 
-					// Determine projectile type for this shot
-					const projectileType = weaponStats.projectileTypes[i];
-					let newShot;
-					const shotPosition = new Vector2D(
-						gameState.player.sprite.position.x,
-						gameState.player.sprite.position.y
-					);
-
-					if (projectileType === 'plasma') {
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Plasma.speed);
-						newShot = new Plasma(shotPosition, shotVelocity);
-					} else if (projectileType === 'missile') {
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Missile.speed);
-						newShot = new Missile(shotPosition, shotVelocity);
-					} else {
-						// Default to laser
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
-						newShot = new Laser(shotPosition, shotVelocity);
-					}
-
-					gameState.playerProjectiles.push(newShot);
+				// Calculate cooldown multiplier: missiles fire at half rate (2x cooldown)
+				let cooldownMultiplier = 1;
+				if (projectileType === 'missile') {
+					cooldownMultiplier = 2;
 				}
+				const effectiveCooldown = weaponStats.fireRate * cooldownMultiplier;
+
+				// Check if this weapon type is ready to fire
+				if (gameState.gameTime > gameState.lastShotTime[projectileType] + effectiveCooldown) {
+					weaponTypesReady.add(projectileType);
+				}
+			}
+
+			// Fire all weapon slots whose types are ready
+			if (weaponTypesReady.size > 0) {
+				for (let i = 0; i < weaponStats.projectileTypes.length; i++) {
+					const projectileType = weaponStats.projectileTypes[i];
+
+					// Only fire if this weapon type is ready
+					if (weaponTypesReady.has(projectileType)) {
+						// Calculate angle for this shot
+						let shotAngle = gameState.player.sprite.rotation;
+						if (weaponStats.projectileTypes.length > 1) {
+							// Distribute shots evenly across the spread angle
+							const angleOffset = (i - (weaponStats.projectileTypes.length - 1) / 2) * spreadRadians;
+							shotAngle += angleOffset;
+						}
+
+						// Create the appropriate projectile
+						let newShot;
+						if (projectileType === 'plasma') {
+							const shotVelocity = Vector2D.fromRadial(shotAngle, Plasma.speed);
+							newShot = new Plasma(shotPosition, shotVelocity);
+						} else if (projectileType === 'missile') {
+							const shotVelocity = Vector2D.fromRadial(shotAngle, Missile.speed);
+							newShot = new Missile(shotPosition, shotVelocity);
+						} else {
+							// Default to laser
+							const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
+							newShot = new Laser(shotPosition, shotVelocity);
+						}
+
+						gameState.playerProjectiles.push(newShot);
+					}
+				}
+
+				// Update last shot time for all weapon types that fired
+				for (const weaponType of weaponTypesReady) {
+					gameState.lastShotTime[weaponType] = gameState.gameTime;
+				}
+
+				// Play sound
 				playSoundEffect('shoot', 0.3);
 			}
 		}
