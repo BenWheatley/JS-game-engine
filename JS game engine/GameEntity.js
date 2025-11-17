@@ -48,14 +48,14 @@ class GameEntity {
   }
 
   /**
-   * Get minimap display information
+   * Get minimap display information for rendering
    * Override in subclasses for custom minimap appearance
-   * @returns {Object} { type: 'enemy'|'asteroid'|'none', size: 'large'|'small' }
+   * @returns {Object} { color: string|null, radius: number } - null color means don't render
    */
   getMinimapInfo() {
     return {
-      type: 'none',
-      size: 'large'
+      color: null,
+      radius: 0
     };
   }
 }

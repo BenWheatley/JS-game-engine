@@ -102,8 +102,8 @@ class Asteroid extends GameEntity {
 
   getMinimapInfo() {
     return {
-      type: 'asteroid',
-      size: 'large'
+      color: GameConfig.MINIMAP.ASTEROID_COLOR,
+      radius: GameConfig.MINIMAP.ENEMY_SIZE_LARGE / 2
     };
   }
 

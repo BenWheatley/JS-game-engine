@@ -60,49 +60,25 @@ class Minimap {
   }
 
   /**
-   * Draws asteroids on the minimap
+   * Draws all NPCs on the minimap (enemies, asteroids, etc.)
    * @param {CanvasRenderingContext2D} context - Canvas rendering context
-   * @param {Array} npcs - Array of all NPCs (will filter for asteroids)
+   * @param {Array} npcs - Array of all NPCs
    * @param {Vector2D} playerPos - Player position
    */
-  drawAsteroids(context, npcs, playerPos) {
-    context.fillStyle = GameConfig.MINIMAP.ASTEROID_COLOR;
-
+  drawNPCs(context, npcs, playerPos) {
     for (const npc of npcs) {
       const info = npc.getMinimapInfo();
-      // Only draw asteroids
-      if (info.type === 'asteroid') {
+      // Only draw if color is specified (null means don't render)
+      if (info.color) {
         const pos = this.worldToMinimap(npc.sprite.position, playerPos);
         if (this.isOnMinimap(pos)) {
-          const size = info.size === 'large' ?
-                      GameConfig.MINIMAP.ENEMY_SIZE_LARGE :
-                      GameConfig.MINIMAP.ENEMY_SIZE_SMALL;
-          const halfSize = size / 2;
-          context.fillRect(pos.x - halfSize, pos.y - halfSize, size, size);
-        }
-      }
-    }
-  }
-
-  /**
-   * Draws enemies on the minimap
-   * @param {CanvasRenderingContext2D} context - Canvas rendering context
-   * @param {Array} npcs - Array of all NPCs (will filter for enemies)
-   * @param {Vector2D} playerPos - Player position
-   */
-  drawEnemies(context, npcs, playerPos) {
-    context.fillStyle = GameConfig.MINIMAP.ENEMY_COLOR;
-    const halfSize = GameConfig.MINIMAP.ENEMY_SIZE_LARGE / 2;
-
-    for (const npc of npcs) {
-      const info = npc.getMinimapInfo();
-      // Only draw enemies (not asteroids)
-      if (info.type === 'enemy') {
-        const pos = this.worldToMinimap(npc.sprite.position, playerPos);
-        if (this.isOnMinimap(pos)) {
-          context.fillRect(pos.x - halfSize, pos.y - halfSize,
-                          GameConfig.MINIMAP.ENEMY_SIZE_LARGE,
-                          GameConfig.MINIMAP.ENEMY_SIZE_LARGE);
+          context.fillStyle = info.color;
+          context.fillRect(
+            pos.x - info.radius,
+            pos.y - info.radius,
+            info.radius * 2,
+            info.radius * 2
+          );
         }
       }
     }
@@ -156,8 +132,7 @@ class Minimap {
     context.fillRect(this.x, this.y, this.size, this.size);
 
     // Draw entities
-    this.drawAsteroids(context, entities.npcs, playerPos);
-    this.drawEnemies(context, entities.npcs, playerPos);
+    this.drawNPCs(context, entities.npcs, playerPos);
     this.drawWormhole(context, entities.wormhole, playerPos);
     this.drawPlayer(context);
 

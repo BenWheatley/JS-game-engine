@@ -38,8 +38,8 @@ class AsteroidSpawn extends GameEntity {
 
   getMinimapInfo() {
     return {
-      type: 'asteroid',
-      size: 'small'
+      color: GameConfig.MINIMAP.ASTEROID_COLOR,
+      radius: GameConfig.MINIMAP.ENEMY_SIZE_SMALL / 2
     };
   }
 
