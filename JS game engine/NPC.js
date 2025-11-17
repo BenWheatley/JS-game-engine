@@ -10,6 +10,7 @@ class NPC extends GameEntity {
     this.sprite.rotation = 0;
     this.velocity = new Vector2D(0, 0); // Start with zero velocity
     this.health = config.HEALTH;
+    this.maxHealth = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
 
     // Store config for onHit/onCollideWithPlayer
@@ -20,6 +21,9 @@ class NPC extends GameEntity {
     this.particleColor = config.PARTICLE_COLOR;
     this.collisionSound = config.COLLISION_SOUND;
     this.collisionVolume = config.COLLISION_VOLUME;
+
+    // Health bar configuration
+    this.showHealthBar = config.SHOW_HEALTH_BAR || false;
 
     // AI state machine
     this.targetPosition = null;
@@ -92,5 +96,40 @@ class NPC extends GameEntity {
       color: GameConfig.MINIMAP.ENEMY_COLOR,
       radius: GameConfig.MINIMAP.ENEMY_SIZE_LARGE / 2
     };
+  }
+
+  /**
+   * Draw the NPC sprite and optional health bar
+   */
+  draw() {
+    // Draw sprite first
+    super.draw();
+
+    // Draw health bar if enabled
+    if (this.showHealthBar) {
+      const context = Sprite._context;
+      if (!context) return;
+
+      const healthPercentage = Math.max(0, Math.min(1, this.health / this.maxHealth));
+
+      const barWidth = 60;
+      const barHeight = 6;
+      const barX = this.sprite.position.x - barWidth / 2;
+      const barY = this.sprite.position.y - this.sprite.size.y / 2 - 12; // 12 pixels above sprite
+
+      // Draw background (red - shows damage)
+      context.fillStyle = GameConfig.HUD.HEALTH_BAR_BG_COLOR;
+      context.fillRect(barX, barY, barWidth, barHeight);
+
+      // Draw foreground (green - shows current health)
+      const currentHealthWidth = barWidth * healthPercentage;
+      context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
+      context.fillRect(barX, barY, currentHealthWidth, barHeight);
+
+      // Draw border (white)
+      context.strokeStyle = GameConfig.HUD.HEALTH_BAR_BORDER_COLOR;
+      context.lineWidth = 1;
+      context.strokeRect(barX, barY, barWidth, barHeight);
+    }
   }
 }
