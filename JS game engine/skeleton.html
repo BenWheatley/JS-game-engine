@@ -116,7 +116,10 @@
 		const gameState = new GameState(canvas);
 
 		// Game state management functions
-		function startGame() {
+		async function startGame() {
+			// Resume audio context on user interaction (required by browser autoplay policies)
+			await SoundManager.resumeAudioContext();
+
 			gameState.reset();
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();

@@ -43,27 +43,48 @@ class SoundManager {
       return;
     }
 
+    if (!SoundManager.audioContext) {
+      DebugLogger.warn('Audio context not initialized');
+      return;
+    }
+
     // Resume AudioContext if suspended (required by browser autoplay policies)
     if (SoundManager.audioContext.state === 'suspended') {
       try {
         await SoundManager.audioContext.resume();
+        DebugLogger.log('Audio context resumed');
       } catch (error) {
         DebugLogger.error('Failed to resume audio context:', error);
         return;
       }
     }
 
-    const source = SoundManager.audioContext.createBufferSource();
-    source.buffer = audioBuffer;
+    try {
+      const source = SoundManager.audioContext.createBufferSource();
+      source.buffer = audioBuffer;
 
-    // Create gain node for volume control
-    const gainNode = SoundManager.audioContext.createGain();
-    gainNode.gain.value = volume;
+      // Create gain node for volume control
+      const gainNode = SoundManager.audioContext.createGain();
+      gainNode.gain.value = volume;
 
-    source.connect(gainNode);
-    gainNode.connect(SoundManager.audioContext.destination);
+      source.connect(gainNode);
+      gainNode.connect(SoundManager.audioContext.destination);
 
-    source.start(0);
+      source.start(0);
+    } catch (error) {
+      DebugLogger.error(`Failed to play sound ${name}:`, error);
+    }
+  }
+
+  static async resumeAudioContext() {
+    if (SoundManager.audioContext && SoundManager.audioContext.state === 'suspended') {
+      try {
+        await SoundManager.audioContext.resume();
+        DebugLogger.log('Audio context resumed on user interaction');
+      } catch (error) {
+        DebugLogger.error('Failed to resume audio context:', error);
+      }
+    }
   }
 
   static get isLoaded() {
