@@ -16,7 +16,8 @@ class GameState {
    */
   static States = {
     PLAYING: 'playing',
-    PAUSED: 'paused'
+    PAUSED: 'paused',
+    UPGRADING: 'upgrading'  // Special state for upgrade menu - time passes but player doesn't control
   };
 
   /**
@@ -36,6 +37,7 @@ class GameState {
     // Systems
     this.particleSystem = new ParticleSystem();
     this.minimap = new Minimap(canvas.width, canvas.height);
+    this.upgradeBackground = new UpgradeBackground();
 
     // Gameplay state (null when in menus, PLAYING during gameplay, PAUSED when paused)
     this.currentState = null;

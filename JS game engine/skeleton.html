@@ -35,6 +35,7 @@
 	<script type="text/javascript" src="Asteroid.js"></script>
 	<script type="text/javascript" src="AsteroidSpawn.js"></script>
 	<script type="text/javascript" src="Wormhole.js"></script>
+	<script type="text/javascript" src="UpgradeBackground.js"></script>
 	<script type="text/javascript" src="Projectile.js"></script>
 	<script type="text/javascript" src="Laser.js"></script>
 	<script type="text/javascript" src="Plasma.js"></script>
@@ -277,8 +278,8 @@
 		}
 
 		function showUpgradeMenu() {
-			// Pause game when showing upgrade menu
-			gameState.currentState = GameState.States.PAUSED;
+			// Set upgrading state - time passes but player has no control
+			gameState.currentState = GameState.States.UPGRADING;
 			musicPlayer.pause();
 			setCursorVisibility(true);
 			setMenuOverlayMode(true); // Transparent overlay for pause
@@ -388,6 +389,12 @@
 
 		// Render loop
 		function render() {
+			// Special rendering for upgrade menu
+			if (gameState.currentState === GameState.States.UPGRADING) {
+				gameState.upgradeBackground.draw(context, canvas.width, canvas.height, gameState.player.sprite.position);
+				return; // Menu overlay will render on top
+			}
+
 			context.save();
 			context.translate(
 				canvas.width/2-gameState.player.sprite.position.x,
@@ -664,6 +671,13 @@
 		function update(deltaTime) {
 			// Handle pause input regardless of game state
 			handlePauseInput();
+
+			// Update upgrade background animation if in upgrading state
+			if (gameState.currentState === GameState.States.UPGRADING) {
+				gameState.upgradeBackground.update(deltaTime);
+				gameState.gameTime += deltaTime; // Time passes during upgrade menu
+				return;
+			}
 
 			// Only update game logic during active gameplay
 			if (gameState.currentState !== GameState.States.PLAYING) {
