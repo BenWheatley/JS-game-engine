@@ -748,9 +748,6 @@
 					if (CollisionDetection.checkAABB(shot, npc)) {
 						playerProjectilesToRemove.add(shot);
 
-						// Spawn impact particles for laser hit
-						gameState.particleSystem.spawnImpact(shot.sprite.position, GameConfig.LASER.PARTICLE_COLOR);
-
 						DebugLogger.log(`Shot damage: ${shot.damage}, NPC type: ${npc.constructor.name}, NPC health before: ${npc.health}`);
 						const hitResult = npc.onHit(shot.damage);
 						DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);
@@ -765,8 +762,6 @@
 						if (hitResult.sound) {
 							playSoundEffect(hitResult.sound, hitResult.volume);
 						}
-						// Play laser hit sound
-						playSoundEffect(GameConfig.LASER.HIT_SOUND, GameConfig.LASER.HIT_VOLUME);
 					}
 				}
 			}
