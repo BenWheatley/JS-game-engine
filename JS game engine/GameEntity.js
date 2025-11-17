@@ -46,4 +46,16 @@ class GameEntity {
       particleColor: null
     };
   }
+
+  /**
+   * Get minimap display information
+   * Override in subclasses for custom minimap appearance
+   * @returns {Object} { type: 'enemy'|'asteroid'|'none', size: 'large'|'small' }
+   */
+  getMinimapInfo() {
+    return {
+      type: 'none',
+      size: 'large'
+    };
+  }
 }

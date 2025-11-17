@@ -36,7 +36,15 @@ class AsteroidSpawn extends GameEntity {
     };
   }
 
-  update(deltaTime) {
+  getMinimapInfo() {
+    return {
+      type: 'asteroid',
+      size: 'small'
+    };
+  }
+
+  update(deltaTime, playerPosition) {
+    // Asteroid spawns ignore playerPosition parameter (accepts it for polymorphism)
     super.update(deltaTime);
     // Add rotation for visual effect (faster than parent asteroid)
     this.sprite.rotation += GameConfig.ASTEROID.ROTATION_SPEED_SMALL;

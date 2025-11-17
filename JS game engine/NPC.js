@@ -48,4 +48,16 @@ class NPC extends GameEntity {
       particleColor: null
     };
   }
+
+  /**
+   * Get minimap display information
+   * NPCs show as enemies on minimap
+   * @returns {Object} { type: 'enemy', size: 'large' }
+   */
+  getMinimapInfo() {
+    return {
+      type: 'enemy',
+      size: 'large'
+    };
+  }
 }

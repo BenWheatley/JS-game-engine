@@ -653,12 +653,8 @@
 
 			// Update all NPCs with unified loop
 			for (const npc of gameState.npcs) {
-				// Asteroids don't need player position
-				if (npc instanceof Asteroid) {
-					npc.update(deltaTime);
-				} else {
-					npc.update(deltaTime, gameState.player.sprite.position);
-				}
+				// All NPCs accept playerPosition (asteroids ignore it)
+				npc.update(deltaTime, gameState.player.sprite.position);
 
 				// Handle NPC shooting (unified)
 				if (npc.tryShoot) {

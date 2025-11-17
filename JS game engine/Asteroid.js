@@ -100,7 +100,15 @@ class Asteroid extends GameEntity {
     };
   }
 
-  update(deltaTime) {
+  getMinimapInfo() {
+    return {
+      type: 'asteroid',
+      size: 'large'
+    };
+  }
+
+  update(deltaTime, playerPosition) {
+    // Asteroids ignore playerPosition parameter (accepts it for polymorphism)
     super.update(deltaTime);
     // Add slow rotation for visual effect
     this.sprite.rotation += GameConfig.ASTEROID.ROTATION_SPEED_LARGE;

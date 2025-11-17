@@ -69,11 +69,12 @@ class Minimap {
     context.fillStyle = GameConfig.MINIMAP.ASTEROID_COLOR;
 
     for (const npc of npcs) {
-      // Only draw asteroids and asteroid spawns
-      if (npc instanceof Asteroid || npc instanceof AsteroidSpawn) {
+      const info = npc.getMinimapInfo();
+      // Only draw asteroids
+      if (info.type === 'asteroid') {
         const pos = this.worldToMinimap(npc.sprite.position, playerPos);
         if (this.isOnMinimap(pos)) {
-          const size = npc instanceof Asteroid ?
+          const size = info.size === 'large' ?
                       GameConfig.MINIMAP.ENEMY_SIZE_LARGE :
                       GameConfig.MINIMAP.ENEMY_SIZE_SMALL;
           const halfSize = size / 2;
@@ -94,8 +95,9 @@ class Minimap {
     const halfSize = GameConfig.MINIMAP.ENEMY_SIZE_LARGE / 2;
 
     for (const npc of npcs) {
+      const info = npc.getMinimapInfo();
       // Only draw enemies (not asteroids)
-      if (npc instanceof AlienScout || npc instanceof AlienFighter || npc instanceof MissileCruiser) {
+      if (info.type === 'enemy') {
         const pos = this.worldToMinimap(npc.sprite.position, playerPos);
         if (this.isOnMinimap(pos)) {
           context.fillRect(pos.x - halfSize, pos.y - halfSize,
