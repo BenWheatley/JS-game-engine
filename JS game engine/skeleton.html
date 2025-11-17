@@ -283,39 +283,79 @@
 			setCursorVisibility(true);
 			setMenuOverlayMode(true); // Transparent overlay for pause
 
-			menuSystem.showMenu(MenuSystem.MenuTypes.UPGRADE, {
-				title: 'CHOOSE UPGRADE',
-				items: [
-					{
-						type: 'button',
-						label: `Weapon Upgrade (Level ${gameState.player.weaponLevel} → ${gameState.player.weaponLevel + 1})`,
-						action: () => {
-							gameState.player.weaponLevel++;
-							DebugLogger.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
-							resumeFromUpgrade();
-						}
-					},
-					{
-						type: 'button',
-						label: `Engine Upgrade (Level ${gameState.player.engineLevel} → ${gameState.player.engineLevel + 1})`,
-						action: () => {
-							gameState.player.engineLevel++;
-							DebugLogger.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
-							resumeFromUpgrade();
-						}
-					},
-					{
-						type: 'button',
-						label: `Shield Upgrade (Level ${gameState.player.shieldLevel} → ${gameState.player.shieldLevel + 1})`,
-						action: () => {
-							gameState.player.shieldLevel++;
-							gameState.player.applyShieldUpgrade(); // Apply max health and heal to full
-							DebugLogger.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
-							resumeFromUpgrade();
-						}
+			// Check max levels
+			const maxWeaponLevel = GameConfig.UPGRADES.WEAPON.length - 1;
+			const maxEngineLevel = GameConfig.UPGRADES.ENGINE.length - 1;
+			const maxShieldLevel = GameConfig.UPGRADES.SHIELD.length - 1;
+
+			const weaponMaxed = gameState.player.weaponLevel >= maxWeaponLevel;
+			const engineMaxed = gameState.player.engineLevel >= maxEngineLevel;
+			const shieldMaxed = gameState.player.shieldLevel >= maxShieldLevel;
+			const allMaxed = weaponMaxed && engineMaxed && shieldMaxed;
+
+			const items = [];
+
+			if (allMaxed) {
+				// All upgrades maxed - show "Heal and Continue" button
+				items.push({
+					type: 'button',
+					label: 'Heal and Continue',
+					action: () => {
+						// Heal to full health
+						gameState.player.health = gameState.player.maxHealth;
+						DebugLogger.log(`Healed to full health: ${gameState.player.health}`);
+						resumeFromUpgrade();
 					}
-				],
-				instructions: 'Select one upgrade before entering the wormhole'
+				});
+			} else {
+				// Show upgrade buttons (disabled if maxed)
+				items.push({
+					type: 'button',
+					label: weaponMaxed
+						? `Weapon Upgrade (MAX LEVEL)`
+						: `Weapon Upgrade (Level ${gameState.player.weaponLevel} → ${gameState.player.weaponLevel + 1})`,
+					disabled: weaponMaxed,
+					action: () => {
+						gameState.player.weaponLevel++;
+						DebugLogger.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
+						resumeFromUpgrade();
+					}
+				});
+
+				items.push({
+					type: 'button',
+					label: engineMaxed
+						? `Engine Upgrade (MAX LEVEL)`
+						: `Engine Upgrade (Level ${gameState.player.engineLevel} → ${gameState.player.engineLevel + 1})`,
+					disabled: engineMaxed,
+					action: () => {
+						gameState.player.engineLevel++;
+						DebugLogger.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
+						resumeFromUpgrade();
+					}
+				});
+
+				items.push({
+					type: 'button',
+					label: shieldMaxed
+						? `Shield Upgrade (MAX LEVEL)`
+						: `Shield Upgrade (Level ${gameState.player.shieldLevel} → ${gameState.player.shieldLevel + 1})`,
+					disabled: shieldMaxed,
+					action: () => {
+						gameState.player.shieldLevel++;
+						gameState.player.applyShieldUpgrade(); // Apply max health and heal to full
+						DebugLogger.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
+						resumeFromUpgrade();
+					}
+				});
+			}
+
+			menuSystem.showMenu(MenuSystem.MenuTypes.UPGRADE, {
+				title: allMaxed ? 'ALL UPGRADES COMPLETE' : 'CHOOSE UPGRADE',
+				items: items,
+				instructions: allMaxed
+					? 'You have reached maximum power!'
+					: 'Select one upgrade before entering the wormhole'
 			});
 		}
 

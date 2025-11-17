@@ -71,6 +71,13 @@ class MenuSystem {
     button.className = 'menu-button';
     button.textContent = config.label;
     button.onclick = config.action;
+
+    // Support disabled state
+    if (config.disabled) {
+      button.disabled = true;
+      button.classList.add('disabled');
+    }
+
     this.buttonsElement.appendChild(button);
   }
 

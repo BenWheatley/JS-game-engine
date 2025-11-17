@@ -102,12 +102,17 @@ class GameState {
 
   /**
    * Advances to next level via wormhole
-   * Spawns new wave
+   * Clears all projectiles and spawns new wave
    */
   advanceLevel() {
     this.currentLevel++;
     DebugLogger.log(`Entered wormhole! Advancing to wave ${this.currentLevel}`);
     this.wormhole = null;
+
+    // Clear all projectiles when transitioning levels
+    this.playerProjectiles = [];
+    this.npcProjectiles = [];
+
     SpawnSystem.spawnWave(
       this.currentLevel,
       this.player.sprite.position,
