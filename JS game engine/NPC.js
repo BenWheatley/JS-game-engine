@@ -21,6 +21,7 @@ class NPC extends GameEntity {
     this.particleColor = config.PARTICLE_COLOR;
     this.collisionSound = config.COLLISION_SOUND;
     this.collisionVolume = config.COLLISION_VOLUME;
+    this.rotationalSpeed = config.ROTATIONAL_SPEED;
 
     // Health bar configuration
     this.showHealthBar = config.SHOW_HEALTH_BAR || false;

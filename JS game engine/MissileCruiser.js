@@ -20,9 +20,9 @@ class MissileCruiser extends NPC {
     // Turn in the direction of smallest angle difference
     if (Math.abs(angleDiff) > GameConfig.NPC.TURN_PRECISION) {
       if (angleDiff > 0) {
-        this.sprite.rotation += Math.min(GameConfig.MISSILE_CRUISER.ROTATIONAL_SPEED * deltaTime, angleDiff);
+        this.sprite.rotation += Math.min(this.rotationalSpeed * deltaTime, angleDiff);
       } else {
-        this.sprite.rotation -= Math.min(GameConfig.MISSILE_CRUISER.ROTATIONAL_SPEED * deltaTime, -angleDiff);
+        this.sprite.rotation -= Math.min(this.rotationalSpeed * deltaTime, -angleDiff);
       }
     }
   }
