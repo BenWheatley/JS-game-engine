@@ -1,31 +1,10 @@
 class AlienFighter extends NPC {
   constructor(position, playerPosition, canvasWidth, canvasHeight) {
-    const config = GameConfig.ALIEN_FIGHTER;
-    const size = new Vector2D(config.WIDTH, config.HEIGHT);
-
-    super(position);
-    // Override sprite with correct image
-    this.sprite = new Sprite(config.IMAGE_URL, position, size);
-    this.sprite.rotation = 0;
-    this.velocity = new Vector2D(0, 0); // Start with zero velocity
-    this.health = config.HEALTH;
-    this.scoreValue = config.SCORE_VALUE;
-
-    // AI state machine
-    this.targetPosition = null;
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
+    super(position, playerPosition, canvasWidth, canvasHeight, GameConfig.ALIEN_FIGHTER);
 
     // Shooting state (uses game time, not wall-clock time)
     this.lastShotTime = 0;
     this.shots = []; // Track shots fired by this fighter
-
-    // Pick initial target
-    this.pickNewTarget(playerPosition);
-  }
-
-  hasReachedTarget() {
-    return NPCAIUtils.hasReachedTarget(this.sprite.position, this.targetPosition);
   }
 
   accelerate(deltaTime) {

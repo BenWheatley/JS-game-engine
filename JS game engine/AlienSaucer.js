@@ -14,29 +14,16 @@ class AlienSaucer extends NPC {
   };
 
   constructor(position, playerPosition, canvasWidth, canvasHeight) {
-    const config = GameConfig.ALIEN_SAUCER;
-    const size = new Vector2D(config.WIDTH, config.HEIGHT);
-
-    super(position);
-    // Override sprite with correct image
-    this.sprite = new Sprite(config.IMAGE_URL, position, size);
-    this.sprite.rotation = 0;
-    this.velocity = new Vector2D(0, 0); // Always zero velocity (uses interpolation instead)
-    this.health = config.HEALTH;
-    this.scoreValue = config.SCORE_VALUE;
+    super(position, playerPosition, canvasWidth, canvasHeight, GameConfig.ALIEN_SAUCER);
 
     // Movement state machine
     this.state = AlienSaucer.States.MOVING;
     this.startPosition = new Vector2D(position.x, position.y);
-    this.targetPosition = null;
     this.movementStartTime = 0;
-    this.movementDuration = config.MOVEMENT_DURATION;
-    this.stopDuration = config.STOP_DURATION;
+    this.movementDuration = GameConfig.ALIEN_SAUCER.MOVEMENT_DURATION;
+    this.stopDuration = GameConfig.ALIEN_SAUCER.STOP_DURATION;
     this.stoppedElapsed = 0;
     this.hasFiredThisCycle = false; // Track if we've fired during this stop
-
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
 
     // Continuous spin rate: 0.5 Hz = 0.5 rotations/second = π radians/second
     this.spinRate = Math.PI / 1000; // radians per millisecond (reduced by 4x)
@@ -45,7 +32,8 @@ class AlienSaucer extends NPC {
     this.curveAmplitude = 0;
     this.curvePerpendicular = new Vector2D(0, 0);
 
-    // Pick initial target
+    // Override targetPosition with custom picking behavior
+    this.targetPosition = null;
     this.pickNewTarget(playerPosition);
   }
 

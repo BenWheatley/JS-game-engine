@@ -3,10 +3,26 @@ class NPC extends GameEntity {
   static size = new Vector2D(42, 43);
   static health = 100;
 
-  constructor(position) {
-    super(position, 0, new Vector2D(0, 0), NPC.size, NPC.imageUrl);
-    this.health = NPC.health;
-    this.scoreValue = 0; // Set by subclasses
+  constructor(position, playerPosition, canvasWidth, canvasHeight, config) {
+    const size = new Vector2D(config.WIDTH, config.HEIGHT);
+    super(position, 0, new Vector2D(0, 0), size, config.IMAGE_URL);
+
+    this.sprite.rotation = 0;
+    this.velocity = new Vector2D(0, 0); // Start with zero velocity
+    this.health = config.HEALTH;
+    this.scoreValue = config.SCORE_VALUE;
+
+    // AI state machine
+    this.targetPosition = null;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+
+    // Pick initial target
+    this.pickNewTarget(playerPosition);
+  }
+
+  hasReachedTarget() {
+    return NPCAIUtils.hasReachedTarget(this.sprite.position, this.targetPosition);
   }
 
   pickNewTarget(playerPosition) {
