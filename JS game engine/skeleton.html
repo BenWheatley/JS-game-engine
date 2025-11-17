@@ -480,8 +480,8 @@
 				context.font = '16px "Press Start 2P"';
 				context.textAlign = 'center';
 				// Draw white stroke (outline)
-				context.strokeStyle = '#FFFFFF';
-				context.lineWidth = 1;
+				context.strokeStyle = '#000000';
+				context.lineWidth = 2;
 				context.strokeText('Wormhole detected!', canvas.width / 2, 50);
 				// Draw cyan fill
 				context.fillStyle = '#00FFFF';
@@ -518,7 +518,7 @@
 					context.rotate(angle);
 					// Draw white stroke (outline)
 					context.strokeStyle = '#FFFFFF';
-					context.lineWidth = 1;
+					context.lineWidth = 2;
 					context.beginPath();
 					context.moveTo(15, 0);
 					context.lineTo(-10, -10);

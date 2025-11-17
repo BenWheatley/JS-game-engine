@@ -53,12 +53,12 @@ const GameConfig = {
       { fireRate: 400, shotCount: 2, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },                  // Level 2: Dual shot
       { fireRate: 300, shotCount: 2, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },                  // Level 3: Even faster
       { fireRate: 300, shotCount: 3, spreadAngle: 10, projectileTypes: ['laser', 'laser', 'laser'] },        // Level 4: Triple shot
-      { fireRate: 400, shotCount: 3, spreadAngle: 10, projectileTypes: ['laser', 'plasma', 'laser'] },       // Level 5: Center plasma (2x fire rate for plasma)
-      { fireRate: 200, shotCount: 4, spreadAngle: 15, projectileTypes: ['laser', 'laser', 'laser', 'laser'] }, // Level 6: Quad shot
-      { fireRate: 150, shotCount: 4, spreadAngle: 15, projectileTypes: ['laser', 'laser', 'laser', 'laser'] }, // Level 7: Max fire rate
-      { fireRate: 150, shotCount: 5, spreadAngle: 20, projectileTypes: ['laser', 'laser', 'plasma', 'laser', 'laser'] }, // Level 8: Penta shot with center plasma
-      { fireRate: 100, shotCount: 5, spreadAngle: 20, projectileTypes: ['laser', 'laser', 'plasma', 'laser', 'laser'] }, // Level 9: Ultra rapid
-      { fireRate: 200, shotCount: 5, spreadAngle: 25, projectileTypes: ['missile', 'laser', 'plasma', 'laser', 'missile'] } // Level 10: Outer missiles (4x fire rate for missiles)
+      { fireRate: 300, shotCount: 3, spreadAngle: 10, projectileTypes: ['laser', 'plasma', 'laser'] },       // Level 5: Center plasma
+      { fireRate: 300, shotCount: 4, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'plasma', 'laser'] }, // Level 6: Quad shot
+      { fireRate: 250, shotCount: 4, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'plasma', 'laser'] }, // Level 7: Max fire rate
+      { fireRate: 250, shotCount: 5, spreadAngle: 20, projectileTypes: ['laser', 'plasma', 'plasma', 'plasma', 'laser'] }, // Level 8: Penta shot with center plasma
+      { fireRate: 200, shotCount: 5, spreadAngle: 20, projectileTypes: ['laser', 'plasma', 'plasma', 'plasma', 'laser'] }, // Level 9: Ultra rapid
+      { fireRate: 200, shotCount: 5, spreadAngle: 25, projectileTypes: ['missile', 'laser', 'plasma', 'laser', 'missile'] } // Level 10: Outer missiles
     ],
 
     // Engine upgrades - affects movement stats
