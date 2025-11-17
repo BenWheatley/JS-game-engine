@@ -1,16 +1,7 @@
 class AlienFighter extends NPC {
-  constructor(playerPosition, canvasWidth, canvasHeight) {
+  constructor(position, playerPosition, canvasWidth, canvasHeight) {
     const config = GameConfig.ALIEN_FIGHTER;
     const size = new Vector2D(config.WIDTH, config.HEIGHT);
-
-    // Calculate spawn position (2x bounding box offscreen)
-    const margin = size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
-    const position = AlienFighter.getRandomSpawnPosition(
-      canvasWidth,
-      canvasHeight,
-      margin,
-      playerPosition
-    );
 
     super(position);
     // Override sprite with correct image
@@ -32,33 +23,6 @@ class AlienFighter extends NPC {
 
     // Pick initial target
     this.pickNewTarget(playerPosition);
-  }
-
-  static getRandomSpawnPosition(canvasWidth, canvasHeight, margin, playerPosition) {
-    // Choose random edge (0=top, 1=right, 2=bottom, 3=left)
-    const edge = Math.floor(Math.random() * 4);
-    let x, y;
-
-    switch(edge) {
-      case 0: // Top
-        x = playerPosition.x - canvasWidth/2 + Math.random() * canvasWidth;
-        y = playerPosition.y - canvasHeight/2 - margin;
-        break;
-      case 1: // Right
-        x = playerPosition.x + canvasWidth/2 + margin;
-        y = playerPosition.y - canvasHeight/2 + Math.random() * canvasHeight;
-        break;
-      case 2: // Bottom
-        x = playerPosition.x - canvasWidth/2 + Math.random() * canvasWidth;
-        y = playerPosition.y + canvasHeight/2 + margin;
-        break;
-      case 3: // Left
-        x = playerPosition.x - canvasWidth/2 - margin;
-        y = playerPosition.y - canvasHeight/2 + Math.random() * canvasHeight;
-        break;
-    }
-
-    return new Vector2D(x, y);
   }
 
   hasReachedTarget() {

@@ -107,8 +107,7 @@ class SpawnSystem {
     for (let i = 0; i < wave.alienScouts; i++) {
       const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
         GameConfig.ALIEN_SCOUT.WIDTH, GameConfig.ALIEN_SCOUT.HEIGHT);
-      const scout = new AlienScout(playerPos, canvasWidth, canvasHeight);
-      scout.sprite.position = position;
+      const scout = new AlienScout(position, playerPos, canvasWidth, canvasHeight);
       npcsArray.push(scout);
     }
 
@@ -116,8 +115,7 @@ class SpawnSystem {
     for (let i = 0; i < wave.alienFighters; i++) {
       const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
         GameConfig.ALIEN_FIGHTER.WIDTH, GameConfig.ALIEN_FIGHTER.HEIGHT);
-      const fighter = new AlienFighter(playerPos, canvasWidth, canvasHeight);
-      fighter.sprite.position = position;
+      const fighter = new AlienFighter(position, playerPos, canvasWidth, canvasHeight);
       npcsArray.push(fighter);
     }
 
@@ -125,8 +123,7 @@ class SpawnSystem {
     for (let i = 0; i < wave.missileCruisers; i++) {
       const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
         GameConfig.MISSILE_CRUISER.WIDTH, GameConfig.MISSILE_CRUISER.HEIGHT);
-      const cruiser = new MissileCruiser(playerPos, canvasWidth, canvasHeight);
-      cruiser.sprite.position = position;
+      const cruiser = new MissileCruiser(position, playerPos, canvasWidth, canvasHeight);
       npcsArray.push(cruiser);
     }
 
@@ -134,8 +131,7 @@ class SpawnSystem {
     for (let i = 0; i < (wave.alienSaucers || 0); i++) {
       const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
         GameConfig.ALIEN_SAUCER.WIDTH, GameConfig.ALIEN_SAUCER.HEIGHT);
-      const saucer = new AlienSaucer(playerPos, canvasWidth, canvasHeight);
-      saucer.sprite.position = position;
+      const saucer = new AlienSaucer(position, playerPos, canvasWidth, canvasHeight);
       npcsArray.push(saucer);
     }
 
