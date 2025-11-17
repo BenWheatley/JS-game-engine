@@ -143,8 +143,7 @@ class SpawnSystem {
     for (let i = 0; i < wave.asteroids; i++) {
       const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
         GameConfig.ASTEROID_BIG.WIDTH, GameConfig.ASTEROID_BIG.HEIGHT);
-      const asteroid = new Asteroid(playerPos, canvasWidth, canvasHeight);
-      asteroid.sprite.position = position;
+      const asteroid = new Asteroid(position, playerPos);
       npcsArray.push(asteroid);
     }
   }

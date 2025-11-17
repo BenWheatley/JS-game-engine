@@ -1,16 +1,7 @@
 class Asteroid extends GameEntity {
-  constructor(playerPosition, canvasWidth, canvasHeight) {
+  constructor(position, playerPosition) {
     const config = GameConfig.ASTEROID_BIG;
     const size = new Vector2D(config.WIDTH, config.HEIGHT);
-
-    // Calculate spawn position (2x bounding box offscreen)
-    const margin = size.x * GameConfig.SHARED.SPAWN_MARGIN_MULTIPLIER;
-    const position = Asteroid.getRandomSpawnPosition(
-      canvasWidth,
-      canvasHeight,
-      margin,
-      playerPosition
-    );
 
     // Calculate direction within 90-degree cone toward player
     const direction = Asteroid.getDirectionTowardPlayer(position, playerPosition);
@@ -19,33 +10,6 @@ class Asteroid extends GameEntity {
     super(position, 0, velocity, size, config.IMAGE_URL);
     this.health = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
-  }
-
-  static getRandomSpawnPosition(canvasWidth, canvasHeight, margin, playerPosition) {
-    // Choose random edge (0=top, 1=right, 2=bottom, 3=left)
-    const edge = Math.floor(Math.random() * 4);
-    let x, y;
-
-    switch(edge) {
-      case 0: // Top
-        x = playerPosition.x - canvasWidth/2 + Math.random() * canvasWidth;
-        y = playerPosition.y - canvasHeight/2 - margin;
-        break;
-      case 1: // Right
-        x = playerPosition.x + canvasWidth/2 + margin;
-        y = playerPosition.y - canvasHeight/2 + Math.random() * canvasHeight;
-        break;
-      case 2: // Bottom
-        x = playerPosition.x - canvasWidth/2 + Math.random() * canvasWidth;
-        y = playerPosition.y + canvasHeight/2 + margin;
-        break;
-      case 3: // Left
-        x = playerPosition.x - canvasWidth/2 - margin;
-        y = playerPosition.y - canvasHeight/2 + Math.random() * canvasHeight;
-        break;
-    }
-
-    return new Vector2D(x, y);
   }
 
   static getDirectionTowardPlayer(spawnPosition, playerPosition) {
@@ -77,7 +41,7 @@ class Asteroid extends GameEntity {
         destroyed: true,
         sound: GameConfig.ASTEROID_BIG.DESTROYED_SOUND,
         volume: GameConfig.ASTEROID_BIG.DESTROYED_VOLUME,
-        spawns: AsteroidSpawn.createSpawnsFromAsteroid(this, this.canvasWidth, this.canvasHeight),
+        spawns: AsteroidSpawn.createSpawnsFromAsteroid(this, this.sprite.position),
         particleColor: GameConfig.ASTEROID_BIG.PARTICLE_COLOR
       };
     } else {

@@ -1,13 +1,11 @@
 class AsteroidSpawn extends GameEntity {
-  constructor(position, velocity, canvasWidth, canvasHeight) {
+  constructor(position, velocity) {
     const config = GameConfig.ASTEROID_SPAWN;
     const size = new Vector2D(config.WIDTH, config.HEIGHT);
 
     super(position, 0, velocity, size, config.IMAGE_URL);
     this.health = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
   }
 
   shouldDespawn(playerPosition, screenSize) {
@@ -51,10 +49,9 @@ class AsteroidSpawn extends GameEntity {
   }
 
   // Static method to create spawns from a destroyed asteroid
-  static createSpawnsFromAsteroid(asteroid, canvasWidth, canvasHeight) {
+  static createSpawnsFromAsteroid(asteroid, position) {
     const spawns = [];
     const originalVelocity = asteroid.velocity;
-    const position = asteroid.sprite.position;
 
     // Generate random velocities that sum to the original velocity
     // Method: Pick 2 random velocities, the 3rd is determined to maintain sum
@@ -82,25 +79,19 @@ class AsteroidSpawn extends GameEntity {
     // Third velocity ensures sum equals original
     const v3 = originalVelocity.sub(v1).sub(v2);
 
-    // Create spawns at slightly offset positions
+    // Create spawns at parent asteroid's position (slightly offset)
     const offset = GameConfig.ASTEROID.SPAWN_OFFSET_DISTANCE;
     spawns.push(new AsteroidSpawn(
       new Vector2D(position.x + Math.cos(angle1) * offset, position.y + Math.sin(angle1) * offset),
-      v1,
-      canvasWidth,
-      canvasHeight
+      v1
     ));
     spawns.push(new AsteroidSpawn(
       new Vector2D(position.x + Math.cos(angle2) * offset, position.y + Math.sin(angle2) * offset),
-      v2,
-      canvasWidth,
-      canvasHeight
+      v2
     ));
     spawns.push(new AsteroidSpawn(
       new Vector2D(position.x + Math.cos(angle1 + Math.PI) * offset, position.y + Math.sin(angle1 + Math.PI) * offset),
-      v3,
-      canvasWidth,
-      canvasHeight
+      v3
     ));
 
     return spawns;
