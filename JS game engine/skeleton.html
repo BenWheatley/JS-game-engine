@@ -373,7 +373,12 @@
 				}
 			}
 
-			// Z-order: Shots first (bottom layer)
+			// Z-order: Wormhole first (bottom layer)
+			if (gameState.wormhole) {
+				gameState.wormhole.draw();
+			}
+
+			// Shots
 			for (const projectile of gameState.playerProjectiles) {
 				projectile.draw();
 			}
@@ -381,14 +386,9 @@
 				projectile.draw();
 			}
 
-			// NPCs second (middle layer)
+			// NPCs
 			for (const npc of gameState.npcs) {
 				npc.draw();
-			}
-
-			// Wormhole
-			if (gameState.wormhole) {
-				gameState.wormhole.draw();
 			}
 
 			// Particles
