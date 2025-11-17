@@ -4,6 +4,6 @@ class Laser extends Projectile {
 	static speed = 5.5; // Speed magnitude (pixels per frame) - 10% faster than plasma/missiles
 
 	constructor(position, velocity) {
-		super(position, velocity, Laser.imageUrl, Laser.size);
+		super(position, velocity, Laser.imageUrl, Laser.size, GameConfig.LASER.DAMAGE);
 	}
 }

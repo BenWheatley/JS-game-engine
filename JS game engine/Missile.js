@@ -4,7 +4,7 @@ class Missile extends Projectile {
   static speed = 3;
 
   constructor(position, velocity) {
-    super(position, velocity, Missile.imageUrl, Missile.size);
+    super(position, velocity, Missile.imageUrl, Missile.size, GameConfig.MISSILE.DAMAGE);
   }
 
   onHitPlayer() {

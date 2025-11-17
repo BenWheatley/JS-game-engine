@@ -749,7 +749,7 @@
 						playerProjectilesToRemove.add(shot);
 						gameState.particleSystem.spawnImpact(shot.sprite.position);
 
-						const hitResult = npc.onHit(GameConfig.LASER.DAMAGE);
+						const hitResult = npc.onHit(shot.damage);
 						if (hitResult.destroyed) {
 							npcsToRemove.add(npc);
 							gameState.score += npc.scoreValue;

@@ -4,7 +4,7 @@ class Plasma extends Projectile {
 	static speed = 5; // Speed magnitude (pixels per frame)
 
 	constructor(position, velocity) {
-		super(position, velocity, Plasma.imageUrl, Plasma.size);
+		super(position, velocity, Plasma.imageUrl, Plasma.size, GameConfig.PLASMA.DAMAGE);
 	}
 
 	onHitPlayer() {
