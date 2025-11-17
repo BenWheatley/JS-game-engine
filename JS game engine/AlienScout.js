@@ -13,7 +13,6 @@ class AlienScout extends NPC {
 
     // AI state machine
     this.targetPosition = null;
-    this.offScreenTime = 0;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
 
@@ -92,16 +91,6 @@ class AlienScout extends NPC {
       this.pickNewTarget(playerPosition);
     }
 
-    // Track off-screen time
-    if (this.isOffScreen(playerPosition)) {
-      this.offScreenTime += deltaTime;
-      if (this.offScreenTime > GameConfig.NPC.OFFSCREEN_TIMEOUT) {
-        this.pickNewTarget(playerPosition);
-        this.offScreenTime = 0;
-      }
-    } else {
-      this.offScreenTime = 0;
-    }
 
     // AI: Turn towards target and accelerate
     if (this.targetPosition) {

@@ -16,7 +16,6 @@ const GameConfig = {
   // NPC AI behavior constants (AlienScout, AlienFighter, MissileCruiser)
   NPC: {
     ARRIVAL_THRESHOLD: 50,              // Distance in pixels to consider target reached
-    OFFSCREEN_TIMEOUT: 2000,            // Milliseconds before retargeting when offscreen
     TARGET_AREA_FACTOR: 0.8,            // Fraction of screen radius for target selection (80% = mostly on-screen)
     TURN_PRECISION: 0.01                // Minimum angle difference in radians before turning
   },
