@@ -738,19 +738,17 @@
 					npcProjectilesToRemove.add(projectile);
 					gameState.particleSystem.spawnImpact(gameState.player.sprite.position, "200, 100, 255");
 
-					// Damage depends on projectile type
-					if (projectile instanceof Missile) {
-						gameState.player.health -= projectile.damage; // 50 damage
-						gameState.player.onDamage(); // Reset shield regen timer
-						DebugLogger.log(`Player hit by missile! Health: ${gameState.player.health}`);
-						playSoundEffect('explosion', 0.6);
-						gameState.particleSystem.spawnExplosion(projectile.sprite.position, "255, 100, 50");
-					} else {
-						// Plasma shots deal 25 damage
-						gameState.player.health -= 25;
-						gameState.player.onDamage(); // Reset shield regen timer
-						DebugLogger.log(`Player hit by alien shot! Health: ${gameState.player.health}`);
-						playSoundEffect('hit', 0.5);
+					const hitResult = projectile.onHitPlayer();
+					gameState.player.health -= hitResult.damage;
+					gameState.player.onDamage(); // Reset shield regen timer
+					DebugLogger.log(`Player hit by projectile! Health: ${gameState.player.health}`);
+
+					if (hitResult.sound) {
+						playSoundEffect(hitResult.sound, hitResult.volume);
+					}
+
+					if (hitResult.particleColor) {
+						gameState.particleSystem.spawnExplosion(projectile.sprite.position, hitResult.particleColor);
 					}
 				}
 			}

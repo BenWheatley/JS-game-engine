@@ -277,5 +277,20 @@ const GameConfig = {
       return GameConfig.MINIMAP.RANGE;  // Automatically uses minimap range
     },
     PROJECTILE_DESPAWN_MULTIPLIER: 2    // Projectile despawn distance as multiple of screen size
+  },
+
+  // Projectile types - NPC weapons
+  PLASMA: {
+    DAMAGE: 25,                         // Damage dealt to player
+    HIT_SOUND: 'hit',                   // Sound when hitting player
+    HIT_VOLUME: 0.5,                    // Volume for hit sound
+    PARTICLE_COLOR: null                // Particle color (null = default)
+  },
+
+  MISSILE: {
+    DAMAGE: 50,                         // Damage dealt to player
+    HIT_SOUND: 'explosion',             // Sound when hitting player
+    HIT_VOLUME: 0.6,                    // Volume for hit sound
+    PARTICLE_COLOR: '255, 100, 50'      // Orange explosion particles
   }
 };

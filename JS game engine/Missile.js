@@ -7,4 +7,13 @@ class Missile extends Projectile {
   constructor(position, velocity) {
     super(position, velocity, Missile.imageUrl, Missile.size, Missile.damage);
   }
+
+  onHitPlayer() {
+    return {
+      damage: GameConfig.MISSILE.DAMAGE,
+      sound: GameConfig.MISSILE.HIT_SOUND,
+      volume: GameConfig.MISSILE.HIT_VOLUME,
+      particleColor: GameConfig.MISSILE.PARTICLE_COLOR
+    };
+  }
 }

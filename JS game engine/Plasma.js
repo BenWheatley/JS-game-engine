@@ -7,4 +7,13 @@ class Plasma extends Projectile {
 	constructor(position, velocity) {
 		super(position, velocity, Plasma.imageUrl, Plasma.size, Plasma.damage);
 	}
+
+	onHitPlayer() {
+		return {
+			damage: GameConfig.PLASMA.DAMAGE,
+			sound: GameConfig.PLASMA.HIT_SOUND,
+			volume: GameConfig.PLASMA.HIT_VOLUME,
+			particleColor: GameConfig.PLASMA.PARTICLE_COLOR
+		};
+	}
 }

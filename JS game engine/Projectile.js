@@ -14,4 +14,17 @@ class Projectile {
   draw() {
     this.sprite.draw();
   }
+
+  /**
+   * Called when this projectile hits the player
+   * @returns {Object} { damage, sound, volume, particleColor }
+   */
+  onHitPlayer() {
+    return {
+      damage: this.damage,
+      sound: null,
+      volume: 0,
+      particleColor: null
+    };
+  }
 }
