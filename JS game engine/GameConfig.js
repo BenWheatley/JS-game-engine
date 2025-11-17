@@ -96,7 +96,6 @@ const GameConfig = {
 
   // HUD display configuration
   HUD: {
-    HEALTH_BAR_WIDTH: 100,              // Health bar width in pixels
     HEALTH_BAR_HEIGHT: 16,              // Health bar height in pixels
     HEALTH_BAR_X: 10,                   // Health bar X position
     HEALTH_BAR_Y: 20,                   // Health bar Y position
