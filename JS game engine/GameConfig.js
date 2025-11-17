@@ -306,5 +306,59 @@ const GameConfig = {
     HIT_SOUND: 'explosion',             // Sound when hitting target
     HIT_VOLUME: 0.6,                    // Volume for hit sound
     PARTICLE_COLOR: '255, 100, 50'      // Orange explosion particles
-  }
+  },
+
+  // Achievement definitions
+  ACHIEVEMENTS: [
+    {
+      id: 'centurion',
+      name: 'Centurion',
+      description: 'Destroy 100 enemies in a single game'
+    },
+    {
+      id: 'untouchable',
+      name: 'Untouchable',
+      description: 'Complete a wave without taking any damage'
+    },
+    {
+      id: 'warp_speed',
+      name: 'Warp Speed',
+      description: 'Reach wave 5'
+    },
+    {
+      id: 'deep_space',
+      name: 'Deep Space',
+      description: 'Reach wave 10'
+    },
+    {
+      id: 'into_the_void',
+      name: 'Into the Void',
+      description: 'Reach wave 15'
+    },
+    {
+      id: 'fully_armed',
+      name: 'Fully Armed',
+      description: 'Max out weapon upgrades (level 10)'
+    },
+    {
+      id: 'speed_demon',
+      name: 'Speed Demon',
+      description: 'Max out engine upgrades (level 10)'
+    },
+    {
+      id: 'fortress',
+      name: 'Fortress',
+      description: 'Max out shield upgrades (level 10)'
+    },
+    {
+      id: 'ultimate_weapon',
+      name: 'Ultimate Weapon',
+      description: 'Max out all three upgrade paths'
+    },
+    {
+      id: 'sniper',
+      name: 'Sniper',
+      description: 'Hit an enemy that\'s offscreen'
+    }
+  ]
 };

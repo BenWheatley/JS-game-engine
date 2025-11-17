@@ -8,7 +8,8 @@ class MenuSystem {
     OPTIONS: 'options',
     GAME_OVER: 'gameOver',
     HIGH_SCORES: 'highScores',
-    UPGRADE: 'upgrade'
+    UPGRADE: 'upgrade',
+    ACHIEVEMENTS: 'achievements'
   };
 
   constructor(overlayElement, titleElement, buttonsElement, instructionsElement) {
@@ -50,6 +51,9 @@ class MenuSystem {
           break;
         case 'scoreList':
           this.createScoreList(itemConfig);
+          break;
+        case 'achievementList':
+          this.createAchievementList(itemConfig);
           break;
       }
     });
@@ -225,6 +229,58 @@ class MenuSystem {
       row.appendChild(nameAndScore);
       container.appendChild(row);
     }
+
+    this.buttonsElement.appendChild(container);
+  }
+
+  createAchievementList(config) {
+    const container = document.createElement('div');
+    container.className = 'menu-achievement-list-container';
+
+    const achievements = config.achievements || [];
+
+    // Create header showing progress
+    const header = document.createElement('div');
+    header.className = 'menu-achievement-header';
+    header.textContent = config.headerText || 'Achievements';
+    container.appendChild(header);
+
+    // Create achievement rows
+    achievements.forEach(achievement => {
+      const row = document.createElement('div');
+      row.className = 'menu-achievement-row';
+
+      // Add locked/unlocked class
+      if (achievement.unlocked) {
+        row.classList.add('unlocked');
+      } else {
+        row.classList.add('locked');
+      }
+
+      // Achievement icon (checkmark or lock)
+      const icon = document.createElement('span');
+      icon.className = 'menu-achievement-icon';
+      icon.textContent = achievement.unlocked ? '✓' : '🔒';
+
+      // Achievement content
+      const content = document.createElement('div');
+      content.className = 'menu-achievement-content';
+
+      const name = document.createElement('div');
+      name.className = 'menu-achievement-name';
+      name.textContent = achievement.name;
+
+      const description = document.createElement('div');
+      description.className = 'menu-achievement-description';
+      description.textContent = achievement.description;
+
+      content.appendChild(name);
+      content.appendChild(description);
+
+      row.appendChild(icon);
+      row.appendChild(content);
+      container.appendChild(row);
+    });
 
     this.buttonsElement.appendChild(container);
   }

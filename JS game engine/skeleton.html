@@ -49,6 +49,7 @@
 	<script type="text/javascript" src="MenuSystem.js"></script>
 	<script type="text/javascript" src="PreferencesManager.js"></script>
 	<script type="text/javascript" src="HighScoreManager.js"></script>
+	<script type="text/javascript" src="AchievementManager.js"></script>
 	<script type="text/javascript" src="Minimap.js"></script>
 </head>
 <body>
@@ -82,6 +83,9 @@
 
 		// Initialize high score manager
 		const highScoreManager = new HighScoreManager(menuSystem);
+
+		// Initialize achievement manager
+		const achievementManager = new AchievementManager(menuSystem);
 
 		// Preferences Management
 		const preferencesManager = new PreferencesManager();
@@ -173,7 +177,7 @@
 					{
 						type: 'button',
 						label: 'Achievements',
-						action: () => alert('Achievements - Coming Soon!')
+						action: () => showAchievementsMenu()
 					}
 				],
 				instructions: 'Arrow Keys or Left Stick: Move | Space or A Button: Shoot | ESC: Pause'
@@ -377,6 +381,38 @@
 				items: [
 					...getVolumeSliders(),
 					getFullscreenCheckbox(),
+					{
+						type: 'button',
+						label: 'Back',
+						action: () => showMainMenu()
+					}
+				],
+				instructions: ''
+			});
+		}
+
+		function showAchievementsMenu() {
+			setMenuOverlayMode(false); // Opaque overlay with background
+
+			// Build achievement list with unlock status
+			const achievementList = GameConfig.ACHIEVEMENTS.map(achievement => {
+				return {
+					...achievement,
+					unlocked: achievementManager.isUnlocked(achievement.id)
+				};
+			});
+
+			const unlockedCount = achievementManager.getUnlockedCount();
+			const totalCount = achievementManager.getTotalCount();
+
+			menuSystem.showMenu(MenuSystem.MenuTypes.ACHIEVEMENTS, {
+				title: 'ACHIEVEMENTS',
+				items: [
+					{
+						type: 'achievementList',
+						achievements: achievementList,
+						headerText: `${unlockedCount} / ${totalCount} Unlocked`
+					},
 					{
 						type: 'button',
 						label: 'Back',
