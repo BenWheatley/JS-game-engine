@@ -748,6 +748,14 @@
 					if (CollisionDetection.checkAABB(shot, npc)) {
 						playerProjectilesToRemove.add(shot);
 
+						// Spawn impact particles and sound from shot properties
+						if (shot.particleColor) {
+							gameState.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
+						}
+						if (shot.hitSound) {
+							playSoundEffect(shot.hitSound, shot.hitVolume);
+						}
+
 						DebugLogger.log(`Shot damage: ${shot.damage}, NPC type: ${npc.constructor.name}, NPC health before: ${npc.health}`);
 						const hitResult = npc.onHit(shot.damage);
 						DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);

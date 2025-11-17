@@ -6,5 +6,8 @@ class Laser extends Projectile {
 	constructor(position, velocity) {
 		DebugLogger.log(`Creating Laser: GameConfig.LASER=${GameConfig.LASER}, GameConfig.LASER.DAMAGE=${GameConfig.LASER ? GameConfig.LASER.DAMAGE : 'LASER undefined'}`);
 		super(position, velocity, Laser.imageUrl, Laser.size, GameConfig.LASER.DAMAGE);
+		this.hitSound = GameConfig.LASER.HIT_SOUND;
+		this.hitVolume = GameConfig.LASER.HIT_VOLUME;
+		this.particleColor = GameConfig.LASER.PARTICLE_COLOR;
 	}
 }
