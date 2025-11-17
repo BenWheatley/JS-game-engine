@@ -150,8 +150,8 @@ const GameConfig = {
     IMAGE_URL: 'alien-scout.png',
     WIDTH: 52,
     HEIGHT: 54,
-    HEALTH: 100,
-    SCORE_VALUE: 150,
+    HEALTH: 10,
+    SCORE_VALUE: 10,
     FORWARD_ACCELERATION: 0.0008,       // Slightly less than player
     MAX_SPEED: 0.05,                    // Slightly less than player
     ROTATIONAL_SPEED: Math.PI / 1200,   // Slightly slower rotation than player
@@ -169,8 +169,8 @@ const GameConfig = {
     IMAGE_URL: 'alien-fighter.png',
     WIDTH: 52,
     HEIGHT: 50,
-    HEALTH: 100,
-    SCORE_VALUE: 200,
+    HEALTH: 20,
+    SCORE_VALUE: 20,
     FORWARD_ACCELERATION: 0.0016,       // 2x AlienScout
     MAX_SPEED: 0.10,                    // 2x AlienScout
     ROTATIONAL_SPEED: Math.PI / 600,    // 2x AlienScout
@@ -191,8 +191,8 @@ const GameConfig = {
     IMAGE_URL: 'missile_ship.png',
     WIDTH: 72,                          // 2x sprite asset size (36x46)
     HEIGHT: 92,
-    HEALTH: 200,
-    SCORE_VALUE: 300,
+    HEALTH: 100,
+    SCORE_VALUE: 200,
     FORWARD_ACCELERATION: 0.0004,       // Slower than AlienScout
     MAX_SPEED: 0.04,                    // Slower than AlienScout
     ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
@@ -213,7 +213,7 @@ const GameConfig = {
     IMAGE_URL: 'alien-saucer.png',
     WIDTH: 64,
     HEIGHT: 64,
-    HEALTH: 300,
+    HEALTH: 200,
     SCORE_VALUE: 500,
     MOVEMENT_DURATION: 3000,            // Milliseconds to reach target (3 seconds)
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
@@ -234,7 +234,7 @@ const GameConfig = {
     WIDTH: 52,
     HEIGHT: 52,
     HEALTH: 30,
-    SCORE_VALUE: 200,
+    SCORE_VALUE: 30,
     SPEED: 0.04,                        // Pixels per millisecond (similar to player max speed)
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
     HIT_VOLUME: 0.4,                    // Volume for hit sound
@@ -250,8 +250,8 @@ const GameConfig = {
     IMAGE_URL: 'asteroid-medium.png',
     WIDTH: 27,
     HEIGHT: 26,
-    HEALTH: 1,
-    SCORE_VALUE: 50,
+    HEALTH: 10,
+    SCORE_VALUE: 10,
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.3,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color for small asteroids
