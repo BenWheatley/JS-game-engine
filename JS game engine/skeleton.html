@@ -747,7 +747,6 @@
 				for (const npc of gameState.npcs) {
 					if (CollisionDetection.checkAABB(shot, npc)) {
 						playerProjectilesToRemove.add(shot);
-						gameState.particleSystem.spawnImpact(shot.sprite.position);
 
 						DebugLogger.log(`Shot damage: ${shot.damage}, NPC type: ${npc.constructor.name}, NPC health before: ${npc.health}`);
 						const hitResult = npc.onHit(shot.damage);

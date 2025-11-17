@@ -157,7 +157,7 @@ const GameConfig = {
     ROTATIONAL_SPEED: Math.PI / 1200,   // Slightly slower rotation than player
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null,               // Particle color (null = default)
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
@@ -177,7 +177,7 @@ const GameConfig = {
     SHOOT_VOLUME: 0.2,                  // Volume for shoot sound (0.0 - 1.0)
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null,               // Particle color (null = default)
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
@@ -199,7 +199,7 @@ const GameConfig = {
     HIT_VOLUME: 0.4,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.6,              // Volume for destruction sound
-    PARTICLE_COLOR: null,               // Particle color (null = default)
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.7               // Volume for collision sound
   },
@@ -217,7 +217,7 @@ const GameConfig = {
     SHOOT_VOLUME: 0.3,                  // Volume for shoot sound (0.0 - 1.0)
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null,               // Particle color (null = default)
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
@@ -234,7 +234,7 @@ const GameConfig = {
     HIT_VOLUME: 0.4,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
-    PARTICLE_COLOR: null,               // Particle color (null = default)
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
