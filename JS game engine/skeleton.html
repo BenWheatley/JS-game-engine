@@ -121,27 +121,26 @@
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
-			canvas.classList.add('hide-cursor');
+			setCursorVisibility(false);
 		}
 
 		function gameOver() {
 			gameState.currentState = null; // No longer in active gameplay
 			musicPlayer.stop();
-			canvas.classList.remove('hide-cursor');
+			setCursorVisibility(true);
 			showGameOverMenu();
 		}
 
 		function returnToMenu() {
 			gameState.currentState = null; // No longer in active gameplay
 			musicPlayer.stop();
-			canvas.classList.remove('hide-cursor');
+			setCursorVisibility(true);
 			showMainMenu();
 		}
 
 		// Menu configuration functions
 		function showMainMenu() {
-			// Remove pause class (show background image)
-			document.getElementById('menuOverlay').classList.remove('pause');
+			setMenuOverlayMode(false); // Opaque overlay with background
 
 			// Restore title image if it was replaced by text
 			const titleElement = document.getElementById('menuTitle');
@@ -179,8 +178,7 @@
 
 
 		function showGameOverMenu() {
-			// Remove pause class (show background image)
-			document.getElementById('menuOverlay').classList.remove('pause');
+			setMenuOverlayMode(false); // Opaque overlay with background
 
 			let playerName = '';
 
@@ -243,12 +241,11 @@
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
-			canvas.classList.add('hide-cursor');
+			setCursorVisibility(false);
 		}
 
 		function showPauseMenu() {
-			// Add pause class for transparent overlay (no background image)
-			document.getElementById('menuOverlay').classList.add('pause');
+			setMenuOverlayMode(true); // Transparent overlay for pause
 
 			menuSystem.showMenu(MenuSystem.MenuTypes.PAUSE, {
 				title: 'PAUSED',
@@ -258,41 +255,8 @@
 						label: 'Continue',
 						action: () => resumeGame()
 					},
-					{
-						type: 'slider',
-						label: 'Sound Effects Volume',
-						min: 0,
-						max: 100,
-						value: preferencesManager.soundEffectsVolume,
-						suffix: '%',
-						onChange: (value) => {
-							preferencesManager.soundEffectsVolume = parseInt(value);
-						}
-					},
-					{
-						type: 'slider',
-						label: 'Music Volume',
-						min: 0,
-						max: 100,
-						value: preferencesManager.musicVolume,
-						suffix: '%',
-						onChange: (value) => {
-							preferencesManager.musicVolume = parseInt(value);
-							Note.setVolume(preferencesManager.musicVolume / 100); // Convert percentage to 0.0-1.0
-						}
-					},
-					{
-						type: 'checkbox',
-						label: 'Fullscreen',
-						checked: VibeEngine.instance.isFullScreen,
-						onChange: (checked) => {
-							if (checked && !VibeEngine.instance.isFullScreen) {
-								VibeEngine.instance.enterFullScreen();
-							} else if (!checked && VibeEngine.instance.isFullScreen) {
-								VibeEngine.instance.exitFullScreen();
-							}
-						}
-					},
+					...getVolumeSliders(),
+					getFullscreenCheckbox(),
 					{
 						type: 'button',
 						label: 'Quit',
@@ -313,10 +277,8 @@
 			// Pause game when showing upgrade menu
 			gameState.currentState = GameState.States.PAUSED;
 			musicPlayer.pause();
-			canvas.classList.remove('hide-cursor');
-
-			// Add pause class for transparent overlay (no background image)
-			document.getElementById('menuOverlay').classList.add('pause');
+			setCursorVisibility(true);
+			setMenuOverlayMode(true); // Transparent overlay for pause
 
 			menuSystem.showMenu(MenuSystem.MenuTypes.UPGRADE, {
 				title: 'CHOOSE UPGRADE',
@@ -359,52 +321,18 @@
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
-			canvas.classList.add('hide-cursor');
+			setCursorVisibility(false);
 			gameState.advanceLevel();
 		}
 
 		function showOptionsMenu() {
-			// Remove pause class (show background image)
-			document.getElementById('menuOverlay').classList.remove('pause');
+			setMenuOverlayMode(false); // Opaque overlay with background
 
 			menuSystem.showMenu(MenuSystem.MenuTypes.OPTIONS, {
 				title: 'OPTIONS',
 				items: [
-					{
-						type: 'slider',
-						label: 'Sound Effects Volume',
-						min: 0,
-						max: 100,
-						value: preferencesManager.soundEffectsVolume,
-						suffix: '%',
-						onChange: (value) => {
-							preferencesManager.soundEffectsVolume = parseInt(value);
-						}
-					},
-					{
-						type: 'slider',
-						label: 'Music Volume',
-						min: 0,
-						max: 100,
-						value: preferencesManager.musicVolume,
-						suffix: '%',
-						onChange: (value) => {
-							preferencesManager.musicVolume = parseInt(value);
-							Note.setVolume(preferencesManager.musicVolume / 100); // Convert percentage to 0.0-1.0
-						}
-					},
-					{
-						type: 'checkbox',
-						label: 'Fullscreen',
-						checked: VibeEngine.instance.isFullScreen,
-						onChange: (checked) => {
-							if (checked && !VibeEngine.instance.isFullScreen) {
-								VibeEngine.instance.enterFullScreen();
-							} else if (!checked && VibeEngine.instance.isFullScreen) {
-								VibeEngine.instance.exitFullScreen();
-							}
-						}
-					},
+					...getVolumeSliders(),
+					getFullscreenCheckbox(),
 					{
 						type: 'button',
 						label: 'Back',
@@ -563,6 +491,101 @@
 			}
 		}
 
+		// Helper: Get volume slider controls (used in Pause and Options menus)
+		function getVolumeSliders() {
+			return [
+				{
+					type: 'slider',
+					label: 'Sound Effects Volume',
+					min: 0,
+					max: 100,
+					value: preferencesManager.soundEffectsVolume,
+					suffix: '%',
+					onChange: (value) => {
+						preferencesManager.soundEffectsVolume = parseInt(value);
+					}
+				},
+				{
+					type: 'slider',
+					label: 'Music Volume',
+					min: 0,
+					max: 100,
+					value: preferencesManager.musicVolume,
+					suffix: '%',
+					onChange: (value) => {
+						preferencesManager.musicVolume = parseInt(value);
+						Note.setVolume(preferencesManager.musicVolume / 100);
+					}
+				}
+			];
+		}
+
+		// Helper: Get fullscreen checkbox control (used in Pause and Options menus)
+		function getFullscreenCheckbox() {
+			return {
+				type: 'checkbox',
+				label: 'Fullscreen',
+				checked: VibeEngine.instance.isFullScreen,
+				onChange: (checked) => {
+					if (checked && !VibeEngine.instance.isFullScreen) {
+						VibeEngine.instance.enterFullScreen();
+					} else if (!checked && VibeEngine.instance.isFullScreen) {
+						VibeEngine.instance.exitFullScreen();
+					}
+				}
+			};
+		}
+
+		// Helper: Set cursor visibility
+		function setCursorVisibility(visible) {
+			if (visible) {
+				canvas.classList.remove('hide-cursor');
+			} else {
+				canvas.classList.add('hide-cursor');
+			}
+		}
+
+		// Helper: Set menu overlay mode (pause = transparent overlay, regular = opaque)
+		function setMenuOverlayMode(isPauseMode) {
+			const overlay = document.getElementById('menuOverlay');
+			if (isPauseMode) {
+				overlay.classList.add('pause');
+			} else {
+				overlay.classList.remove('pause');
+			}
+		}
+
+		// Helper: Update all projectiles
+		function updateAllProjectiles() {
+			for (const projectile of gameState.playerProjectiles) {
+				projectile.update();
+			}
+			for (const projectile of gameState.npcProjectiles) {
+				projectile.update();
+			}
+		}
+
+		// Helper: Despawn projectiles that are too far from player
+		function despawnDistantProjectiles(despawnDistance) {
+			const filterByDistance = (projectile) => {
+				const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
+				return distance < despawnDistance;
+			};
+			gameState.playerProjectiles = gameState.playerProjectiles.filter(filterByDistance);
+			gameState.npcProjectiles = gameState.npcProjectiles.filter(filterByDistance);
+		}
+
+		// Helper: Wrap a single coordinate around world boundaries
+		function wrapCoordinate(npcCoord, playerCoord, wrapDistance) {
+			const offset = npcCoord - playerCoord;
+			if (offset > wrapDistance) {
+				return playerCoord - wrapDistance;
+			} else if (offset < -wrapDistance) {
+				return playerCoord + wrapDistance;
+			}
+			return npcCoord;
+		}
+
 		// Player shooting function
 		function shoot() {
 			const weaponStats = gameState.player.getWeaponStats();
@@ -647,12 +670,7 @@
 			}
 
 			// Update all projectiles
-			for (const projectile of gameState.playerProjectiles) {
-				projectile.update();
-			}
-			for (const projectile of gameState.npcProjectiles) {
-				projectile.update();
-			}
+			updateAllProjectiles();
 
 			// Update particles
 			gameState.particleSystem.update(deltaTime);
@@ -755,33 +773,14 @@
 			const wrapDistance = GameConfig.WORLD.NPC_WRAP_DISTANCE; // Minimap range - wrap NPCs at this distance
 			const despawnDistance = Math.max(canvas.width, canvas.height) * GameConfig.WORLD.PROJECTILE_DESPAWN_MULTIPLIER; // Despawn projectiles
 
-			// Wrap all NPCs around minimap edges (unified loop)
+			// Wrap all NPCs around minimap edges
 			for (const npc of gameState.npcs) {
-				const offsetX = npc.sprite.position.x - gameState.player.sprite.position.x;
-				const offsetY = npc.sprite.position.y - gameState.player.sprite.position.y;
-
-				if (offsetX > wrapDistance) {
-					npc.sprite.position.x = gameState.player.sprite.position.x - wrapDistance;
-				} else if (offsetX < -wrapDistance) {
-					npc.sprite.position.x = gameState.player.sprite.position.x + wrapDistance;
-				}
-
-				if (offsetY > wrapDistance) {
-					npc.sprite.position.y = gameState.player.sprite.position.y - wrapDistance;
-				} else if (offsetY < -wrapDistance) {
-					npc.sprite.position.y = gameState.player.sprite.position.y + wrapDistance;
-				}
+				npc.sprite.position.x = wrapCoordinate(npc.sprite.position.x, gameState.player.sprite.position.x, wrapDistance);
+				npc.sprite.position.y = wrapCoordinate(npc.sprite.position.y, gameState.player.sprite.position.y, wrapDistance);
 			}
 
-			// Despawn projectiles that are too far from player (unified filtering)
-			gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile => {
-				const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
-				return distance < despawnDistance;
-			});
-			gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile => {
-				const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
-				return distance < despawnDistance;
-			});
+			// Despawn projectiles that are too far from player
+			despawnDistantProjectiles(despawnDistance);
 
 			checkGamepadInput(deltaTime);
 		}
