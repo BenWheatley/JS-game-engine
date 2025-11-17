@@ -211,8 +211,8 @@ const GameConfig = {
     IMAGE_URL: 'alien-saucer.png',
     WIDTH: 64,
     HEIGHT: 64,
-    HEALTH: 150,
-    SCORE_VALUE: 250,
+    HEALTH: 300,
+    SCORE_VALUE: 500,
     MOVEMENT_DURATION: 3000,            // Milliseconds to reach target (3 seconds)
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
@@ -229,7 +229,7 @@ const GameConfig = {
     IMAGE_URL: 'asteroid-big.png',
     WIDTH: 52,
     HEIGHT: 52,
-    HEALTH: 3,
+    HEALTH: 30,
     SCORE_VALUE: 200,
     SPEED: 0.04,                        // Pixels per millisecond (similar to player max speed)
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
