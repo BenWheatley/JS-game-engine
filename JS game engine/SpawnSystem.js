@@ -14,7 +14,8 @@ class SpawnSystem {
    * @returns {Object} Wave definition with spawn counts
    */
   static getWaveDefinition(level) {
-    const waveIndex = Math.min(level - 1, GameConfig.SPAWNING.MAX_LEVEL_INDEX);
+    const maxIndex = GameConfig.SPAWNING.WAVES.length - 1;
+    const waveIndex = Math.min(level - 1, maxIndex);
     const baseWave = GameConfig.SPAWNING.WAVES[waveIndex];
 
     // If level exceeds wave definitions, scale up the last wave

@@ -1,8 +1,7 @@
 class Projectile {
-  constructor(position, velocity, imageUrl, size, damage) {
+  constructor(position, velocity, imageUrl, size) {
     this.sprite = new Sprite(imageUrl, position, size);
     this.velocity = velocity;
-    this.damage = damage;
     // Set rotation to face direction of travel (+PI/2 because sprite faces up at 0 rotation)
     this.sprite.rotation = Math.atan2(velocity.y, velocity.x) + Math.PI / 2;
   }
@@ -21,7 +20,7 @@ class Projectile {
    */
   onHitPlayer() {
     return {
-      damage: this.damage,
+      damage: 0,
       sound: null,
       volume: 0,
       particleColor: null

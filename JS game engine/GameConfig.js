@@ -142,8 +142,7 @@ const GameConfig = {
     ],
 
     // Scaling factor for levels beyond the wave definitions
-    SCALING_FACTOR: 1.15,               // Multiply enemy counts by this for each level beyond wave array
-    MAX_LEVEL_INDEX: 9                  // Index of last wave (repeats with scaling after this)
+    SCALING_FACTOR: 1.15                // Multiply enemy counts by this for each level beyond wave array
   },
 
   // Alien Scout - Basic enemy that flies around
@@ -284,7 +283,7 @@ const GameConfig = {
     DAMAGE: 25,                         // Damage dealt to player
     HIT_SOUND: 'hit',                   // Sound when hitting player
     HIT_VOLUME: 0.5,                    // Volume for hit sound
-    PARTICLE_COLOR: null                // Particle color (null = default)
+    PARTICLE_COLOR: '50, 150, 255'      // Blue/cyan particles
   },
 
   MISSILE: {

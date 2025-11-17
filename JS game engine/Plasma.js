@@ -5,7 +5,7 @@ class Plasma extends Projectile {
 	static damage = 10;
 
 	constructor(position, velocity) {
-		super(position, velocity, Plasma.imageUrl, Plasma.size, Plasma.damage);
+		super(position, velocity, Plasma.imageUrl, Plasma.size);
 	}
 
 	onHitPlayer() {

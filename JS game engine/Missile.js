@@ -5,7 +5,7 @@ class Missile extends Projectile {
   static damage = 50;
 
   constructor(position, velocity) {
-    super(position, velocity, Missile.imageUrl, Missile.size, Missile.damage);
+    super(position, velocity, Missile.imageUrl, Missile.size);
   }
 
   onHitPlayer() {
