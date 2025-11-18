@@ -72,7 +72,51 @@ class AchievementManager {
     this.saveAchievements();
 
     DebugLogger.log(`Achievement unlocked: ${achievementId}`);
+
+    // Show toast notification
+    this.showToast(achievementId);
+
     return true;
+  }
+
+  /**
+   * Shows a toast notification for an unlocked achievement
+   * @param {string} achievementId - ID of achievement to display
+   */
+  showToast(achievementId) {
+    // Find achievement config
+    const achievement = GameConfig.ACHIEVEMENTS.find(a => a.id === achievementId);
+    if (!achievement) {
+      return;
+    }
+
+    // Get or create toast container
+    let container = document.getElementById('achievementToastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'achievementToastContainer';
+      document.body.appendChild(container);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+
+    toast.innerHTML = `
+      <div class="achievement-toast-icon">✓</div>
+      <div class="achievement-toast-content">
+        <div class="achievement-toast-title">Achievement Unlocked</div>
+        <div class="achievement-toast-name">${achievement.name}</div>
+        <div class="achievement-toast-description">${achievement.description}</div>
+      </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Remove toast after animation completes (4 seconds total)
+    setTimeout(() => {
+      toast.remove();
+    }, 4000);
   }
 
   /**
