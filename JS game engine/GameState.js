@@ -51,6 +51,14 @@ class GameState {
       plasma: 0,
       missile: 0
     }; // Game time of last shot per projectile type
+
+    // Achievement tracking
+    this.achievementStats = {
+      totalAliensKilled: 0,           // Total aliens destroyed (for centurion)
+      collisionKills: 0,               // Aliens/asteroids destroyed by ramming (for demolition_derby)
+      damageTakenThisWave: 0,          // Damage taken in current wave (for untouchable)
+      waveStartHealth: 0               // Health at wave start (for untouchable)
+    };
   }
 
   /**
@@ -71,6 +79,14 @@ class GameState {
       laser: 0,
       plasma: 0,
       missile: 0
+    };
+
+    // Reset achievement tracking for new game
+    this.achievementStats = {
+      totalAliensKilled: 0,
+      collisionKills: 0,
+      damageTakenThisWave: 0,
+      waveStartHealth: this.player.health
     };
 
     // Spawn first wave
@@ -122,6 +138,10 @@ class GameState {
     // Clear all projectiles when transitioning levels
     this.playerProjectiles = [];
     this.npcProjectiles = [];
+
+    // Reset wave-specific achievement tracking
+    this.achievementStats.damageTakenThisWave = 0;
+    this.achievementStats.waveStartHealth = this.player.health;
 
     SpawnSystem.spawnWave(
       this.currentLevel,

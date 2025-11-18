@@ -281,6 +281,14 @@
 			});
 		}
 
+		function checkUltimateWeaponAchievement() {
+			if (gameState.player.weaponLevel === 10 &&
+				gameState.player.engineLevel === 10 &&
+				gameState.player.shieldLevel === 10) {
+				achievementManager.unlock('ultimate_weapon');
+			}
+		}
+
 		function showUpgradeMenu() {
 			// Set upgrading state - time passes but player has no control
 			gameState.currentState = GameState.States.UPGRADING;
@@ -323,6 +331,13 @@
 					action: () => {
 						gameState.player.weaponLevel++;
 						DebugLogger.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
+
+						// Check weapon upgrade achievements
+						if (gameState.player.weaponLevel === 10) {
+							achievementManager.unlock('fully_armed');
+						}
+						checkUltimateWeaponAchievement();
+
 						resumeFromUpgrade();
 					}
 				});
@@ -336,6 +351,13 @@
 					action: () => {
 						gameState.player.engineLevel++;
 						DebugLogger.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
+
+						// Check engine upgrade achievements
+						if (gameState.player.engineLevel === 10) {
+							achievementManager.unlock('speed_demon');
+						}
+						checkUltimateWeaponAchievement();
+
 						resumeFromUpgrade();
 					}
 				});
@@ -350,6 +372,13 @@
 						gameState.player.shieldLevel++;
 						gameState.player.applyShieldUpgrade(); // Apply max health and heal to full
 						DebugLogger.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
+
+						// Check shield upgrade achievements
+						if (gameState.player.shieldLevel === 10) {
+							achievementManager.unlock('fortress');
+						}
+						checkUltimateWeaponAchievement();
+
 						resumeFromUpgrade();
 					}
 				});
@@ -365,12 +394,26 @@
 		}
 
 		function resumeFromUpgrade() {
+			// Check Untouchable achievement before advancing
+			if (gameState.achievementStats.damageTakenThisWave === 0) {
+				achievementManager.unlock('untouchable');
+			}
+
 			// Resume game and advance level
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			setCursorVisibility(false);
 			gameState.advanceLevel();
+
+			// Check wave progression achievements
+			if (gameState.currentLevel === 5) {
+				achievementManager.unlock('warp_speed');
+			} else if (gameState.currentLevel === 10) {
+				achievementManager.unlock('deep_space');
+			} else if (gameState.currentLevel === 15) {
+				achievementManager.unlock('into_the_void');
+			}
 		}
 
 		function showOptionsMenu() {
@@ -854,6 +897,16 @@
 							playSoundEffect(shot.hitSound, shot.hitVolume);
 						}
 
+						// Check if NPC is offscreen for Sniper achievement
+						const npcScreenX = npc.sprite.position.x - gameState.player.sprite.position.x + canvas.width / 2;
+						const npcScreenY = npc.sprite.position.y - gameState.player.sprite.position.y + canvas.height / 2;
+						const isOffscreen = npcScreenX < 0 || npcScreenX > canvas.width ||
+						                    npcScreenY < 0 || npcScreenY > canvas.height;
+
+						if (isOffscreen) {
+							achievementManager.unlock('sniper');
+						}
+
 						DebugLogger.log(`Shot damage: ${shot.damage}, NPC type: ${npc.constructor.name}, NPC health before: ${npc.health}`);
 						const hitResult = npc.onHit(shot.damage);
 						DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);
@@ -863,6 +916,14 @@
 							gameState.particleSystem.spawnExplosion(npc.sprite.position, hitResult.particleColor);
 							if (hitResult.spawns) {
 								gameState.npcs.push(...hitResult.spawns);
+							}
+
+							// Track alien kills (not asteroids) for centurion achievement
+							if (npc.constructor.name !== 'Asteroid' && npc.constructor.name !== 'AsteroidSpawn') {
+								gameState.achievementStats.totalAliensKilled++;
+								if (gameState.achievementStats.totalAliensKilled >= 100) {
+									achievementManager.unlock('centurion');
+								}
 							}
 						}
 						if (hitResult.sound) {
@@ -886,6 +947,15 @@
 					if (collisionResult.sound) {
 						playSoundEffect(collisionResult.sound, collisionResult.volume);
 					}
+
+					// Track collision kills for demolition_derby achievement
+					gameState.achievementStats.collisionKills++;
+					if (gameState.achievementStats.collisionKills >= 30) {
+						achievementManager.unlock('demolition_derby');
+					}
+
+					// Track damage taken for untouchable achievement
+					gameState.achievementStats.damageTakenThisWave += collisionResult.damage;
 				}
 			}
 
@@ -906,6 +976,9 @@
 					if (hitResult.particleColor) {
 						gameState.particleSystem.spawnExplosion(projectile.sprite.position, hitResult.particleColor);
 					}
+
+					// Track damage taken for untouchable achievement
+					gameState.achievementStats.damageTakenThisWave += hitResult.damage;
 				}
 			}
 
