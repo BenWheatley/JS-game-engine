@@ -186,7 +186,7 @@ const GameConfig = {
     COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
 
-  // Missile Cruiser - Heavy enemy that fires homing missiles
+  // Missile Cruiser - Heavy enemy that fires missiles
   MISSILE_CRUISER: {
     IMAGE_URL: 'missile_ship.png',
     WIDTH: 72,                          // 2x sprite asset size (36x46)
