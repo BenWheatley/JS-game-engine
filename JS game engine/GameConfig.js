@@ -217,7 +217,7 @@ const GameConfig = {
     HEALTH: 200,
     SCORE_VALUE: 500,
     SHOW_HEALTH_BAR: true,              // Display health bar above sprite
-    MOVEMENT_DURATION: 3000,            // Milliseconds to reach target (3 seconds)
+    MOVEMENT_DURATION: 4500,            // Milliseconds to reach target
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
     SHOOT_VOLUME: 0.3,                  // Volume for shoot sound (0.0 - 1.0)
