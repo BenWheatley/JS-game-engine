@@ -560,6 +560,12 @@
 			context.textAlign = 'left';
 			context.fillText(`Score: ${gameState.score}`, 10, 60);
 
+			// Mini-map
+			gameState.minimap.draw(context, {
+				npcs: gameState.npcs,
+				wormhole: gameState.wormhole
+			}, gameState.player.sprite.position);
+
 			// Wormhole message and arrow
 			if (gameState.wormhole) {
 				// Draw message with stroke
@@ -622,12 +628,6 @@
 					context.restore();
 				}
 			}
-
-			// Mini-map
-			gameState.minimap.draw(context, {
-				npcs: gameState.npcs,
-				wormhole: gameState.wormhole
-			}, gameState.player.sprite.position);
 		}
 
 		// Handle ESC key for pause/resume (checked every frame)
