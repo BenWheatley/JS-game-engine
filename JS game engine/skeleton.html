@@ -290,6 +290,11 @@
 		}
 
 		function showUpgradeMenu() {
+			// Check Untouchable achievement before advancing
+			if (gameState.achievementStats.damageTakenThisWave === 0) {
+				achievementManager.unlock('untouchable');
+			}
+
 			// Set upgrading state - time passes but player has no control
 			gameState.currentState = GameState.States.UPGRADING;
 			musicPlayer.pause();
@@ -388,11 +393,6 @@
 		}
 
 		function resumeFromUpgrade() {
-			// Check Untouchable achievement before advancing
-			if (gameState.achievementStats.damageTakenThisWave === 0) {
-				achievementManager.unlock('untouchable');
-			}
-
 			// Resume game and advance level
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
