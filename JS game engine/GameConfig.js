@@ -191,7 +191,7 @@ const GameConfig = {
     IMAGE_URL: 'missile_ship.png',
     WIDTH: 72,                          // 2x sprite asset size (36x46)
     HEIGHT: 92,
-    HEALTH: 100,
+    HEALTH: 200,
     SCORE_VALUE: 200,
     SHOW_HEALTH_BAR: true,              // Display health bar above sprite
     FORWARD_ACCELERATION: 0.0004,       // Slower than AlienScout
@@ -214,7 +214,7 @@ const GameConfig = {
     IMAGE_URL: 'alien-saucer.png',
     WIDTH: 64,
     HEIGHT: 64,
-    HEALTH: 200,
+    HEALTH: 100,
     SCORE_VALUE: 500,
     SHOW_HEALTH_BAR: true,              // Display health bar above sprite
     MOVEMENT_DURATION: 4500,            // Milliseconds to reach target
