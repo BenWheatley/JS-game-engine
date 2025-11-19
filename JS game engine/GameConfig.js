@@ -123,22 +123,22 @@ const GameConfig = {
       { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, asteroids: 4 },
 
       // Level 5: Ramping up
-      { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 2, asteroids: 5 },
+      { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, asteroids: 5 },
 
       // Level 6: Heavy combat
-      { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 2, asteroids: 6 },
+      { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, asteroids: 6 },
 
       // Level 7: Elite wave
-      { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 3, asteroids: 6 },
+      { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, asteroids: 6 },
 
       // Level 8: Introduce missile cruisers
-      { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 4, asteroids: 7 },
+      { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, asteroids: 7 },
 
       // Level 9: Near impossible
-      { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 5, asteroids: 8 },
+      { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, asteroids: 8 },
 
       // Level 10+: Repeating pattern with scaling
-      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 6, asteroids: 10 }
+      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, asteroids: 10 }
     ],
 
     // Scaling factor for levels beyond the wave definitions
