@@ -54,10 +54,7 @@ class GameState {
 
     // Achievement tracking
     this.achievementStats = {
-      totalAliensKilled: 0,           // Total aliens destroyed (for centurion)
-      collisionKills: 0,               // Aliens/asteroids destroyed by ramming (for demolition_derby)
-      damageTakenThisWave: 0,          // Damage taken in current wave (for untouchable)
-      waveStartHealth: 0               // Health at wave start (for untouchable)
+      damageTakenThisWave: 0          // Damage taken in current wave (for untouchable)
     };
   }
 
@@ -83,10 +80,7 @@ class GameState {
 
     // Reset achievement tracking for new game
     this.achievementStats = {
-      totalAliensKilled: 0,
-      collisionKills: 0,
-      damageTakenThisWave: 0,
-      waveStartHealth: this.player.health
+      damageTakenThisWave: 0
     };
 
     // Spawn first wave
@@ -141,7 +135,6 @@ class GameState {
 
     // Reset wave-specific achievement tracking
     this.achievementStats.damageTakenThisWave = 0;
-    this.achievementStats.waveStartHealth = this.player.health;
 
     SpawnSystem.spawnWave(
       this.currentLevel,
