@@ -277,6 +277,29 @@ class MenuSystem {
       content.appendChild(name);
       content.appendChild(description);
 
+      // Add progress bar if achievement tracks progress and isn't unlocked
+      if (achievement.trackProgress && !achievement.unlocked && achievement.maxProgress) {
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'menu-achievement-progress-container';
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'menu-achievement-progress-bar';
+
+        const progressFill = document.createElement('div');
+        progressFill.className = 'menu-achievement-progress-fill';
+        const progressPercent = Math.min(100, (achievement.progress / achievement.maxProgress) * 100);
+        progressFill.style.width = `${progressPercent}%`;
+
+        const progressText = document.createElement('div');
+        progressText.className = 'menu-achievement-progress-text';
+        progressText.textContent = `${achievement.progress} / ${achievement.maxProgress}`;
+
+        progressBar.appendChild(progressFill);
+        progressContainer.appendChild(progressBar);
+        progressContainer.appendChild(progressText);
+        content.appendChild(progressContainer);
+      }
+
       row.appendChild(icon);
       row.appendChild(content);
       container.appendChild(row);

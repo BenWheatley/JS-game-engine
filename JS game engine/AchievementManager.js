@@ -18,7 +18,7 @@ class AchievementManager {
 
   /**
    * Loads achievements from localStorage
-   * @returns {Object} Map of achievement ID to unlock data {unlocked: boolean, timestamp: number}
+   * @returns {Object} Map of achievement ID to unlock data {unlocked: boolean, timestamp: number, progress: number}
    */
   loadAchievements() {
     try {
@@ -35,7 +35,8 @@ class AchievementManager {
     for (const achievement of GameConfig.ACHIEVEMENTS) {
       achievements[achievement.id] = {
         unlocked: false,
-        timestamp: null
+        timestamp: null,
+        progress: 0  // Current progress value
       };
     }
     return achievements;
@@ -154,12 +155,90 @@ class AchievementManager {
   }
 
   /**
+   * Increments progress for an achievement
+   * @param {string} achievementId - ID of achievement to update
+   * @param {number} amount - Amount to increment by (default: 1)
+   */
+  progress(achievementId, amount = 1) {
+    if (!this.achievements[achievementId]) {
+      DebugLogger.error(`Unknown achievement ID: ${achievementId}`);
+      return;
+    } else {
+      DebugLogger.log(`Progress: ${achievementId}`)
+    }
+
+    // Don't track progress for already unlocked achievements
+    if (this.achievements[achievementId].unlocked) {
+      return;
+    }
+
+    // Find achievement config
+    const config = GameConfig.ACHIEVEMENTS.find(a => a.id === achievementId);
+    if (!config || !config.trackProgress) {
+      return;
+    }
+
+    // Increment progress
+    this.achievements[achievementId].progress += amount;
+    this.saveAchievements();
+
+    // Check if achievement should unlock
+    if (this.achievements[achievementId].progress >= config.maxProgress) {
+      this.unlock(achievementId);
+    }
+  }
+
+  /**
+   * Sets absolute progress for an achievement (instead of incrementing)
+   * @param {string} achievementId - ID of achievement to update
+   * @param {number} value - Absolute progress value
+   */
+  setProgress(achievementId, value) {
+    if (!this.achievements[achievementId]) {
+      DebugLogger.error(`Unknown achievement ID: ${achievementId}`);
+      return;
+    } else {
+      DebugLogger.log(`Set progress: ${achievementId}`)
+    }
+
+    // Don't track progress for already unlocked achievements
+    if (this.achievements[achievementId].unlocked) {
+      return;
+    }
+
+    // Find achievement config
+    const config = GameConfig.ACHIEVEMENTS.find(a => a.id === achievementId);
+    if (!config || !config.trackProgress) {
+      return;
+    }
+
+    // Set progress
+    this.achievements[achievementId].progress = value;
+    this.saveAchievements();
+
+    // Check if achievement should unlock
+    if (this.achievements[achievementId].progress >= config.maxProgress) {
+      this.unlock(achievementId);
+    }
+  }
+
+  /**
+   * Gets current progress for an achievement
+   * @param {string} achievementId - ID of achievement
+   * @returns {number} Current progress value
+   */
+  getProgress(achievementId) {
+    return this.achievements[achievementId]?.progress || 0;
+  }
+
+  /**
    * Resets all achievements (for testing)
    */
   resetAll() {
     for (const achievementId in this.achievements) {
       this.achievements[achievementId].unlocked = false;
       this.achievements[achievementId].timestamp = null;
+      this.achievements[achievementId].progress = 0;
     }
     this.saveAchievements();
     DebugLogger.log('All achievements reset');

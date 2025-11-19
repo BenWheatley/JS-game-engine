@@ -332,10 +332,8 @@
 						gameState.player.weaponLevel++;
 						DebugLogger.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
 
-						// Check weapon upgrade achievements
-						if (gameState.player.weaponLevel === 10) {
-							achievementManager.unlock('fully_armed');
-						}
+						// Update weapon upgrade achievement progress
+						achievementManager.setProgress('fully_armed', gameState.player.weaponLevel);
 						checkUltimateWeaponAchievement();
 
 						resumeFromUpgrade();
@@ -352,10 +350,8 @@
 						gameState.player.engineLevel++;
 						DebugLogger.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
 
-						// Check engine upgrade achievements
-						if (gameState.player.engineLevel === 10) {
-							achievementManager.unlock('speed_demon');
-						}
+						// Update engine upgrade achievement progress
+						achievementManager.setProgress('speed_demon', gameState.player.engineLevel);
 						checkUltimateWeaponAchievement();
 
 						resumeFromUpgrade();
@@ -373,10 +369,8 @@
 						gameState.player.applyShieldUpgrade(); // Apply max health and heal to full
 						DebugLogger.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
 
-						// Check shield upgrade achievements
-						if (gameState.player.shieldLevel === 10) {
-							achievementManager.unlock('fortress');
-						}
+						// Update shield upgrade achievement progress
+						achievementManager.setProgress('fortress', gameState.player.shieldLevel);
 						checkUltimateWeaponAchievement();
 
 						resumeFromUpgrade();
@@ -406,14 +400,10 @@
 			setCursorVisibility(false);
 			gameState.advanceLevel();
 
-			// Check wave progression achievements
-			if (gameState.currentLevel === 5) {
-				achievementManager.unlock('warp_speed');
-			} else if (gameState.currentLevel === 10) {
-				achievementManager.unlock('deep_space');
-			} else if (gameState.currentLevel === 15) {
-				achievementManager.unlock('into_the_void');
-			}
+			// Update wave progression achievements
+			achievementManager.setProgress('warp_speed', gameState.currentLevel);
+			achievementManager.setProgress('deep_space', gameState.currentLevel);
+			achievementManager.setProgress('into_the_void', gameState.currentLevel);
 		}
 
 		function showOptionsMenu() {
@@ -437,11 +427,12 @@
 		function showAchievementsMenu() {
 			setMenuOverlayMode(false); // Opaque overlay with background
 
-			// Build achievement list with unlock status
+			// Build achievement list with unlock status and progress
 			const achievementList = GameConfig.ACHIEVEMENTS.map(achievement => {
 				return {
 					...achievement,
-					unlocked: achievementManager.isUnlocked(achievement.id)
+					unlocked: achievementManager.isUnlocked(achievement.id),
+					progress: achievementManager.getProgress(achievement.id)
 				};
 			});
 
@@ -920,10 +911,7 @@
 
 							// Track alien kills (not asteroids) for centurion achievement
 							if (npc.constructor.name !== 'Asteroid' && npc.constructor.name !== 'AsteroidSpawn') {
-								gameState.achievementStats.totalAliensKilled++;
-								if (gameState.achievementStats.totalAliensKilled >= 100) {
-									achievementManager.unlock('centurion');
-								}
+								achievementManager.progress('centurion', 1);
 							}
 						}
 						if (hitResult.sound) {
@@ -949,10 +937,7 @@
 					}
 
 					// Track collision kills for demolition_derby achievement
-					gameState.achievementStats.collisionKills++;
-					if (gameState.achievementStats.collisionKills >= 30) {
-						achievementManager.unlock('demolition_derby');
-					}
+					achievementManager.progress('demolition_derby', 1);
 
 					// Track damage taken for untouchable achievement
 					gameState.achievementStats.damageTakenThisWave += collisionResult.damage;

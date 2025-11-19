@@ -382,6 +382,35 @@ canvas[style*="position: fixed"] ~ #menuOverlay {
 	line-height: 1.4;
 }
 
+.menu-achievement-progress-container {
+	margin-top: 8px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.menu-achievement-progress-bar {
+	flex: 1;
+	height: 12px;
+	background: rgba(0, 0, 0, 0.5);
+	border: 1px solid #666;
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.menu-achievement-progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #00aa00 0%, #00ff00 100%);
+	transition: width 0.3s ease;
+}
+
+.menu-achievement-progress-text {
+	color: #ccc;
+	font-size: 9px;
+	min-width: 60px;
+	text-align: right;
+}
+
 /* Achievement Toast Notification */
 #achievementToastContainer {
 	position: fixed;

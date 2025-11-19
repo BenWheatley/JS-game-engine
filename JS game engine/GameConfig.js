@@ -309,61 +309,85 @@ const GameConfig = {
   },
 
   // Achievement definitions
+  // trackProgress: true enables progress tracking and display
+  // maxProgress: target value for completion (null for instant/binary achievements)
   ACHIEVEMENTS: [
     {
       id: 'demolition_derby',
       name: 'Demolition Derby',
-      description: 'Destroy 30 aliens or asteroids by ramming them'
+      description: 'Destroy 30 aliens or asteroids by ramming them',
+      trackProgress: true,
+      maxProgress: 30
     },
     {
       id: 'centurion',
       name: 'Centurion',
-      description: 'Destroy 100 aliens in total'
+      description: 'Destroy 100 aliens in total',
+      trackProgress: true,
+      maxProgress: 100
     },
     {
       id: 'untouchable',
       name: 'Untouchable',
-      description: 'Complete a wave without taking any damage'
+      description: 'Complete a wave without taking any damage',
+      trackProgress: false,
+      maxProgress: null
     },
     {
       id: 'warp_speed',
       name: 'Warp Speed',
-      description: 'Reach wave 5'
+      description: 'Reach wave 5',
+      trackProgress: true,
+      maxProgress: 5
     },
     {
       id: 'deep_space',
       name: 'Deep Space',
-      description: 'Reach wave 10'
+      description: 'Reach wave 10',
+      trackProgress: true,
+      maxProgress: 10
     },
     {
       id: 'into_the_void',
       name: 'Into the Void',
-      description: 'Reach wave 15'
+      description: 'Reach wave 15',
+      trackProgress: true,
+      maxProgress: 15
     },
     {
       id: 'fully_armed',
       name: 'Fully Armed',
-      description: 'Max out weapon upgrades (level 10)'
+      description: 'Max out weapon upgrades (level 10)',
+      trackProgress: true,
+      maxProgress: 10
     },
     {
       id: 'speed_demon',
       name: 'Speed Demon',
-      description: 'Max out engine upgrades (level 10)'
+      description: 'Max out engine upgrades (level 10)',
+      trackProgress: true,
+      maxProgress: 10
     },
     {
       id: 'fortress',
       name: 'Fortress',
-      description: 'Max out shield upgrades (level 10)'
+      description: 'Max out shield upgrades (level 10)',
+      trackProgress: true,
+      maxProgress: 10
     },
     {
       id: 'ultimate_weapon',
       name: 'Ultimate Weapon',
-      description: 'Max out all three upgrade paths'
+      description: 'Max out all three upgrade paths',
+      trackProgress: false,
+      maxProgress: null
     },
     {
       id: 'sniper',
       name: 'Sniper',
-      description: 'Hit an enemy that\'s offscreen'
+      description: 'Hit an enemy that\'s offscreen',
+      trackProgress: false,
+      maxProgress: null
     }
   ]
 };
