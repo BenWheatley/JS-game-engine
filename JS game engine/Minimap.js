@@ -127,6 +127,14 @@ class Minimap {
    * @param {Vector2D} playerPos - Player position
    */
   draw(context, entities, playerPos) {
+    // Save current context state (including clipping)
+    context.save();
+
+    // Define clipping region
+    context.beginPath();
+    context.rect(this.x, this.y, this.size, this.size);
+    context.clip();
+
     // Draw background (without border)
     context.fillStyle = GameConfig.MINIMAP.BACKGROUND_COLOR;
     context.fillRect(this.x, this.y, this.size, this.size);
@@ -135,6 +143,9 @@ class Minimap {
     this.drawNPCs(context, entities.npcs, playerPos);
     this.drawWormhole(context, entities.wormhole, playerPos);
     this.drawPlayer(context);
+
+    // Restore context: clipping is removed
+    context.restore();
 
     // Draw border last (on top)
     context.strokeStyle = GameConfig.MINIMAP.BORDER_COLOR;
