@@ -464,6 +464,9 @@
 				gameState.upgradeBackground.draw(context, canvas.width, canvas.height, gameState.player.sprite.position);
 				return; // Menu overlay will render on top
 			}
+			
+			// I want the blocky look for this game; strictly this doesn't need to be set every frame, but it doesn't hurt to be every frame
+			context.imageSmoothingEnabled = false;
 
 			// Background
 			context.fillStyle = 'black';
