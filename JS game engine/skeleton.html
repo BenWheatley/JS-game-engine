@@ -221,12 +221,17 @@
 
 			let playerName = '';
 
-			// Function to submit the score (shared between button and Enter key)
-			const submitScore = () => {
+			// Helper to save score and stop game (shared by all buttons)
+			const saveAndStopGame = () => {
 				const name = playerName.trim() || 'Anonymous';
 				highScoreManager.saveHighScore(name, gameState.score);
 				// Stop game from continuing to update
 				gameState.currentState = null;
+			};
+
+			// Function to submit the score (shared between button and Enter key)
+			const submitScore = () => {
+				saveAndStopGame();
 				highScoreManager.showHighScoresMenu();
 			};
 
@@ -254,10 +259,7 @@
 						type: 'button',
 						label: 'New Game',
 						action: () => {
-							const name = playerName.trim() || 'Anonymous';
-							highScoreManager.saveHighScore(name, gameState.score);
-							// Stop game from continuing to update
-							gameState.currentState = null;
+							saveAndStopGame();
 							startGame();
 						}
 					},
@@ -265,10 +267,7 @@
 						type: 'button',
 						label: 'Main Menu',
 						action: () => {
-							const name = playerName.trim() || 'Anonymous';
-							highScoreManager.saveHighScore(name, gameState.score);
-							// Stop game from continuing to update
-							gameState.currentState = null;
+							saveAndStopGame();
 							returnToMenu();
 						}
 					}
