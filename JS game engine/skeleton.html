@@ -134,7 +134,7 @@
 
 		function gameOver() {
 			// Spawn large explosion at player position
-			const playerColor = "100, 200, 255"; // Blue color for player ship
+			const explosionColor = "255, 100, 50"; // Orange/red color for explosion
 			const explosionSize = 60; // Much larger than normal explosions (24)
 			const minSpeed = 0.05;
 			const maxSpeed = 0.25;
@@ -156,12 +156,9 @@
 					velocity,
 					lifetime,
 					size,
-					playerColor
+					explosionColor
 				));
 			}
-
-			// Keep game running but mark player as dead
-			gameState.player.isDead = true;
 
 			musicPlayer.stop();
 			setCursorVisibility(true);
@@ -555,7 +552,7 @@
 			gameState.particleSystem.draw(context);
 
 			// Player last (top layer) - don't draw if dead
-			if (!gameState.player.isDead) {
+			if (gameState.player.health > 0) {
 				gameState.player.draw();
 			}
 
@@ -884,7 +881,7 @@
 			gameState.gameTime += deltaTime;
 
 			// Only process player input if player is alive
-			if (!gameState.player.isDead) {
+			if (gameState.player.health > 0) {
 				if (engine.keyDown["ArrowLeft"]) {
 					gameState.player.turnLeft(deltaTime);
 				}
@@ -986,7 +983,7 @@
 			}
 
 			// Check player-NPC collisions (unified loop) - only if player is alive
-			if (!gameState.player.isDead) {
+			if (gameState.player.health > 0) {
 				for (const npc of gameState.npcs) {
 					if (CollisionDetection.checkAABB(gameState.player, npc)) {
 						npcsToRemove.add(npc);
@@ -1016,7 +1013,7 @@
 			}
 
 			// Check NPC projectile-player collisions (unified loop) - only if player is alive
-			if (!gameState.player.isDead) {
+			if (gameState.player.health > 0) {
 				for (const projectile of gameState.npcProjectiles) {
 					if (CollisionDetection.checkAABB(gameState.player, projectile)) {
 						npcProjectilesToRemove.add(projectile);
@@ -1041,7 +1038,7 @@
 			}
 
 			// Check player-wormhole collision (show upgrade menu) - only if player is alive
-			if (!gameState.player.isDead && gameState.wormhole && CollisionDetection.checkCircle(gameState.wormhole, gameState.player)) {
+			if (gameState.player.health > 0 && gameState.wormhole && CollisionDetection.checkCircle(gameState.wormhole, gameState.player)) {
 				showUpgradeMenu();
 				playSoundEffect('achievement', 0.5); // Play a sound effect
 			}
@@ -1052,8 +1049,9 @@
 			gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
 
 			// Check for game over - only trigger once
-			if (!gameState.player.isDead && gameState.player.health <= 0) {
+			if (gameState.player.health <= 0 && gameState.player.health > -1000) {
 				gameOver();
+				gameState.player.health = -1000; // Sentinel value to prevent retriggering
 				// Don't return - let the game continue running
 			}
 
@@ -1075,7 +1073,7 @@
 
 		function checkGamepadInput(deltaTime) {
 			// Don't process gamepad input if player is dead
-			if (gameState.player.isDead) {
+			if (gameState.player.health <= 0) {
 				return;
 			}
 
