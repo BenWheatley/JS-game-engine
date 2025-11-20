@@ -117,6 +117,14 @@ canvas[style*="position: fixed"] ~ #menuOverlay {
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
+/* Gamepad navigation highlight */
+.menu-button.gamepad-selected {
+	background: linear-gradient(180deg, #5a7fa0 0%, #3d5a78 100%);
+	border-color: #7aa3cc;
+	box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7), 0 0 15px rgba(122, 163, 204, 0.4);
+	transform: translateY(-2px);
+}
+
 .menu-instructions {
 	position: absolute;
 	bottom: 40px;

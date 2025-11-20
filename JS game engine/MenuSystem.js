@@ -19,6 +19,15 @@ class MenuSystem {
     this.instructionsElement = instructionsElement;
     this.currentMenu = null;
     this.currentMenuType = null;
+
+    // Gamepad navigation state
+    this.selectableItems = [];
+    this.selectedIndex = 0;
+    this.lastGamepadState = {
+      dpadUp: false,
+      dpadDown: false,
+      buttonA: false
+    };
   }
 
   showMenu(menuType, menuConfig) {
@@ -33,6 +42,8 @@ class MenuSystem {
 
     // Clear existing items
     this.buttonsElement.innerHTML = '';
+    this.selectableItems = [];
+    this.selectedIndex = 0;
 
     // Create menu items
     menuConfig.items.forEach(itemConfig => {
@@ -68,6 +79,11 @@ class MenuSystem {
 
     // Show overlay
     this.overlayElement.classList.remove('hidden');
+
+    // Highlight first selectable item if using gamepad
+    if (this.selectableItems.length > 0) {
+      this.updateSelection();
+    }
   }
 
   createButton(config) {
@@ -80,6 +96,14 @@ class MenuSystem {
     if (config.disabled) {
       button.disabled = true;
       button.classList.add('disabled');
+    }
+
+    // Add to selectable items for gamepad navigation (if not disabled)
+    if (!config.disabled) {
+      this.selectableItems.push({
+        element: button,
+        action: config.action
+      });
     }
 
     this.buttonsElement.appendChild(button);
@@ -328,5 +352,92 @@ class MenuSystem {
 
   isVisible() {
     return !this.overlayElement.classList.contains('hidden');
+  }
+
+  /**
+   * Update visual highlighting for currently selected item
+   */
+  updateSelection() {
+    // Remove highlight from all items
+    this.selectableItems.forEach(item => {
+      item.element.classList.remove('gamepad-selected');
+    });
+
+    // Add highlight to selected item
+    if (this.selectableItems[this.selectedIndex]) {
+      this.selectableItems[this.selectedIndex].element.classList.add('gamepad-selected');
+    }
+  }
+
+  /**
+   * Navigate to next menu item
+   */
+  selectNext() {
+    if (this.selectableItems.length === 0) return;
+
+    this.selectedIndex = (this.selectedIndex + 1) % this.selectableItems.length;
+    this.updateSelection();
+  }
+
+  /**
+   * Navigate to previous menu item
+   */
+  selectPrevious() {
+    if (this.selectableItems.length === 0) return;
+
+    this.selectedIndex = (this.selectedIndex - 1 + this.selectableItems.length) % this.selectableItems.length;
+    this.updateSelection();
+  }
+
+  /**
+   * Activate currently selected item
+   */
+  activateSelected() {
+    if (this.selectableItems[this.selectedIndex]) {
+      const item = this.selectableItems[this.selectedIndex];
+      if (item.action) {
+        item.action();
+      }
+    }
+  }
+
+  /**
+   * Handle gamepad input for menu navigation
+   * @param {Gamepad} gamepad - The gamepad object
+   */
+  handleGamepadInput(gamepad) {
+    if (!this.isVisible() || this.selectableItems.length === 0) {
+      return;
+    }
+
+    // D-pad or left stick for navigation
+    // D-pad: buttons[12] = up, buttons[13] = down
+    // Left stick: axes[1] < -0.5 = up, axes[1] > 0.5 = down
+    const dpadUp = gamepad.buttons[12]?.pressed || false;
+    const dpadDown = gamepad.buttons[13]?.pressed || false;
+    const stickUp = gamepad.axes[1] < -0.5;
+    const stickDown = gamepad.axes[1] > 0.5;
+
+    const upPressed = dpadUp || stickUp;
+    const downPressed = dpadDown || stickDown;
+
+    // A button (buttons[0]) to activate
+    const buttonA = gamepad.buttons[0]?.pressed || false;
+
+    // Detect rising edge (button just pressed, wasn't pressed before)
+    if (upPressed && !this.lastGamepadState.dpadUp) {
+      this.selectPrevious();
+    }
+    if (downPressed && !this.lastGamepadState.dpadDown) {
+      this.selectNext();
+    }
+    if (buttonA && !this.lastGamepadState.buttonA) {
+      this.activateSelected();
+    }
+
+    // Update last state
+    this.lastGamepadState.dpadUp = upPressed;
+    this.lastGamepadState.dpadDown = downPressed;
+    this.lastGamepadState.buttonA = buttonA;
   }
 }

@@ -826,6 +826,15 @@
 
 		// Update loop; deltaTime is milliseconds
 		function update(deltaTime) {
+			// Handle gamepad input for menu navigation
+			const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+			for (let i = 0; i < gamepads.length; i++) {
+				if (gamepads[i]) {
+					menuSystem.handleGamepadInput(gamepads[i]);
+					break; // Only handle first connected gamepad
+				}
+			}
+
 			// Handle pause input regardless of game state
 			handlePauseInput();
 
