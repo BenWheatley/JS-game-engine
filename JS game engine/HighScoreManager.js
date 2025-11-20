@@ -86,7 +86,7 @@ class HighScoreManager {
     // Sort by score descending
     highScores.sort((a, b) => b.score - a.score);
 
-    localStorage.setItem(this.storageKey, JSON.stringify(topScores));
+    localStorage.setItem(this.storageKey, JSON.stringify(highScores));
   }
 
   /**
