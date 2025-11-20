@@ -135,10 +135,10 @@
 		function gameOver() {
 			// Spawn large explosion at player position
 			const explosionColor = "255, 100, 50"; // Orange/red color for explosion
-			const explosionSize = 60; // Much larger than normal explosions (24)
+			const explosionSize = 120; // Much larger than normal explosions (24)
 			const minSpeed = 0.05;
 			const maxSpeed = 0.25;
-			const lifetime = 1200; // Longer lasting particles
+			const lifetime = 2400; // Much longer lasting particles
 			const minSize = 3;
 			const maxSize = 8;
 
@@ -160,14 +160,14 @@
 				));
 			}
 
-			musicPlayer.stop();
+			// Don't stop music - keep playing in menus
 			setCursorVisibility(true);
 			showGameOverMenu();
 		}
 
 		function returnToMenu() {
 			gameState.currentState = null; // No longer in active gameplay
-			musicPlayer.stop();
+			// Don't stop music - keep playing in menus
 			setCursorVisibility(true);
 			showMainMenu();
 		}
@@ -175,6 +175,11 @@
 		// Menu configuration functions
 		function showMainMenu() {
 			setMenuOverlayMode(false); // Opaque overlay with background
+
+			// Start music if not already playing
+			if (!musicPlayer.isPlaying) {
+				musicPlayer.play();
+			}
 
 			// Restore title image if it was replaced by text
 			const titleElement = document.getElementById('menuTitle');
@@ -220,6 +225,8 @@
 			const submitScore = () => {
 				const name = playerName.trim() || 'Anonymous';
 				highScoreManager.saveHighScore(name, gameState.score);
+				// Stop game from continuing to update
+				gameState.currentState = null;
 				highScoreManager.showHighScoresMenu();
 			};
 
@@ -249,6 +256,8 @@
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
 							highScoreManager.saveHighScore(name, gameState.score);
+							// Stop game from continuing to update
+							gameState.currentState = null;
 							startGame();
 						}
 					},
@@ -258,6 +267,8 @@
 						action: () => {
 							const name = playerName.trim() || 'Anonymous';
 							highScoreManager.saveHighScore(name, gameState.score);
+							// Stop game from continuing to update
+							gameState.currentState = null;
 							returnToMenu();
 						}
 					}
