@@ -68,7 +68,7 @@ class Game {
     const explosionSize = 120; // Much larger than normal explosions (24)
     const minSpeed = 0.05;
     const maxSpeed = 0.25;
-    const lifetime = 2400; // Much longer lasting particles
+    const lifetime = 3400; // Much longer lasting particles
     const minSize = 3;
     const maxSize = 8;
 
@@ -85,8 +85,8 @@ class Game {
         new Vector2D(this.gameState.player.sprite.position.x, this.gameState.player.sprite.position.y),
         velocity,
         lifetime,
-        size,
-        explosionColor
+        explosionColor,
+        size
       ));
     }
 
