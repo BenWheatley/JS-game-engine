@@ -11,7 +11,6 @@ class HighScoreManager {
   constructor(menuSystem) {
     this.menuSystem = menuSystem;
     this.storageKey = 'highScores';
-    this.maxScores = 100;
   }
 
   /**
@@ -87,8 +86,6 @@ class HighScoreManager {
     // Sort by score descending
     highScores.sort((a, b) => b.score - a.score);
 
-    // Keep only top scores to prevent unlimited growth
-    const topScores = highScores.slice(0, this.maxScores);
     localStorage.setItem(this.storageKey, JSON.stringify(topScores));
   }
 
