@@ -802,6 +802,24 @@
 			}
 		}
 
+		// Helper function for handling NPC destruction
+		function handleNPCDestroyed(npc) {
+			// Add score
+			gameState.score += npc.scoreValue;
+
+			// Spawn explosion particles
+			gameState.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor);
+
+			// Handle spawns (e.g., asteroid fragments)
+			// Note: hitResult.spawns is handled in the shot collision code path
+			// For player collisions, we don't need spawns since the NPC is destroyed instantly
+
+			// Track alien kills (not asteroids) for centurion achievement
+			if (npc.constructor.name !== 'Asteroid' && npc.constructor.name !== 'AsteroidSpawn') {
+				achievementManager.progress('centurion', 1);
+			}
+		}
+
 		// Update loop; deltaTime is milliseconds
 		function update(deltaTime) {
 			// Handle pause input regardless of game state
@@ -906,15 +924,11 @@
 						DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);
 						if (hitResult.destroyed) {
 							npcsToRemove.add(npc);
-							gameState.score += npc.scoreValue;
-							gameState.particleSystem.spawnExplosion(npc.sprite.position, hitResult.particleColor);
+							handleNPCDestroyed(npc);
+
+							// Handle spawns (specific to asteroid splitting)
 							if (hitResult.spawns) {
 								gameState.npcs.push(...hitResult.spawns);
-							}
-
-							// Track alien kills (not asteroids) for centurion achievement
-							if (npc.constructor.name !== 'Asteroid' && npc.constructor.name !== 'AsteroidSpawn') {
-								achievementManager.progress('centurion', 1);
 							}
 						}
 						if (hitResult.sound) {
@@ -931,10 +945,15 @@
 
 					const collisionResult = npc.onCollideWithPlayer();
 					DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, NPC health: ${npc.health}, collision damage: ${collisionResult.damage}, player health before: ${gameState.player.health}`);
-					gameState.particleSystem.spawnExplosion(npc.sprite.position, collisionResult.particleColor);
+
+					// Handle NPC destruction (score, particles, centurion achievement)
+					handleNPCDestroyed(npc);
+
+					// Apply damage to player
 					gameState.player.health -= collisionResult.damage;
 					gameState.player.onDamage(); // Reset shield regen timer
 					DebugLogger.log(`Player health after: ${gameState.player.health}`);
+
 					if (collisionResult.sound) {
 						playSoundEffect(collisionResult.sound, collisionResult.volume);
 					}
