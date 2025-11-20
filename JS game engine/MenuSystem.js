@@ -21,7 +21,6 @@ class MenuSystem {
     this.currentMenuType = null;
 
     // Gamepad navigation state
-    this.selectableItems = [];
     this.selectedIndex = 0;
     this.lastGamepadState = {
       dpadUp: false,
@@ -42,7 +41,6 @@ class MenuSystem {
 
     // Clear existing items
     this.buttonsElement.innerHTML = '';
-    this.selectableItems = [];
     this.selectedIndex = 0;
 
     // Create menu items
@@ -81,9 +79,7 @@ class MenuSystem {
     this.overlayElement.classList.remove('hidden');
 
     // Highlight first selectable item if using gamepad
-    if (this.selectableItems.length > 0) {
-      this.updateSelection();
-    }
+    this.updateSelection();
   }
 
   createButton(config) {
@@ -96,14 +92,6 @@ class MenuSystem {
     if (config.disabled) {
       button.disabled = true;
       button.classList.add('disabled');
-    }
-
-    // Add to selectable items for gamepad navigation (if not disabled)
-    if (!config.disabled) {
-      this.selectableItems.push({
-        element: button,
-        action: config.action
-      });
     }
 
     this.buttonsElement.appendChild(button);
@@ -355,27 +343,40 @@ class MenuSystem {
   }
 
   /**
+   * Get all selectable buttons (not disabled)
+   * @returns {NodeList} List of selectable button elements
+   */
+  getSelectableButtons() {
+    return this.buttonsElement.querySelectorAll('.menu-button:not(:disabled)');
+  }
+
+  /**
    * Update visual highlighting for currently selected item
    */
   updateSelection() {
+    const buttons = this.getSelectableButtons();
+    if (buttons.length === 0) return;
+
     // Remove highlight from all items
-    this.selectableItems.forEach(item => {
-      item.element.classList.remove('gamepad-selected');
+    buttons.forEach(button => {
+      button.classList.remove('gamepad-selected');
     });
 
+    // Clamp selectedIndex to valid range
+    this.selectedIndex = Math.max(0, Math.min(this.selectedIndex, buttons.length - 1));
+
     // Add highlight to selected item
-    if (this.selectableItems[this.selectedIndex]) {
-      this.selectableItems[this.selectedIndex].element.classList.add('gamepad-selected');
-    }
+    buttons[this.selectedIndex].classList.add('gamepad-selected');
   }
 
   /**
    * Navigate to next menu item
    */
   selectNext() {
-    if (this.selectableItems.length === 0) return;
+    const buttons = this.getSelectableButtons();
+    if (buttons.length === 0) return;
 
-    this.selectedIndex = (this.selectedIndex + 1) % this.selectableItems.length;
+    this.selectedIndex = (this.selectedIndex + 1) % buttons.length;
     this.updateSelection();
   }
 
@@ -383,9 +384,10 @@ class MenuSystem {
    * Navigate to previous menu item
    */
   selectPrevious() {
-    if (this.selectableItems.length === 0) return;
+    const buttons = this.getSelectableButtons();
+    if (buttons.length === 0) return;
 
-    this.selectedIndex = (this.selectedIndex - 1 + this.selectableItems.length) % this.selectableItems.length;
+    this.selectedIndex = (this.selectedIndex - 1 + buttons.length) % buttons.length;
     this.updateSelection();
   }
 
@@ -393,11 +395,9 @@ class MenuSystem {
    * Activate currently selected item
    */
   activateSelected() {
-    if (this.selectableItems[this.selectedIndex]) {
-      const item = this.selectableItems[this.selectedIndex];
-      if (item.action) {
-        item.action();
-      }
+    const buttons = this.getSelectableButtons();
+    if (buttons[this.selectedIndex]) {
+      buttons[this.selectedIndex].click();
     }
   }
 
@@ -406,7 +406,7 @@ class MenuSystem {
    * @param {Gamepad} gamepad - The gamepad object
    */
   handleGamepadInput(gamepad) {
-    if (!this.isVisible() || this.selectableItems.length === 0) {
+    if (!this.isVisible() || this.getSelectableButtons().length === 0) {
       return;
     }
 
