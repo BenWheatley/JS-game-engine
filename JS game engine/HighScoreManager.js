@@ -90,6 +90,68 @@ class HighScoreManager {
   }
 
   /**
+   * Finds the most recent score from an array of scores
+   * @param {Array} scores - Array of score objects with date property
+   * @returns {Object|null} Most recent score object or null if empty
+   */
+  findMostRecentScore(scores) {
+    if (scores.length === 0) return null;
+
+    return scores.reduce((mostRecent, score) => {
+      const scoreDate = new Date(score.date);
+      const mostRecentDate = mostRecent ? new Date(mostRecent.date) : null;
+      return (!mostRecentDate || scoreDate > mostRecentDate) ? score : mostRecent;
+    }, null);
+  }
+
+  /**
+   * Creates a score entry for display in the menu
+   * @param {Object} score - Score object
+   * @param {number} rank - Display rank (1-based)
+   * @param {Object|null} mostRecentScore - The most recent score for comparison
+   * @returns {Object} Formatted score entry
+   */
+  createScoreEntry(score, rank, mostRecentScore) {
+    return {
+      ...score,
+      rank: rank,
+      isEllipsis: false,
+      isRecent: score === mostRecentScore
+    };
+  }
+
+  /**
+   * Prepares the display scores list based on recent score rank
+   * @param {Array} allScores - All scores sorted by rank
+   * @param {Object|null} mostRecentScore - The most recent score
+   * @returns {Array} Array of scores to display (max 10 entries)
+   */
+  prepareDisplayScores(allScores, mostRecentScore) {
+    const recentIndex = mostRecentScore ? allScores.indexOf(mostRecentScore) : -1;
+    const recentRank = recentIndex >= 0 ? recentIndex + 1 : -1;
+
+    // Recent score is in top 10 or doesn't exist, show top 10 normally
+    if (recentRank === -1 || recentRank <= 10) {
+      return allScores.slice(0, 10).map((score, index) =>
+        this.createScoreEntry(score, index + 1, mostRecentScore)
+      );
+    }
+
+    // Recent score is outside top 10: show top 8, ellipsis, then recent score
+    const displayScores = allScores.slice(0, 8).map((score, index) =>
+      this.createScoreEntry(score, index + 1, mostRecentScore)
+    );
+
+    // Add ellipsis at position 9
+    displayScores.push({ isEllipsis: true, rank: 9 });
+
+    // Add recent score at position 10 with its actual rank
+    displayScores.push(this.createScoreEntry(allScores[recentIndex], recentRank, mostRecentScore));
+
+    return displayScores;
+  }
+
+  /**
    * Displays the high scores menu
    * Shows top 10 scores, or top 8 + most recent if recent is outside top 10
    */
@@ -98,57 +160,8 @@ class HighScoreManager {
     document.getElementById('menuOverlay').classList.remove('pause');
 
     const allScores = this.getHighScores();
-
-    // Find the most recent score by date
-    let mostRecentScore = null;
-    let mostRecentDate = null;
-
-    allScores.forEach(score => {
-      const scoreDate = new Date(score.date);
-      if (!mostRecentDate || scoreDate > mostRecentDate) {
-        mostRecentDate = scoreDate;
-        mostRecentScore = score;
-      }
-    });
-
-    // Find the rank of the most recent score
-    const recentIndex = mostRecentScore ? allScores.indexOf(mostRecentScore) : -1;
-    const recentRank = recentIndex >= 0 ? recentIndex + 1 : -1;
-
-    let displayScores = [];
-
-    if (recentRank === -1 || recentRank <= 10) {
-      // Recent score is in top 10 or doesn't exist, show top 10 normally
-      displayScores = allScores.slice(0, 10).map((score, index) => ({
-        ...score,
-        rank: index + 1,
-        isEllipsis: false,
-        isRecent: score === mostRecentScore
-      }));
-    } else {
-      // Recent score is outside top 10
-      // Show positions 1-8
-      displayScores = allScores.slice(0, 8).map((score, index) => ({
-        ...score,
-        rank: index + 1,
-        isEllipsis: false,
-        isRecent: score === mostRecentScore
-      }));
-
-      // Add ellipsis at position 9
-      displayScores.push({
-        isEllipsis: true,
-        rank: 9
-      });
-
-      // Add recent score at position 10 with its actual rank
-      displayScores.push({
-        ...allScores[recentIndex],
-        rank: recentRank,
-        isEllipsis: false,
-        isRecent: true
-      });
-    }
+    const mostRecentScore = this.findMostRecentScore(allScores);
+    const displayScores = this.prepareDisplayScores(allScores, mostRecentScore);
 
     this.menuSystem.showMenu(MenuSystem.MenuTypes.HIGH_SCORES, {
       title: 'HIGH SCORES',
