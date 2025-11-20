@@ -728,23 +728,30 @@
 			}
 		}
 
-		// Helper: Despawn projectiles that are too far from player
+		// Helper: Check if entity is beyond wrap distance from player (per-axis check)
+		function isBeyondWrapDistance(entityPos, playerPos, wrapDistance) {
+			const offsetX = entityPos.x - playerPos.x;
+			const offsetY = entityPos.y - playerPos.y;
+			return Math.abs(offsetX) > wrapDistance || Math.abs(offsetY) > wrapDistance;
+		}
+
+		// Helper: Despawn projectiles that are too far from player (uses same logic as NPC wrapping)
 		function despawnDistantProjectiles(despawnDistance) {
-			const filterByDistance = (projectile) => {
-				const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
-				return distance < despawnDistance;
-			};
-			gameState.playerProjectiles = gameState.playerProjectiles.filter(filterByDistance);
-			gameState.npcProjectiles = gameState.npcProjectiles.filter(filterByDistance);
+			gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile =>
+				!isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, despawnDistance)
+			);
+			gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile =>
+				!isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, despawnDistance)
+			);
 		}
 
 		// Helper: Wrap a single coordinate around world boundaries
 		function wrapCoordinate(npcCoord, playerCoord, wrapDistance) {
 			const offset = npcCoord - playerCoord;
 			if (offset > wrapDistance) {
-				return playerCoord - wrapDistance;
+				return playerCoord - wrapDistance + (offset - wrapDistance);
 			} else if (offset < -wrapDistance) {
-				return playerCoord + wrapDistance;
+				return playerCoord + wrapDistance + (offset + wrapDistance);
 			}
 			return npcCoord;
 		}
