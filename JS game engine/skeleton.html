@@ -51,6 +51,7 @@
 	<script type="text/javascript" src="HighScoreManager.js"></script>
 	<script type="text/javascript" src="AchievementManager.js"></script>
 	<script type="text/javascript" src="Minimap.js"></script>
+	<script type="text/javascript" src="Game.js"></script>
 </head>
 <body>
 	<div id="gameContainer">
@@ -90,13 +91,6 @@
 		// Preferences Management
 		const preferencesManager = new PreferencesManager();
 
-		// Helper function to apply volume
-		function playSoundEffect(name, baseVolume) {
-			soundManager.play(name, baseVolume * (preferencesManager.soundEffectsVolume / 100));
-		}
-
-		let backgroundSprite;
-
 		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
 		const musicPlayer = new MusicPlayer();
@@ -109,64 +103,46 @@
 			Note.setVolume(preferencesManager.musicVolume / 100);
 		})();
 
+		// Initialize game instance
+		const game = new Game(canvas, context, menuSystem, soundManager, musicPlayer, preferencesManager, achievementManager);
+
 		// Background will be tiled - store a single tile sprite
-		let backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
-		backgroundSprite = new Sprite(
+		const backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
+		game.backgroundSprite = new Sprite(
 			'background-fuzzy-edge.png',
 			new Vector2D(0, 0),
 			backgroundTileSize
 		);
+		game.backgroundTileSize = backgroundTileSize;
 
-		// Initialize game state
-		const gameState = new GameState(canvas);
+		// Keep gameState reference for existing code (to be refactored later)
+		const gameState = game.gameState;
+		let backgroundSprite = game.backgroundSprite;
+
+		// Helper function to apply volume
+		function playSoundEffect(name, baseVolume) {
+			soundManager.play(name, baseVolume * (preferencesManager.soundEffectsVolume / 100));
+		}
+
+		// Helper function for cursor visibility
+		function setCursorVisibility(visible) {
+			game.setCursorVisibility(visible);
+		}
 
 		// Game state management functions
 		async function startGame() {
 			// Resume audio context on user interaction (required by browser autoplay policies)
 			await SoundManager.resumeAudioContext();
-
-			gameState.reset();
-			gameState.currentState = GameState.States.PLAYING;
-			menuSystem.hideMenu();
-			musicPlayer.play();
-			setCursorVisibility(false);
+			await game.startGame();
 		}
 
 		function gameOver() {
-			// Spawn large explosion at player position
-			const explosionColor = "255, 100, 50"; // Orange/red color for explosion
-			const explosionSize = 120; // Much larger than normal explosions (24)
-			const minSpeed = 0.05;
-			const maxSpeed = 0.25;
-			const lifetime = 2400; // Much longer lasting particles
-			const minSize = 3;
-			const maxSize = 8;
-
-			for (let i = 0; i < explosionSize; i++) {
-				const angle = (Math.PI * 2 * i) / explosionSize + (Math.random() - 0.5) * 0.5;
-				const speed = minSpeed + Math.random() * (maxSpeed - minSpeed);
-				const velocity = new Vector2D(
-					Math.cos(angle) * speed,
-					Math.sin(angle) * speed
-				);
-				const size = minSize + Math.random() * (maxSize - minSize);
-
-				gameState.particleSystem.particles.push(new Particle(
-					new Vector2D(gameState.player.sprite.position.x, gameState.player.sprite.position.y),
-					velocity,
-					lifetime,
-					size,
-					explosionColor
-				));
-			}
-
-			// Don't stop music - keep playing in menus
-			setCursorVisibility(true);
+			game.gameOver();
 			showGameOverMenu();
 		}
 
 		function returnToMenu() {
-			gameState.currentState = null; // No longer in active gameplay
+			game.gameState.currentState = null; // No longer in active gameplay
 			// Don't stop music - keep playing in menus
 			setCursorVisibility(true);
 			showMainMenu();
@@ -224,9 +200,9 @@
 			// Helper to save score and stop game (shared by all buttons)
 			const saveAndStopGame = () => {
 				const name = playerName.trim() || 'Anonymous';
-				highScoreManager.saveHighScore(name, gameState.score);
+				highScoreManager.saveHighScore(name, game.gameState.score);
 				// Stop game from continuing to update
-				gameState.currentState = null;
+				game.gameState.currentState = null;
 			};
 
 			// Function to submit the score (shared between button and Enter key)
@@ -272,13 +248,13 @@
 						}
 					}
 				],
-				instructions: `Final Score: ${gameState.score}`
+				instructions: `Final Score: ${game.gameState.score}`
 			});
 		}
 
 		function pauseGame() {
-			if (gameState.currentState === GameState.States.PLAYING) {
-				gameState.currentState = GameState.States.PAUSED;
+			if (game.gameState.currentState === GameState.States.PLAYING) {
+				game.gameState.currentState = GameState.States.PAUSED;
 				musicPlayer.pause();
 				canvas.classList.remove('hide-cursor');
 				showPauseMenu();
@@ -286,7 +262,7 @@
 		}
 
 		function resumeGame() {
-			gameState.currentState = GameState.States.PLAYING;
+			game.gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			setCursorVisibility(false);
@@ -309,7 +285,7 @@
 						type: 'button',
 						label: 'Quit',
 						action: () => {
-							if (gameState.score > 0) {
+							if (game.gameState.score > 0) {
 								gameOver();
 							} else {
 								returnToMenu();
@@ -322,9 +298,9 @@
 		}
 
 		function checkUltimateWeaponAchievement() {
-			if (gameState.player.weaponLevel === 10 &&
-				gameState.player.engineLevel === 10 &&
-				gameState.player.shieldLevel === 10) {
+			if (game.gameState.player.weaponLevel === 10 &&
+				game.gameState.player.engineLevel === 10 &&
+				game.gameState.player.shieldLevel === 10) {
 				achievementManager.unlock('ultimate_weapon');
 			}
 		}
