@@ -15,6 +15,9 @@ class Player extends GameEntity {
     // Shield regeneration tracking
     this.timeSinceLastDamage = 0;
     this.regenAccumulator = 0; // Tracks partial HP for regen
+
+    // Death state
+    this.isDead = false;
   }
 
   /**
