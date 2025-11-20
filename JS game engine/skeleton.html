@@ -305,6 +305,31 @@
 			}
 		}
 
+		// Helper: Create an upgrade button with consistent structure
+		function createUpgradeButton(upgradeName, levelProperty, achievementId, maxLevel, applyUpgrade = null) {
+			const currentLevel = gameState.player[levelProperty];
+			const isMaxed = currentLevel >= maxLevel;
+
+			return {
+				type: 'button',
+				label: isMaxed
+					? `${upgradeName} Upgrade (MAX LEVEL)`
+					: `${upgradeName} Upgrade (Level ${currentLevel} → ${currentLevel + 1})`,
+				disabled: isMaxed,
+				action: () => {
+					gameState.player[levelProperty]++;
+					if (applyUpgrade) applyUpgrade();
+					DebugLogger.log(`${upgradeName} upgraded to level ${gameState.player[levelProperty]}`);
+
+					// Update achievement progress
+					achievementManager.setProgress(achievementId, gameState.player[levelProperty]);
+					checkUltimateWeaponAchievement();
+
+					resumeFromUpgrade();
+				}
+			};
+		}
+
 		function showUpgradeMenu() {
 			// Check Untouchable achievement before advancing
 			if (gameState.achievementStats.damageTakenThisWave === 0) {
@@ -321,11 +346,9 @@
 			const maxWeaponLevel = GameConfig.UPGRADES.WEAPON.length - 1;
 			const maxEngineLevel = GameConfig.UPGRADES.ENGINE.length - 1;
 			const maxShieldLevel = GameConfig.UPGRADES.SHIELD.length - 1;
-
-			const weaponMaxed = gameState.player.weaponLevel >= maxWeaponLevel;
-			const engineMaxed = gameState.player.engineLevel >= maxEngineLevel;
-			const shieldMaxed = gameState.player.shieldLevel >= maxShieldLevel;
-			const allMaxed = weaponMaxed && engineMaxed && shieldMaxed;
+			const allMaxed = gameState.player.weaponLevel >= maxWeaponLevel &&
+			                 gameState.player.engineLevel >= maxEngineLevel &&
+			                 gameState.player.shieldLevel >= maxShieldLevel;
 
 			const items = [];
 
@@ -343,60 +366,11 @@
 				});
 			} else {
 				// Show upgrade buttons (disabled if maxed)
-				items.push({
-					type: 'button',
-					label: weaponMaxed
-						? `Weapon Upgrade (MAX LEVEL)`
-						: `Weapon Upgrade (Level ${gameState.player.weaponLevel} → ${gameState.player.weaponLevel + 1})`,
-					disabled: weaponMaxed,
-					action: () => {
-						gameState.player.weaponLevel++;
-						DebugLogger.log(`Weapon upgraded to level ${gameState.player.weaponLevel}`);
-
-						// Update weapon upgrade achievement progress
-						achievementManager.setProgress('fully_armed', gameState.player.weaponLevel);
-						checkUltimateWeaponAchievement();
-
-						resumeFromUpgrade();
-					}
-				});
-
-				items.push({
-					type: 'button',
-					label: engineMaxed
-						? `Engine Upgrade (MAX LEVEL)`
-						: `Engine Upgrade (Level ${gameState.player.engineLevel} → ${gameState.player.engineLevel + 1})`,
-					disabled: engineMaxed,
-					action: () => {
-						gameState.player.engineLevel++;
-						DebugLogger.log(`Engine upgraded to level ${gameState.player.engineLevel}`);
-
-						// Update engine upgrade achievement progress
-						achievementManager.setProgress('speed_demon', gameState.player.engineLevel);
-						checkUltimateWeaponAchievement();
-
-						resumeFromUpgrade();
-					}
-				});
-
-				items.push({
-					type: 'button',
-					label: shieldMaxed
-						? `Shield Upgrade (MAX LEVEL)`
-						: `Shield Upgrade (Level ${gameState.player.shieldLevel} → ${gameState.player.shieldLevel + 1})`,
-					disabled: shieldMaxed,
-					action: () => {
-						gameState.player.shieldLevel++;
-						gameState.player.applyShieldUpgrade(); // Apply max health and heal to full
-						DebugLogger.log(`Shield upgraded to level ${gameState.player.shieldLevel}`);
-
-						// Update shield upgrade achievement progress
-						achievementManager.setProgress('fortress', gameState.player.shieldLevel);
-						checkUltimateWeaponAchievement();
-
-						resumeFromUpgrade();
-					}
-				});
+				items.push(createUpgradeButton('Weapon', 'weaponLevel', 'fully_armed', maxWeaponLevel));
+				items.push(createUpgradeButton('Engine', 'engineLevel', 'speed_demon', maxEngineLevel));
+				items.push(createUpgradeButton('Shield', 'shieldLevel', 'fortress', maxShieldLevel,
+					() => gameState.player.applyShieldUpgrade()
+				));
 			}
 
 			menuSystem.showMenu(MenuSystem.MenuTypes.UPGRADE, {
@@ -828,6 +802,33 @@
 		}
 
 		// Helper function for handling NPC destruction
+		// Helper: Check if entity is offscreen
+		function isOffscreen(entityPos) {
+			const screenX = entityPos.x - gameState.player.sprite.position.x + canvas.width / 2;
+			const screenY = entityPos.y - gameState.player.sprite.position.y + canvas.height / 2;
+			return screenX < 0 || screenX > canvas.width || screenY < 0 || screenY > canvas.height;
+		}
+
+		// Helper: Handle shot impact effects (particles and sound)
+		function handleShotImpact(shot) {
+			if (shot.particleColor) {
+				gameState.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
+			}
+			if (shot.hitSound) {
+				playSoundEffect(shot.hitSound, shot.hitVolume);
+			}
+		}
+
+		// Helper: Handle collision effects (sound and particles)
+		function handleCollisionEffects(result, position) {
+			if (result.sound) {
+				playSoundEffect(result.sound, result.volume);
+			}
+			if (result.particleColor) {
+				gameState.particleSystem.spawnExplosion(position, result.particleColor);
+			}
+		}
+
 		function handleNPCDestroyed(npc) {
 			// Add score
 			gameState.score += npc.scoreValue;
@@ -875,24 +876,16 @@
 
 			// Only process player input if player is alive
 			if (gameState.player.health > 0) {
-				if (engine.keyDown["ArrowLeft"]) {
-					gameState.player.turnLeft(deltaTime);
-				}
-				if (engine.keyDown["ArrowRight"]) {
-					gameState.player.turnRight(deltaTime);
-				}
-				if (engine.keyDown["ArrowUp"]) {
-					gameState.player.accelerate(deltaTime);
-				}
-				if (engine.keyDown["ArrowDown"]) {
-					gameState.player.reverseThrust(deltaTime);
-				}
-				if (engine.keyDown[" "]) {
-					shoot();
-				}
+				// Handle keyboard input
+				if (engine.keyDown["ArrowLeft"]) gameState.player.turnLeft(deltaTime);
+				if (engine.keyDown["ArrowRight"]) gameState.player.turnRight(deltaTime);
+				if (engine.keyDown["ArrowUp"]) gameState.player.accelerate(deltaTime);
+				if (engine.keyDown["ArrowDown"]) gameState.player.reverseThrust(deltaTime);
+				if (engine.keyDown[" "]) shoot();
 
+				// Update player state
 				gameState.player.update(deltaTime);
-				gameState.player.updateShieldRegen(deltaTime); // Update shield regeneration
+				gameState.player.updateShieldRegen(deltaTime);
 			}
 
 			// Update all NPCs with unified loop
@@ -939,26 +932,17 @@
 						playerProjectilesToRemove.add(shot);
 
 						// Spawn impact particles and sound from shot properties
-						if (shot.particleColor) {
-							gameState.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
-						}
-						if (shot.hitSound) {
-							playSoundEffect(shot.hitSound, shot.hitVolume);
-						}
+						handleShotImpact(shot);
 
 						// Check if NPC is offscreen for Sniper achievement
-						const npcScreenX = npc.sprite.position.x - gameState.player.sprite.position.x + canvas.width / 2;
-						const npcScreenY = npc.sprite.position.y - gameState.player.sprite.position.y + canvas.height / 2;
-						const isOffscreen = npcScreenX < 0 || npcScreenX > canvas.width ||
-						                    npcScreenY < 0 || npcScreenY > canvas.height;
-
-						if (isOffscreen) {
+						if (isOffscreen(npc.sprite.position)) {
 							achievementManager.unlock('sniper');
 						}
 
 						DebugLogger.log(`Shot damage: ${shot.damage}, NPC type: ${npc.constructor.name}, NPC health before: ${npc.health}`);
 						const hitResult = npc.onHit(shot.damage);
 						DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);
+
 						if (hitResult.destroyed) {
 							npcsToRemove.add(npc);
 							handleNPCDestroyed(npc);
@@ -968,9 +952,8 @@
 								gameState.npcs.push(...hitResult.spawns);
 							}
 						}
-						if (hitResult.sound) {
-							playSoundEffect(hitResult.sound, hitResult.volume);
-						}
+
+						handleCollisionEffects(hitResult, npc.sprite.position);
 					}
 				}
 			}
@@ -982,7 +965,7 @@
 						npcsToRemove.add(npc);
 
 						const collisionResult = npc.onCollideWithPlayer();
-						DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, NPC health: ${npc.health}, collision damage: ${collisionResult.damage}, player health before: ${gameState.player.health}`);
+						DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, collision damage: ${collisionResult.damage}, player health: ${gameState.player.health}`);
 
 						// Handle NPC destruction (score, particles, centurion achievement)
 						handleNPCDestroyed(npc);
@@ -990,11 +973,9 @@
 						// Apply damage to player
 						gameState.player.health -= collisionResult.damage;
 						gameState.player.onDamage(); // Reset shield regen timer
-						DebugLogger.log(`Player health after: ${gameState.player.health}`);
 
-						if (collisionResult.sound) {
-							playSoundEffect(collisionResult.sound, collisionResult.volume);
-						}
+						// Handle collision effects
+						handleCollisionEffects(collisionResult, npc.sprite.position);
 
 						// Track collision kills for demolition_derby achievement
 						achievementManager.progress('demolition_derby', 1);
@@ -1016,13 +997,8 @@
 						gameState.player.onDamage(); // Reset shield regen timer
 						DebugLogger.log(`Player hit by projectile! Health: ${gameState.player.health}`);
 
-						if (hitResult.sound) {
-							playSoundEffect(hitResult.sound, hitResult.volume);
-						}
-
-						if (hitResult.particleColor) {
-							gameState.particleSystem.spawnExplosion(projectile.sprite.position, hitResult.particleColor);
-						}
+						// Handle collision effects
+						handleCollisionEffects(hitResult, projectile.sprite.position);
 
 						// Track damage taken for untouchable achievement
 						gameState.achievementStats.damageTakenThisWave += hitResult.damage;
