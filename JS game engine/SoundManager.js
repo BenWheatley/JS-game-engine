@@ -8,6 +8,7 @@ class SoundManager {
       return SoundManager.instance;
     }
     SoundManager.instance = this;
+    this._activeSources = new Set();
   }
 
   static init() {
@@ -21,7 +22,15 @@ class SoundManager {
     try {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
+      DebugLogger.log(`Fetched bytes for ${name}: ${arrayBuffer.byteLength}`);
+
       const audioBuffer = await SoundManager.audioContext.decodeAudioData(arrayBuffer);
+
+      if (!audioBuffer || audioBuffer.length === 0) {
+        DebugLogger.error(`Audio buffer empty for ${name}`);
+        return;
+      }
+
       SoundManager.sounds[name] = audioBuffer;
       DebugLogger.log(`Loaded sound: ${name}`);
     } catch (error) {
@@ -49,7 +58,9 @@ class SoundManager {
     }
 
     // Resume AudioContext if suspended (required by browser autoplay policies)
-    if (SoundManager.audioContext.state === 'suspended') {
+    DebugLogger.log(`AudioContext state before play: ${SoundManager.audioContext.state}`);
+
+    if (SoundManager.audioContext.state === "suspended") {
       try {
         await SoundManager.audioContext.resume();
         DebugLogger.log('Audio context resumed');
@@ -69,6 +80,11 @@ class SoundManager {
 
       source.connect(gainNode);
       gainNode.connect(SoundManager.audioContext.destination);
+
+      this._activeSources.add(source);
+      source.onended = () => this._activeSources.delete(source);
+
+      DebugLogger.log(`Playing sound: ${name}`);
 
       source.start(0);
     } catch (error) {
