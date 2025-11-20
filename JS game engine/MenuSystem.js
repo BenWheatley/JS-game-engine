@@ -165,6 +165,18 @@ class MenuSystem {
       if (config.onChange) config.onChange(e.target.value);
     };
 
+    // Handle Enter/Return key to trigger onSubmit action
+    input.onkeydown = (e) => {
+      // Check for Enter key (key code 13, or key name 'Enter')
+      // Use both e.key and e.keyCode for cross-browser compatibility
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        e.preventDefault(); // Prevent default form submission behavior
+        if (config.onSubmit) {
+          config.onSubmit();
+        }
+      }
+    };
+
     // Focus input when created if autofocus is enabled
     if (config.autofocus) {
       setTimeout(() => input.focus(), 100);

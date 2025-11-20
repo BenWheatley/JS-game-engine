@@ -190,6 +190,13 @@
 
 			let playerName = '';
 
+			// Function to submit the score (shared between button and Enter key)
+			const submitScore = () => {
+				const name = playerName.trim() || 'Anonymous';
+				highScoreManager.saveHighScore(name, gameState.score);
+				highScoreManager.showHighScoresMenu();
+			};
+
 			menuSystem.showMenu(MenuSystem.MenuTypes.GAME_OVER, {
 				title: 'GAME OVER',
 				items: [
@@ -202,16 +209,13 @@
 						autofocus: true,
 						onChange: (value) => {
 							playerName = value;
-						}
+						},
+						onSubmit: submitScore
 					},
 					{
 						type: 'button',
 						label: 'Submit Score',
-						action: () => {
-							const name = playerName.trim() || 'Anonymous';
-							highScoreManager.saveHighScore(name, gameState.score);
-							highScoreManager.showHighScoresMenu();
-						}
+						action: submitScore
 					},
 					{
 						type: 'button',
