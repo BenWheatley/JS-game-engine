@@ -1,0 +1,11 @@
+# Claude Code Rules for this Project
+
+## Git Usage
+- This is a git repository - use git for version control
+- Do NOT create .backup files - git handles backups
+- Use `git diff` or `git status` to check changes if needed
+
+## Testing/Opening Files
+- Do NOT use `open "/Users/benwheatley/Documents/Code/JS-game-engine/JS game engine/skeleton.html"`
+- That command doesn't work for opening the game in browser
+- User will manually open/test the game in their browser when needed
