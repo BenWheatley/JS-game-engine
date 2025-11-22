@@ -325,7 +325,7 @@
 						// Heal to full health
 						gameState.player.health = gameState.player.maxHealth;
 						DebugLogger.log(`Healed to full health: ${gameState.player.health}`);
-						resumeFromUpgrade();
+						game.resumeFromUpgrade();
 					}
 				});
 			} else {
@@ -344,7 +344,7 @@
 						achievementManager.setProgress('fully_armed', gameState.player.weaponLevel);
 						checkUltimateWeaponAchievement();
 
-						resumeFromUpgrade();
+						game.resumeFromUpgrade();
 					}
 				});
 
@@ -362,7 +362,7 @@
 						achievementManager.setProgress('speed_demon', gameState.player.engineLevel);
 						checkUltimateWeaponAchievement();
 
-						resumeFromUpgrade();
+						game.resumeFromUpgrade();
 					}
 				});
 
@@ -381,7 +381,7 @@
 						achievementManager.setProgress('fortress', gameState.player.shieldLevel);
 						checkUltimateWeaponAchievement();
 
-						resumeFromUpgrade();
+						game.resumeFromUpgrade();
 					}
 				});
 			}
