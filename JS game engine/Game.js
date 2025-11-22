@@ -565,8 +565,8 @@ class Game {
 			}
 		}
 	}
-	
-	this.checkGamepadInput(deltaTime) {
+
+	checkGamepadInput(deltaTime) {
 		// Don't process gamepad input if player is dead
 		if (gameState.player.health <= 0) {
 			return;
