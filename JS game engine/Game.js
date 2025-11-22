@@ -188,10 +188,10 @@ class Game {
 	// Helper: Despawn projectiles that are too far from player (uses same logic as NPC wrapping)
 	despawnDistantProjectiles(wrapDistance) {
 		gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile =>
-			!isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
+			!this.isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
 		);
 		gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile =>
-			!isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
+			!this.isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
 		);
 	}
 		
@@ -273,7 +273,7 @@ class Game {
 			}
 
 			// Play sound
-			this.playSoundEffect('shoot', 0.3);
+			soundManager.play('shoot', 0.3);
 		}
 	}
 
@@ -356,7 +356,7 @@ class Game {
 				if (shootResult && shootResult.shots) {
 					gameState.npcProjectiles.push(...shootResult.shots);
 					if (shootResult.sound) {
-						this.playSoundEffect(shootResult.sound, shootResult.volume);
+						soundManager.play(shootResult.sound, shootResult.volume);
 					}
 				}
 			}
@@ -393,7 +393,7 @@ class Game {
 						gameState.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
 					}
 					if (shot.hitSound) {
-						this.playSoundEffect(shot.hitSound, shot.hitVolume);
+						soundManager.play(shot.hitSound, shot.hitVolume);
 					}
 
 					// Check if NPC is offscreen for Sniper achievement
@@ -419,7 +419,7 @@ class Game {
 						}
 					}
 					if (hitResult.sound) {
-						this.playSoundEffect(hitResult.sound, hitResult.volume);
+						soundManager.play(hitResult.sound, hitResult.volume);
 					}
 				}
 			}
@@ -443,7 +443,7 @@ class Game {
 					DebugLogger.log(`Player health after: ${gameState.player.health}`);
 
 					if (collisionResult.sound) {
-						this.playSoundEffect(collisionResult.sound, collisionResult.volume);
+						soundManager.play(collisionResult.sound, collisionResult.volume);
 					}
 
 					// Track collision kills for demolition_derby achievement
@@ -467,7 +467,7 @@ class Game {
 					DebugLogger.log(`Player hit by projectile! Health: ${gameState.player.health}`);
 
 					if (hitResult.sound) {
-						this.playSoundEffect(hitResult.sound, hitResult.volume);
+						soundManager.play(hitResult.sound, hitResult.volume);
 					}
 
 					if (hitResult.particleColor) {
@@ -483,7 +483,7 @@ class Game {
 		// Check player-wormhole collision (show upgrade menu) - only if player is alive
 		if (gameState.player.health > 0 && gameState.wormhole && CollisionDetection.checkCircle(gameState.wormhole, gameState.player)) {
 			showUpgradeMenu();
-			this.playSoundEffect('achievement', 0.5); // Play a sound effect
+			soundManager.play('achievement', 0.5); // Play a sound effect
 		}
 
 		// Remove collided entities (unified filtering)
@@ -632,10 +632,5 @@ class Game {
 				gamepad.buttons[9].wasPressed = false;
 			}
 		}
-	}
-
-	// Helper function to apply volume
-	playSoundEffect(name, baseVolume) {
-		soundManager.play(name, baseVolume * (preferencesManager.soundEffectsVolume / 100));
 	}
 }

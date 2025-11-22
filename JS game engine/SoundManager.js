@@ -3,19 +3,20 @@ class SoundManager {
   static sounds = {};
   static audioContext = null;
 
-  constructor() {
+  constructor(preferencesManager) {
     if (SoundManager.instance) {
       return SoundManager.instance;
     }
     SoundManager.instance = this;
     this._activeSources = new Set();
+    this.preferencesManager = preferencesManager;
   }
 
-  static init() {
+  static init(preferencesManager) {
     if (!SoundManager.audioContext) {
       SoundManager.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-    return new SoundManager();
+    return new SoundManager(preferencesManager);
   }
 
   async loadSound(name, url) {
@@ -75,8 +76,10 @@ class SoundManager {
       source.buffer = audioBuffer;
 
       // Create gain node for volume control
+      // Apply both the base volume and the user's sound effects volume preference
       const gainNode = SoundManager.audioContext.createGain();
-      gainNode.gain.value = volume;
+      const effectiveVolume = volume * (this.preferencesManager.soundEffectsVolume / 100);
+      gainNode.gain.value = effectiveVolume;
 
       source.connect(gainNode);
       gainNode.connect(SoundManager.audioContext.destination);

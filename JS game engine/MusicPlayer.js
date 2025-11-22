@@ -1,10 +1,11 @@
 class MusicPlayer {
-  constructor() {
+  constructor(preferencesManager) {
     this.musicData = null;
     this.isPlaying = false;
     this.shouldLoop = true;
     this.scheduledTimeouts = [];
     this.startTime = 0;
+    this.preferencesManager = preferencesManager;
   }
 
   async loadMusic(url) {
