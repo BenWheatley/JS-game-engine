@@ -178,16 +178,23 @@ class Game {
 		}
 	}
 
-	// Helper: Despawn projectiles that are too far from player
-	despawnDistantProjectiles(despawnDistance) {
-		const filterByDistance = (projectile) => {
-			const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
-			return distance < despawnDistance;
-		};
-		gameState.playerProjectiles = gameState.playerProjectiles.filter(filterByDistance);
-		gameState.npcProjectiles = gameState.npcProjectiles.filter(filterByDistance);
+	// Helper: Check if entity is beyond wrap distance from player (per-axis check)
+	isBeyondWrapDistance(entityPos, playerPos, wrapDistance) {
+		const offsetX = entityPos.x - playerPos.x;
+		const offsetY = entityPos.y - playerPos.y;
+		return Math.abs(offsetX) > wrapDistance || Math.abs(offsetY) > wrapDistance;
 	}
 
+	// Helper: Despawn projectiles that are too far from player (uses same logic as NPC wrapping)
+	despawnDistantProjectiles(wrapDistance) {
+		gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile =>
+			!isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
+		);
+		gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile =>
+			!isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
+		);
+	}
+		
 	// Helper: Wrap a single coordinate around world boundaries
 	wrapCoordinate(npcCoord, playerCoord, wrapDistance) {
 		const offset = npcCoord - playerCoord;
@@ -493,7 +500,6 @@ class Game {
 
 		// Wrap NPCs that go beyond minimap bounds, despawn projectiles
 		const wrapDistance = GameConfig.WORLD.NPC_WRAP_DISTANCE; // Minimap range - wrap NPCs at this distance
-		const despawnDistance = Math.max(canvas.width, canvas.height) * GameConfig.WORLD.PROJECTILE_DESPAWN_MULTIPLIER; // Despawn projectiles
 
 		// Wrap all NPCs around minimap edges
 		for (const npc of gameState.npcs) {
@@ -502,7 +508,7 @@ class Game {
 		}
 
 		// Despawn projectiles that are too far from player
-		this.despawnDistantProjectiles(despawnDistance);
+		this.despawnDistantProjectiles(wrapDistance);
 
 		this.checkGamepadInput(deltaTime);
 	}
