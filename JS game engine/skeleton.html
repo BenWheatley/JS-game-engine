@@ -28,6 +28,7 @@
 	<script type="text/javascript" src="SpawnSystem.js"></script>
 	<script type="text/javascript" src="GameState.js"></script>
     <script type="text/javascript" src="GameEntity.js"></script>
+    <script type="text/javascript" src="Game.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
 	<script type="text/javascript" src="NPC.js"></script>
 	<script type="text/javascript" src="AlienScout.js"></script>
@@ -90,13 +91,6 @@
 		// Preferences Management
 		const preferencesManager = new PreferencesManager();
 
-		// Helper function to apply volume
-		function playSoundEffect(name, baseVolume) {
-			soundManager.play(name, baseVolume * (preferencesManager.soundEffectsVolume / 100));
-		}
-
-		let backgroundSprite;
-
 		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
 		const musicPlayer = new MusicPlayer();
@@ -111,7 +105,7 @@
 
 		// Background will be tiled - store a single tile sprite
 		let backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
-		backgroundSprite = new Sprite(
+		let backgroundSprite = new Sprite(
 			'background-fuzzy-edge.png',
 			new Vector2D(0, 0),
 			backgroundTileSize
@@ -119,6 +113,8 @@
 
 		// Initialize game state
 		const gameState = new GameState(canvas);
+		
+		const game = new Game();
 
 		// Game state management functions
 		async function startGame() {
@@ -516,7 +512,7 @@
 
 		// Show main menu and start game loop
 		showMainMenu();
-		engine.start(update, render, () => Sprite.stillLoading());
+		engine.start(game.update, game.render, () => Sprite.stillLoading());
 	</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 class Game {
 	// Render loop
-	function render() {
+	render() {
 		// Special rendering for upgrade menu
 		if (gameState.currentState === GameState.States.UPGRADING) {
 			gameState.upgradeBackground.draw(context, canvas.width, canvas.height, gameState.player.sprite.position);
@@ -169,7 +169,7 @@ class Game {
 	}
 	
 	// Helper: Update all projectiles
-	function updateAllProjectiles() {
+	updateAllProjectiles() {
 		for (const projectile of gameState.playerProjectiles) {
 			projectile.update();
 		}
@@ -179,7 +179,7 @@ class Game {
 	}
 
 	// Helper: Despawn projectiles that are too far from player
-	function despawnDistantProjectiles(despawnDistance) {
+	despawnDistantProjectiles(despawnDistance) {
 		const filterByDistance = (projectile) => {
 			const distance = projectile.sprite.position.dist(gameState.player.sprite.position);
 			return distance < despawnDistance;
@@ -189,7 +189,7 @@ class Game {
 	}
 
 	// Helper: Wrap a single coordinate around world boundaries
-	function wrapCoordinate(npcCoord, playerCoord, wrapDistance) {
+	wrapCoordinate(npcCoord, playerCoord, wrapDistance) {
 		const offset = npcCoord - playerCoord;
 		if (offset > wrapDistance) {
 			return playerCoord - wrapDistance;
@@ -200,7 +200,7 @@ class Game {
 	}
 	
 	// Player shooting function
-	function shoot() {
+	shoot() {
 		const weaponStats = gameState.player.getWeaponStats();
 		const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
 		const shotPosition = new Vector2D(
@@ -271,7 +271,7 @@ class Game {
 	}
 
 	// Helper function for handling NPC destruction
-	function handleNPCDestroyed(npc) {
+	handleNPCDestroyed(npc) {
 		// Add score
 		gameState.score += npc.scoreValue;
 
@@ -289,7 +289,7 @@ class Game {
 	}
 
 	// Update loop; deltaTime is milliseconds
-	function update(deltaTime) {
+	update(deltaTime) {
 		// Handle gamepad input for menu navigation
 		const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
 		for (let i = 0; i < gamepads.length; i++) {
@@ -507,7 +507,7 @@ class Game {
 		checkGamepadInput(deltaTime);
 	}
 
-	function gameOver() {
+	gameOver() {
 		// Spawn large explosion at player position
 		const explosionColor = "255, 100, 50"; // Orange/red color for explosion
 		const explosionSize = 120; // Much larger than normal explosions (24)
@@ -540,7 +540,7 @@ class Game {
 		showGameOverMenu();
 	}
 
-	function resumeFromUpgrade() {
+	resumeFromUpgrade() {
 		// Resume game and advance level
 		gameState.currentState = GameState.States.PLAYING;
 		menuSystem.hideMenu();
@@ -555,7 +555,7 @@ class Game {
 	}
 	
 	// Handle ESC key for pause/resume (checked every frame)
-	function handlePauseInput() {
+	handlePauseInput() {
 		if (engine.keyDown["Escape"]) {
 			engine.keyDown["Escape"] = false;
 			if (gameState.currentState === GameState.States.PLAYING) {
@@ -566,7 +566,7 @@ class Game {
 		}
 	}
 	
-	function checkGamepadInput(deltaTime) {
+	checkGamepadInput(deltaTime) {
 		// Don't process gamepad input if player is dead
 		if (gameState.player.health <= 0) {
 			return;
@@ -626,5 +626,10 @@ class Game {
 				gamepad.buttons[9].wasPressed = false;
 			}
 		}
+	}
+
+	// Helper function to apply volume
+	playSoundEffect(name, baseVolume) {
+		soundManager.play(name, baseVolume * (preferencesManager.soundEffectsVolume / 100));
 	}
 }
