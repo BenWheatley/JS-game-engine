@@ -512,7 +512,7 @@
 
 		// Show main menu and start game loop
 		showMainMenu();
-		engine.start(game.update, game.render, () => Sprite.stillLoading());
+		engine.start(game.update.bind(game), game.render.bind(game), () => Sprite.stillLoading());
 	</script>
 </body>
 </html>
