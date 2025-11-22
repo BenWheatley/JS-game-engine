@@ -82,18 +82,14 @@
 			document.getElementById('menuInstructions')
 		);
 
-		// Initialize high score manager
+		// Initialize globals:
 		const highScoreManager = new HighScoreManager(menuSystem);
-
-		// Initialize achievement manager
 		const achievementManager = new AchievementManager(menuSystem);
-
-		// Preferences Management
 		const preferencesManager = new PreferencesManager();
-
-		// Initialize sound manager and music player
 		const soundManager = SoundManager.init();
 		const musicPlayer = new MusicPlayer();
+		const gameState = new GameState(canvas);
+		const game = new Game();
 
 		// Preload assets
 		(async () => {
@@ -110,11 +106,8 @@
 			new Vector2D(0, 0),
 			backgroundTileSize
 		);
-
-		// Initialize game state
-		const gameState = new GameState(canvas);
 		
-		const game = new Game();
+		musicPlayer.play();
 
 		// Game state management functions
 		async function startGame() {
@@ -242,7 +235,6 @@
 		function pauseGame() {
 			if (gameState.currentState === GameState.States.PLAYING) {
 				gameState.currentState = GameState.States.PAUSED;
-				musicPlayer.pause();
 				canvas.classList.remove('hide-cursor');
 				showPauseMenu();
 			}
@@ -284,14 +276,6 @@
 			});
 		}
 
-		function checkUltimateWeaponAchievement() {
-			if (gameState.player.weaponLevel === 10 &&
-				gameState.player.engineLevel === 10 &&
-				gameState.player.shieldLevel === 10) {
-				achievementManager.unlock('ultimate_weapon');
-			}
-		}
-
 		function showUpgradeMenu() {
 			// Check Untouchable achievement before advancing
 			if (gameState.achievementStats.damageTakenThisWave === 0) {
@@ -300,7 +284,6 @@
 
 			// Set upgrading state - time passes but player has no control
 			gameState.currentState = GameState.States.UPGRADING;
-			musicPlayer.pause();
 			setCursorVisibility(true);
 			setMenuOverlayMode(true); // Transparent overlay for pause
 
@@ -341,7 +324,11 @@
 						if (applyFn) applyFn();
 						DebugLogger.log(`${name} upgraded to level ${gameState.player[levelProp]}`);
 						achievementManager.setProgress(achievementId, gameState.player[levelProp]);
-						checkUltimateWeaponAchievement();
+						if (gameState.player.weaponLevel === 10 &&
+							gameState.player.engineLevel === 10 &&
+							gameState.player.shieldLevel === 10) {
+							achievementManager.unlock('ultimate_weapon');
+						}
 						game.resumeFromUpgrade();
 					}
 				});
