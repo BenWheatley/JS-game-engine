@@ -510,9 +510,18 @@
 			}
 		}
 
+		// Wrapper functions for game loop
+		function update(deltaTime) {
+			game.update(deltaTime);
+		}
+
+		function render() {
+			game.render();
+		}
+
 		// Show main menu and start game loop
 		showMainMenu();
-		engine.start(game.update.bind(game), game.render.bind(game), () => Sprite.stillLoading());
+		engine.start(update, render, () => Sprite.stillLoading());
 	</script>
 </body>
 </html>
