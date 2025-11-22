@@ -266,7 +266,7 @@ class Game {
 			}
 
 			// Play sound
-			playSoundEffect('shoot', 0.3);
+			this.playSoundEffect('shoot', 0.3);
 		}
 	}
 
@@ -300,7 +300,7 @@ class Game {
 		}
 
 		// Handle pause input regardless of game state
-		handlePauseInput();
+		this.handlePauseInput();
 
 		// Update upgrade background animation if in upgrading state
 		if (gameState.currentState === GameState.States.UPGRADING) {
@@ -331,7 +331,7 @@ class Game {
 				gameState.player.reverseThrust(deltaTime);
 			}
 			if (engine.keyDown[" "]) {
-				shoot();
+				this.shoot();
 			}
 
 			gameState.player.update(deltaTime);
@@ -349,14 +349,14 @@ class Game {
 				if (shootResult && shootResult.shots) {
 					gameState.npcProjectiles.push(...shootResult.shots);
 					if (shootResult.sound) {
-						playSoundEffect(shootResult.sound, shootResult.volume);
+						this.playSoundEffect(shootResult.sound, shootResult.volume);
 					}
 				}
 			}
 		}
 
 		// Update all projectiles
-		updateAllProjectiles();
+		this.updateAllProjectiles();
 
 		// Update particles
 		gameState.particleSystem.update(deltaTime);
@@ -386,7 +386,7 @@ class Game {
 						gameState.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
 					}
 					if (shot.hitSound) {
-						playSoundEffect(shot.hitSound, shot.hitVolume);
+						this.playSoundEffect(shot.hitSound, shot.hitVolume);
 					}
 
 					// Check if NPC is offscreen for Sniper achievement
@@ -404,7 +404,7 @@ class Game {
 					DebugLogger.log(`Hit result destroyed: ${hitResult.destroyed}, NPC health after: ${npc.health}`);
 					if (hitResult.destroyed) {
 						npcsToRemove.add(npc);
-						handleNPCDestroyed(npc);
+						this.handleNPCDestroyed(npc);
 
 						// Handle spawns (specific to asteroid splitting)
 						if (hitResult.spawns) {
@@ -412,7 +412,7 @@ class Game {
 						}
 					}
 					if (hitResult.sound) {
-						playSoundEffect(hitResult.sound, hitResult.volume);
+						this.playSoundEffect(hitResult.sound, hitResult.volume);
 					}
 				}
 			}
@@ -428,7 +428,7 @@ class Game {
 					DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, NPC health: ${npc.health}, collision damage: ${collisionResult.damage}, player health before: ${gameState.player.health}`);
 
 					// Handle NPC destruction (score, particles, centurion achievement)
-					handleNPCDestroyed(npc);
+					this.handleNPCDestroyed(npc);
 
 					// Apply damage to player
 					gameState.player.health -= collisionResult.damage;
@@ -436,7 +436,7 @@ class Game {
 					DebugLogger.log(`Player health after: ${gameState.player.health}`);
 
 					if (collisionResult.sound) {
-						playSoundEffect(collisionResult.sound, collisionResult.volume);
+						this.playSoundEffect(collisionResult.sound, collisionResult.volume);
 					}
 
 					// Track collision kills for demolition_derby achievement
@@ -460,7 +460,7 @@ class Game {
 					DebugLogger.log(`Player hit by projectile! Health: ${gameState.player.health}`);
 
 					if (hitResult.sound) {
-						playSoundEffect(hitResult.sound, hitResult.volume);
+						this.playSoundEffect(hitResult.sound, hitResult.volume);
 					}
 
 					if (hitResult.particleColor) {
@@ -476,7 +476,7 @@ class Game {
 		// Check player-wormhole collision (show upgrade menu) - only if player is alive
 		if (gameState.player.health > 0 && gameState.wormhole && CollisionDetection.checkCircle(gameState.wormhole, gameState.player)) {
 			showUpgradeMenu();
-			playSoundEffect('achievement', 0.5); // Play a sound effect
+			this.playSoundEffect('achievement', 0.5); // Play a sound effect
 		}
 
 		// Remove collided entities (unified filtering)
@@ -486,7 +486,7 @@ class Game {
 
 		// Check for game over - only trigger once
 		if (gameState.player.health <= 0 && gameState.player.health > -1000) {
-			gameOver();
+			this.gameOver();
 			gameState.player.health = -1000; // Sentinel value to prevent retriggering
 			// Don't return - let the game continue running
 		}
@@ -497,14 +497,14 @@ class Game {
 
 		// Wrap all NPCs around minimap edges
 		for (const npc of gameState.npcs) {
-			npc.sprite.position.x = wrapCoordinate(npc.sprite.position.x, gameState.player.sprite.position.x, wrapDistance);
-			npc.sprite.position.y = wrapCoordinate(npc.sprite.position.y, gameState.player.sprite.position.y, wrapDistance);
+			npc.sprite.position.x = this.wrapCoordinate(npc.sprite.position.x, gameState.player.sprite.position.x, wrapDistance);
+			npc.sprite.position.y = this.wrapCoordinate(npc.sprite.position.y, gameState.player.sprite.position.y, wrapDistance);
 		}
 
 		// Despawn projectiles that are too far from player
-		despawnDistantProjectiles(despawnDistance);
+		this.despawnDistantProjectiles(despawnDistance);
 
-		checkGamepadInput(deltaTime);
+		this.checkGamepadInput(deltaTime);
 	}
 
 	gameOver() {
@@ -566,7 +566,7 @@ class Game {
 		}
 	}
 	
-	checkGamepadInput(deltaTime) {
+	this.checkGamepadInput(deltaTime) {
 		// Don't process gamepad input if player is dead
 		if (gameState.player.health <= 0) {
 			return;
@@ -612,7 +612,7 @@ class Game {
 
 			// Button 0 (A/Cross): Shoot
 			if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
-				shoot();
+				this.shoot();
 			}
 
 			// Button 9 (Start/Options): Pause game
