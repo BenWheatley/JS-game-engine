@@ -78,7 +78,7 @@ class SoundManager {
       // Create gain node for volume control
       // Apply both the base volume and the user's sound effects volume preference
       const gainNode = SoundManager.audioContext.createGain();
-      const effectiveVolume = volume * (this.preferencesManager.soundEffectsVolume / 100);
+      const effectiveVolume = volume * (SoundManager.instance.preferencesManager.soundEffectsVolume / 100);
       gainNode.gain.value = effectiveVolume;
 
       source.connect(gainNode);

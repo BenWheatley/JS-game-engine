@@ -87,7 +87,7 @@
 		const highScoreManager = new HighScoreManager(menuSystem);
 		const achievementManager = new AchievementManager(menuSystem);
 		const preferencesManager = new PreferencesManager();
-		const soundManager = SoundManager.init();
+		const soundManager = SoundManager.init(preferencesManager);
 		const musicPlayer = new MusicPlayer();
 		const gameState = new GameState(canvas);
 		const game = new Game();
