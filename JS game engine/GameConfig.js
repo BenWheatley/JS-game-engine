@@ -35,7 +35,7 @@ const GameConfig = {
   PLAYER: {
     FORWARD_ACCELERATION: 0.002,        // Forward thrust acceleration per millisecond
     BACKWARD_ACCELERATION: 0.0002,      // Reverse thrust acceleration per millisecond (10% of forward)
-    MAX_SPEED: 0.08,                    // Maximum velocity magnitude
+    MAX_SPEED: 0.1,                    // Maximum velocity magnitude
     ROTATIONAL_SPEED: Math.PI / 1000 * 1.1, // Radians per millisecond (rotation speed)
     FIRE_RATE: 500,                     // Milliseconds between shots (fire cooldown)
     GAMEPAD_DEADZONE: 0.15              // Analog stick deadzone to prevent drift
