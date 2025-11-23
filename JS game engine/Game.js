@@ -72,7 +72,7 @@ class Game {
 
 		// HUD - render in screen space
 		// Health bar
-		const healthBarWidth = gameState.player.maxHealth;
+		const healthBarWidth = gameState.player.getMaxHealth() * 0.85;
 		const healthBarHeight = GameConfig.HUD.HEALTH_BAR_HEIGHT;
 		const healthBarX = GameConfig.HUD.HEALTH_BAR_X;
 		const healthBarY = GameConfig.HUD.HEALTH_BAR_Y;
@@ -82,7 +82,7 @@ class Game {
 		context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
 		// Draw health bar foreground (green - shows current health)
-		const healthPercentage = Math.max(0, Math.min(1, gameState.player.health / gameState.player.maxHealth));
+		const healthPercentage = Math.max(0, Math.min(1, gameState.player.health / gameState.player.getMaxHealth()));
 		const currentHealthWidth = healthBarWidth * healthPercentage;
 		context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
 		context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
@@ -106,16 +106,17 @@ class Game {
 
 		// Wormhole message and arrow
 		if (gameState.wormhole) {
+			const wormhole_text_top = 60;
 			// Draw message with stroke
 			context.font = '16px "Press Start 2P"';
 			context.textAlign = 'center';
 			// Draw white stroke (outline)
 			context.strokeStyle = '#000000';
 			context.lineWidth = 2;
-			context.strokeText('Wormhole detected!', canvas.width / 2, 50);
+			context.strokeText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
 			// Draw cyan fill
 			context.fillStyle = '#00FFFF';
-			context.fillText('Wormhole detected!', canvas.width / 2, 50);
+			context.fillText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
 
 			// Calculate direction to wormhole
 			const dx = gameState.wormhole.position.x - gameState.player.sprite.position.x;

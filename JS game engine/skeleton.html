@@ -266,7 +266,7 @@
 						label: 'Quit',
 						action: () => {
 							if (gameState.score > 0) {
-								gameOver();
+								game.gameOver();
 							} else {
 								returnToMenu();
 							}
@@ -307,7 +307,7 @@
 					label: 'Heal and Continue',
 					action: () => {
 						// Heal to full health
-						gameState.player.health = gameState.player.maxHealth;
+						gameState.player.health = gameState.player.getMaxHealth();
 						DebugLogger.log(`Healed to full health: ${gameState.player.health}`);
 						game.resumeFromUpgrade();
 					}

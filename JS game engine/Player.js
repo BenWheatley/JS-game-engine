@@ -4,8 +4,6 @@ class Player extends GameEntity {
 
   constructor() {
     super(new Vector2D(0, 0), 0, new Vector2D(), Player.size, Player.imageUrl);
-    this.maxHealth = GameConfig.PLAYER.INITIAL_HEALTH; // Current maximum (can change with power-ups)
-    this.health = this.maxHealth; // Current health
 
     // Upgrade levels (start at 0, increase when player chooses upgrades)
     this.weaponLevel = 0;
@@ -15,6 +13,8 @@ class Player extends GameEntity {
     // Shield regeneration tracking
     this.timeSinceLastDamage = 0;
     this.regenAccumulator = 0; // Tracks partial HP for regen
+
+	this.health = this.getMaxHealth();
   }
 
   /**
@@ -49,8 +49,11 @@ class Player extends GameEntity {
    */
   applyShieldUpgrade() {
     const shieldStats = this.getShieldStats();
-    this.maxHealth = shieldStats.maxHealth;
-    this.health = this.maxHealth; // Heal to full on upgrade
+    this.health = this.getMaxHealth(); // Heal to full on upgrade
+  }
+  
+  getMaxHealth() {
+    return this.getShieldStats().maxHealth;
   }
 
   /**
@@ -75,14 +78,14 @@ class Player extends GameEntity {
 
     // Only regenerate if delay has passed and not at max health
     const regenDelayMs = shieldStats.regenDelay * 1000;
-    if (this.timeSinceLastDamage >= regenDelayMs && this.health < this.maxHealth) {
+    if (this.timeSinceLastDamage >= regenDelayMs && this.health < this.getMaxHealth()) {
       // Accumulate fractional HP (regenRate is HP per second)
       this.regenAccumulator += (shieldStats.regenRate * deltaTime) / 1000;
 
       // Apply whole HP points
       const hpToRegen = Math.floor(this.regenAccumulator);
       if (hpToRegen > 0) {
-        this.health = Math.min(this.health + hpToRegen, this.maxHealth);
+        this.health = Math.min(this.health + hpToRegen, this.getMaxHealth());
         this.regenAccumulator -= hpToRegen;
       }
     }

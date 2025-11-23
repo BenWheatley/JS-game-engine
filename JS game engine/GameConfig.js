@@ -33,7 +33,6 @@ const GameConfig = {
 
   // Player physics and controls
   PLAYER: {
-    INITIAL_HEALTH: 100,                // Starting health points
     FORWARD_ACCELERATION: 0.002,        // Forward thrust acceleration per millisecond
     BACKWARD_ACCELERATION: 0.0002,      // Reverse thrust acceleration per millisecond (10% of forward)
     MAX_SPEED: 0.08,                    // Maximum velocity magnitude
