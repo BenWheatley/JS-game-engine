@@ -37,7 +37,6 @@ class GameState {
     // Systems
     this.particleSystem = new ParticleSystem();
     this.minimap = new Minimap(canvas.width, canvas.height);
-    this.upgradeBackground = new UpgradeBackground();
 
     // Gameplay state (null when in menus, PLAYING during gameplay, PAUSED when paused)
     this.currentState = null;

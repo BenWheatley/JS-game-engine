@@ -1,15 +1,61 @@
 class Game {
+	constructor() {
+		this.upgradeBackground = new UpgradeBackground();
+	}
+
 	// Render loop
 	render() {
-		// Special rendering for upgrade menu
-		if (gameState.currentState === GameState.States.UPGRADING) {
-			gameState.upgradeBackground.draw(context, canvas.width, canvas.height, gameState.player.sprite.position);
-			return; // Menu overlay will render on top
-		}
-		
 		// I want the blocky look for this game; strictly this doesn't need to be set every frame, but it doesn't hurt to be every frame
 		context.imageSmoothingEnabled = false;
 
+		this.renderGamespaceElements();
+
+		// Special rendering for upgrade menu
+		if (gameState.currentState === GameState.States.UPGRADING) {
+			this.upgradeBackground.draw(context, canvas.width, canvas.height, 0, 0.5, 1, 1);
+		} else {
+			this.renderHUD();
+			this.renderWormholeMessageAndArrow();
+		}
+	}
+	
+	renderHUD() {
+		// HUD - render in screen space
+		// Health bar
+		const healthBarWidth = gameState.player.getMaxHealth() * 0.85;
+		const healthBarHeight = GameConfig.HUD.HEALTH_BAR_HEIGHT;
+		const healthBarX = GameConfig.HUD.HEALTH_BAR_X;
+		const healthBarY = GameConfig.HUD.HEALTH_BAR_Y;
+
+		// Draw health bar background (red - shows damage)
+		context.fillStyle = GameConfig.HUD.HEALTH_BAR_BG_COLOR;
+		context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+		// Draw health bar foreground (green - shows current health)
+		const healthPercentage = Math.max(0, Math.min(1, gameState.player.health / gameState.player.getMaxHealth()));
+		const currentHealthWidth = healthBarWidth * healthPercentage;
+		context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
+		context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
+
+		// Draw health bar border (white)
+		context.strokeStyle = GameConfig.HUD.HEALTH_BAR_BORDER_COLOR;
+		context.lineWidth = GameConfig.HUD.HEALTH_BAR_BORDER_WIDTH;
+		context.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+		// Draw score
+		context.fillStyle = '#FFFFFF';
+		context.font = '12px "Press Start 2P"';
+		context.textAlign = 'left';
+		context.fillText(`Score: ${gameState.score}`, 10, 60);
+
+		// Mini-map
+		gameState.minimap.draw(context, {
+			npcs: gameState.npcs,
+			wormhole: gameState.wormhole
+		}, gameState.player.sprite.position);
+	}
+	
+	renderGamespaceElements() {
 		// Background
 		context.fillStyle = 'black';
 		context.fillRect(0, 0, canvas.width, canvas.height);
@@ -69,103 +115,72 @@ class Game {
 		}
 
 		context.restore();
+	}
+	
+	renderWormholeMessageAndArrow() {
+		if (!gameState.wormhole) {
+			return;
+		}
+		
+		const wormhole_text_top = 60;
+		// Draw message with stroke
+		context.font = '16px "Press Start 2P"';
+		context.textAlign = 'center';
+		// Draw white stroke (outline)
+		context.strokeStyle = '#000000';
+		context.lineWidth = 2;
+		context.strokeText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
+		// Draw cyan fill
+		context.fillStyle = '#00FFFF';
+		context.fillText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
 
-		// HUD - render in screen space
-		// Health bar
-		const healthBarWidth = gameState.player.getMaxHealth() * 0.85;
-		const healthBarHeight = GameConfig.HUD.HEALTH_BAR_HEIGHT;
-		const healthBarX = GameConfig.HUD.HEALTH_BAR_X;
-		const healthBarY = GameConfig.HUD.HEALTH_BAR_Y;
+		// Calculate direction to wormhole
+		const dx = gameState.wormhole.position.x - gameState.player.sprite.position.x;
+		const dy = gameState.wormhole.position.y - gameState.player.sprite.position.y;
+		const angle = Math.atan2(dy, dx);
 
-		// Draw health bar background (red - shows damage)
-		context.fillStyle = GameConfig.HUD.HEALTH_BAR_BG_COLOR;
-		context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+		// Check if wormhole is on-screen
+		const screenHalfWidth = canvas.width / 2;
+		const screenHalfHeight = canvas.height / 2;
+		const wormholeOnScreen = Math.abs(dx) < screenHalfWidth && Math.abs(dy) < screenHalfHeight;
 
-		// Draw health bar foreground (green - shows current health)
-		const healthPercentage = Math.max(0, Math.min(1, gameState.player.health / gameState.player.getMaxHealth()));
-		const currentHealthWidth = healthBarWidth * healthPercentage;
-		context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
-		context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
+		// Only draw arrow if wormhole is off-screen
+		if (!wormholeOnScreen) {
+			// Draw arrow at screen edge pointing to wormhole
+			const arrowDistance = 50; // Distance from screen edge
+			const centerX = canvas.width / 2;
+			const centerY = canvas.height / 2;
 
-		// Draw health bar border (white)
-		context.strokeStyle = GameConfig.HUD.HEALTH_BAR_BORDER_COLOR;
-		context.lineWidth = GameConfig.HUD.HEALTH_BAR_BORDER_WIDTH;
-		context.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+			// Calculate arrow position at edge of screen
+			let arrowX = centerX + Math.cos(angle) * (canvas.width / 2 - arrowDistance);
+			let arrowY = centerY + Math.sin(angle) * (canvas.height / 2 - arrowDistance);
 
-		// Draw score
-		context.fillStyle = '#FFFFFF';
-		context.font = '12px "Press Start 2P"';
-		context.textAlign = 'left';
-		context.fillText(`Score: ${gameState.score}`, 10, 60);
+			// Clamp to screen bounds
+			arrowX = Math.max(arrowDistance, Math.min(canvas.width - arrowDistance, arrowX));
+			arrowY = Math.max(arrowDistance, Math.min(canvas.height - arrowDistance, arrowY));
 
-		// Mini-map
-		gameState.minimap.draw(context, {
-			npcs: gameState.npcs,
-			wormhole: gameState.wormhole
-		}, gameState.player.sprite.position);
-
-		// Wormhole message and arrow
-		if (gameState.wormhole) {
-			const wormhole_text_top = 60;
-			// Draw message with stroke
-			context.font = '16px "Press Start 2P"';
-			context.textAlign = 'center';
+			// Draw arrow
+			context.save();
+			context.translate(arrowX, arrowY);
+			context.rotate(angle);
 			// Draw white stroke (outline)
 			context.strokeStyle = '#000000';
 			context.lineWidth = 2;
-			context.strokeText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
+			context.beginPath();
+			context.moveTo(15, 0);
+			context.lineTo(-10, -10);
+			context.lineTo(-10, 10);
+			context.closePath();
+			context.stroke();
 			// Draw cyan fill
 			context.fillStyle = '#00FFFF';
-			context.fillText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
-
-			// Calculate direction to wormhole
-			const dx = gameState.wormhole.position.x - gameState.player.sprite.position.x;
-			const dy = gameState.wormhole.position.y - gameState.player.sprite.position.y;
-			const angle = Math.atan2(dy, dx);
-
-			// Check if wormhole is on-screen
-			const screenHalfWidth = canvas.width / 2;
-			const screenHalfHeight = canvas.height / 2;
-			const wormholeOnScreen = Math.abs(dx) < screenHalfWidth && Math.abs(dy) < screenHalfHeight;
-
-			// Only draw arrow if wormhole is off-screen
-			if (!wormholeOnScreen) {
-				// Draw arrow at screen edge pointing to wormhole
-				const arrowDistance = 50; // Distance from screen edge
-				const centerX = canvas.width / 2;
-				const centerY = canvas.height / 2;
-
-				// Calculate arrow position at edge of screen
-				let arrowX = centerX + Math.cos(angle) * (canvas.width / 2 - arrowDistance);
-				let arrowY = centerY + Math.sin(angle) * (canvas.height / 2 - arrowDistance);
-
-				// Clamp to screen bounds
-				arrowX = Math.max(arrowDistance, Math.min(canvas.width - arrowDistance, arrowX));
-				arrowY = Math.max(arrowDistance, Math.min(canvas.height - arrowDistance, arrowY));
-
-				// Draw arrow
-				context.save();
-				context.translate(arrowX, arrowY);
-				context.rotate(angle);
-				// Draw white stroke (outline)
-				context.strokeStyle = '#000000';
-				context.lineWidth = 2;
-				context.beginPath();
-				context.moveTo(15, 0);
-				context.lineTo(-10, -10);
-				context.lineTo(-10, 10);
-				context.closePath();
-				context.stroke();
-				// Draw cyan fill
-				context.fillStyle = '#00FFFF';
-				context.beginPath();
-				context.moveTo(15, 0);
-				context.lineTo(-10, -10);
-				context.lineTo(-10, 10);
-				context.closePath();
-				context.fill();
-				context.restore();
-			}
+			context.beginPath();
+			context.moveTo(15, 0);
+			context.lineTo(-10, -10);
+			context.lineTo(-10, 10);
+			context.closePath();
+			context.fill();
+			context.restore();
 		}
 	}
 	
@@ -312,7 +327,7 @@ class Game {
 
 		// Update upgrade background animation if in upgrading state
 		if (gameState.currentState === GameState.States.UPGRADING) {
-			gameState.upgradeBackground.update(deltaTime);
+			this.upgradeBackground.update(deltaTime);
 			gameState.gameTime += deltaTime; // Time passes during upgrade menu
 			return;
 		}
@@ -551,7 +566,6 @@ class Game {
 		// Resume game and advance level
 		gameState.currentState = GameState.States.PLAYING;
 		menuSystem.hideMenu();
-		musicPlayer.play();
 		setCursorVisibility(false);
 		gameState.advanceLevel();
 
