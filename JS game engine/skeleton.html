@@ -90,7 +90,7 @@
 		const soundManager = SoundManager.init(preferencesManager);
 		const musicPlayer = new MusicPlayer();
 		const gameState = new GameState(canvas);
-		const game = new Game();
+		let game = null;
 
 		// Preload assets
 		(async () => {
@@ -115,6 +115,7 @@
 			// Resume audio context on user interaction (required by browser autoplay policies)
 			await SoundManager.resumeAudioContext();
 
+			game = new Game();
 			gameState.reset();
 			gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
@@ -182,8 +183,8 @@
 			const saveAndStopGame = () => {
 				const name = playerName.trim() || 'Anonymous';
 				highScoreManager.saveHighScore(name, gameState.score);
-				// Stop game from continuing to update
 				gameState.currentState = null;
+				game = null;
 			};
 
 			// Function to submit the score (shared between button and Enter key)
@@ -466,11 +467,15 @@
 
 		// Wrapper functions for game loop
 		function update(deltaTime) {
-			game.update(deltaTime);
+			if (game != null) {
+				game.update(deltaTime);
+			}
 		}
 
 		function render() {
-			game.render();
+			if (game != null) {
+				game.render();
+			}
 		}
 
 		// Show main menu and start game loop
