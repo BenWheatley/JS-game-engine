@@ -12,7 +12,7 @@ class Game {
 
 		// Special rendering for upgrade menu
 		if (gameState.currentState === GameState.States.UPGRADING) {
-			this.upgradeBackground.draw(context, canvas.width, canvas.height, 0, 0.5, 1, 1);
+			this.upgradeBackground.draw(context, canvas.width, canvas.height, 0, 128, 255, 255);
 		} else {
 			this.renderHUD();
 			this.renderWormholeMessageAndArrow();
@@ -328,7 +328,6 @@ class Game {
 		// Update upgrade background animation if in upgrading state
 		if (gameState.currentState === GameState.States.UPGRADING) {
 			this.upgradeBackground.update(deltaTime);
-			gameState.gameTime += deltaTime; // Time passes during upgrade menu
 			return;
 		}
 
