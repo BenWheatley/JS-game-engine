@@ -97,10 +97,10 @@ class UpgradeBackground {
 
 	/**
 	 * Update animation state
-	 * @param {number} deltaTime - Time elapsed since last update in seconds
+	 * @param {number} deltaTime - Time elapsed since last update in milliseconds
 	 */
 	update(deltaTime) {
-		this.time += deltaTime;
+		this.time += deltaTime / 1000;
 	}
 
 	/**
