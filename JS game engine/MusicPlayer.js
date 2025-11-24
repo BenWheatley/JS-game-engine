@@ -26,9 +26,6 @@ class MusicPlayer {
       return;
     }
 
-    // Initialize audio context if needed
-    Note.initAudioContext();
-
     this.isPlaying = true;
     this.startTime = Date.now();
 

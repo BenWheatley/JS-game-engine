@@ -12,12 +12,6 @@ class Note {
     return null;
   }
 
-  static initAudioContext() {
-    // No-op: AudioContext is now managed by SoundManager
-    // This method is kept for backwards compatibility
-    return Note.audioContext;
-  }
-
   static setVolume(volume) {
     Note.volume = Math.max(0, Math.min(1, volume)); // Clamp between 0 and 1
   }
