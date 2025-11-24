@@ -9,7 +9,6 @@ const GameConfig = {
   // Shared constants used across multiple entity types
   SHARED: {
     SPAWN_MARGIN_MULTIPLIER: 2,         // Spawn distance as multiple of sprite size (offscreen)
-    DESPAWN_DISTANCE_MULTIPLIER: 3,     // Distance from player before entity despawns (screen sizes)
     SPRITE_UP_ANGLE_OFFSET: Math.PI / 2 // Sprite faces up at rotation 0, add 90° to get direction
   },
 
@@ -282,7 +281,6 @@ const GameConfig = {
     get NPC_WRAP_DISTANCE() {
       return GameConfig.MINIMAP.RANGE;  // Automatically uses minimap range
     },
-    PROJECTILE_DESPAWN_MULTIPLIER: 2    // Projectile despawn distance as multiple of screen size
   },
 
   // Projectile types

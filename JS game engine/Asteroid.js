@@ -28,12 +28,6 @@ class Asteroid extends GameEntity {
     return new Vector2D(Math.cos(finalAngle), Math.sin(finalAngle));
   }
 
-  shouldDespawn(playerPosition, screenSize) {
-    const distance = this.sprite.position.dist(playerPosition);
-    const despawnDistance = Math.max(screenSize.x, screenSize.y) * GameConfig.SHARED.DESPAWN_DISTANCE_MULTIPLIER;
-    return distance > despawnDistance;
-  }
-
   onHit(damage) {
     // Multi-hit asteroid that spawns fragments
     this.health -= damage;

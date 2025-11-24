@@ -9,12 +9,6 @@ class AsteroidSpawn extends GameEntity {
     DebugLogger.log(`AsteroidSpawn created with health: ${this.health}, config.HEALTH: ${config.HEALTH}`);
   }
 
-  shouldDespawn(playerPosition, screenSize) {
-    const distance = this.sprite.position.dist(playerPosition);
-    const despawnDistance = Math.max(screenSize.x, screenSize.y) * GameConfig.SHARED.DESPAWN_DISTANCE_MULTIPLIER;
-    return distance > despawnDistance;
-  }
-
   onHit(damage) {
     // Single-hit asteroid fragment
     return {
