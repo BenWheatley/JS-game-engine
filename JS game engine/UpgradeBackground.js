@@ -9,6 +9,9 @@ class UpgradeBackground {
 		this.time = 0;
 		this.MAX_OCTAVE = 8;
 
+		// Render scale factor (1/4 resolution for performance and pixelated look)
+		this.scale = 4;
+
 		// Cached dimensions
 		this.cachedWidth = 0;
 		this.cachedHeight = 0;
@@ -18,6 +21,8 @@ class UpgradeBackground {
 		this.pixel_theta = null;
 		this.noiseTable = null;
 		this.imageData = null;
+		this.lowResCanvas = null;
+		this.lowResContext = null;
 
 		this.thetaToPerlinScale = 128 / Math.PI;
 
@@ -109,10 +114,19 @@ class UpgradeBackground {
 	 * @param {number} a - Alpha component (0-255)
 	 */
 	draw(context, canvasWidth, canvasHeight, r, g, b, a) {
-		// Recompute geometry if canvas size changed
-		if (this.cachedWidth !== canvasWidth || this.cachedHeight !== canvasHeight) {
-			this._precomputeGeometry(canvasWidth, canvasHeight);
-			this.imageData = context.createImageData(canvasWidth, canvasHeight);
+		// Calculate low-resolution dimensions
+		const lowResWidth = Math.floor(canvasWidth / this.scale);
+		const lowResHeight = Math.floor(canvasHeight / this.scale);
+
+		// Create or update low-res canvas if needed
+		if (!this.lowResCanvas || this.cachedWidth !== lowResWidth || this.cachedHeight !== lowResHeight) {
+			this.lowResCanvas = document.createElement('canvas');
+			this.lowResCanvas.width = lowResWidth;
+			this.lowResCanvas.height = lowResHeight;
+			this.lowResContext = this.lowResCanvas.getContext('2d');
+
+			this._precomputeGeometry(lowResWidth, lowResHeight);
+			this.imageData = this.lowResContext.createImageData(lowResWidth, lowResHeight);
 		}
 
 		const data = this.imageData.data;
@@ -171,6 +185,13 @@ class UpgradeBackground {
 			data[index++] = a;
 		}
 
-		context.putImageData(this.imageData, 0, 0);
+		// Draw to low-res canvas
+		this.lowResContext.putImageData(this.imageData, 0, 0);
+
+		// Disable image smoothing for pixelated upscaling
+		context.imageSmoothingEnabled = false;
+
+		// Scale up to full canvas size
+		context.drawImage(this.lowResCanvas, 0, 0, canvasWidth, canvasHeight);
 	}
 }
