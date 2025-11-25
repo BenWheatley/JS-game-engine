@@ -85,10 +85,12 @@ class Game {
 		context.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
 		// Draw score
+		context.strokeStyle = '#000000';
+		context.lineWidth = 2;
 		context.fillStyle = '#FFFFFF';
 		context.font = '12px "Press Start 2P"';
 		context.textAlign = 'left';
-		context.fillText(`Score: ${this.score}`, 10, 60);
+		context.strokeAndFillText(`Score: ${this.score}`, 10, 60);
 
 		// Mini-map
 		this.minimap.draw(context, {
@@ -171,10 +173,9 @@ class Game {
 		// Draw white stroke (outline)
 		context.strokeStyle = '#000000';
 		context.lineWidth = 2;
-		context.strokeText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
 		// Draw cyan fill
 		context.fillStyle = '#00FFFF';
-		context.fillText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
+		context.strokeAndFillText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
 
 		// Calculate direction to wormhole
 		const dx = this.wormhole.position.x - this.player.sprite.position.x;
@@ -205,22 +206,15 @@ class Game {
 			context.save();
 			context.translate(arrowX, arrowY);
 			context.rotate(angle);
-			// Draw white stroke (outline)
-			context.strokeStyle = '#000000';
+			context.strokeStyle = '#000000'; // Draw white stroke (outline)
 			context.lineWidth = 2;
+			context.fillStyle = '#00FFFF'; // Draw cyan fill
 			context.beginPath();
 			context.moveTo(15, 0);
 			context.lineTo(-10, -10);
 			context.lineTo(-10, 10);
 			context.closePath();
 			context.stroke();
-			// Draw cyan fill
-			context.fillStyle = '#00FFFF';
-			context.beginPath();
-			context.moveTo(15, 0);
-			context.lineTo(-10, -10);
-			context.lineTo(-10, 10);
-			context.closePath();
 			context.fill();
 			context.restore();
 		}
