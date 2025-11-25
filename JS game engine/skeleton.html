@@ -100,6 +100,9 @@
 			Note.setVolume(preferencesManager.musicVolume / 100);
 		})();
 
+		// Initialize game instance
+		const game = new Game(canvas, context, menuSystem, soundManager, musicPlayer, preferencesManager, achievementManager);
+
 		// Background will be tiled - store a single tile sprite
 		let backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
 		let backgroundSprite = new Sprite(
@@ -124,7 +127,7 @@
 		}
 
 		function returnToMenu() {
-			gameState.currentState = null; // No longer in active gameplay
+			game.gameState.currentState = null; // No longer in active gameplay
 			// Don't stop music - keep playing in menus
 			setCursorVisibility(true);
 			showMainMenu();
@@ -230,7 +233,7 @@
 						}
 					}
 				],
-				instructions: `Final Score: ${gameState.score}`
+				instructions: `Final Score: ${game.gameState.score}`
 			});
 		}
 
@@ -243,7 +246,7 @@
 		}
 
 		function resumeGame() {
-			gameState.currentState = GameState.States.PLAYING;
+			game.gameState.currentState = GameState.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			setCursorVisibility(false);
@@ -293,11 +296,9 @@
 			const maxWeaponLevel = GameConfig.UPGRADES.WEAPON.length - 1;
 			const maxEngineLevel = GameConfig.UPGRADES.ENGINE.length - 1;
 			const maxShieldLevel = GameConfig.UPGRADES.SHIELD.length - 1;
-
-			const weaponMaxed = gameState.player.weaponLevel >= maxWeaponLevel;
-			const engineMaxed = gameState.player.engineLevel >= maxEngineLevel;
-			const shieldMaxed = gameState.player.shieldLevel >= maxShieldLevel;
-			const allMaxed = weaponMaxed && engineMaxed && shieldMaxed;
+			const allMaxed = gameState.player.weaponLevel >= maxWeaponLevel &&
+			                 gameState.player.engineLevel >= maxEngineLevel &&
+			                 gameState.player.shieldLevel >= maxShieldLevel;
 
 			const items = [];
 
