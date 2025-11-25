@@ -98,6 +98,9 @@
 			Note.setVolume(preferencesManager.musicVolume / 100);
 		})();
 
+		// Initialize game instance
+		const game = new Game(canvas, context, menuSystem, soundManager, musicPlayer, preferencesManager, achievementManager);
+
 		// Background will be tiled - store a single tile sprite
 		let backgroundTileSize = new Vector2D(1536, 1024); // Actual size of background image
 		let backgroundSprite = new Sprite(
