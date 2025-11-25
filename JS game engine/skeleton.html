@@ -17,39 +17,42 @@
 		// Enable debug logging only when running on localhost
 		DebugLogger.debug = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 	</script>
+	<!-- Game engine stuff, to be wrapped into its own single-import thing later -->
+	<script type="text/javascript" src="CanvasRenderingContext2D-extensions.js"></script>
 	<script type="text/javascript" src="Vector2D.js"></script>
 	<script type="text/javascript" src="Projectile.js"></script>
 	<script type="text/javascript" src="GameEntity.js"></script>
 	<script type="text/javascript" src="NPC.js"></script>
-	
 	<script type="text/javascript" src="AchievementManager.js"></script>
-	<script type="text/javascript" src="AlienFighter.js"></script>
-	<script type="text/javascript" src="AlienSaucer.js"></script>
-	<script type="text/javascript" src="AlienScout.js"></script>
 	<script type="text/javascript" src="AssetLoader.js"></script>
-	<script type="text/javascript" src="Asteroid.js"></script>
-	<script type="text/javascript" src="AsteroidSpawn.js"></script>
 	<script type="text/javascript" src="CollisionDetection.js"></script>
-	<script type="text/javascript" src="GameConfig.js"></script>
 	<script type="text/javascript" src="HighScoreManager.js"></script>
-	<script type="text/javascript" src="Laser.js"></script>
 	<script type="text/javascript" src="MenuSystem.js"></script>
-	<script type="text/javascript" src="Minimap.js"></script>
-	<script type="text/javascript" src="Missile.js"></script>
-	<script type="text/javascript" src="MissileCruiser.js"></script>
 	<script type="text/javascript" src="MusicPlayer.js"></script>
-	<script type="text/javascript" src="NPCAIUtils.js"></script>
 	<script type="text/javascript" src="Particle.js"></script>
 	<script type="text/javascript" src="ParticleSystem.js"></script>
-	<script type="text/javascript" src="Plasma.js"></script>
-	<script type="text/javascript" src="Player.js"></script>
 	<script type="text/javascript" src="PreferencesManager.js"></script>
 	<script type="text/javascript" src="SimpleMusic.js"></script>
 	<script type="text/javascript" src="SoundManager.js"></script>
-	<script type="text/javascript" src="SpawnSystem.js"></script>
 	<script type="text/javascript" src="Sprite.js"></script>
-	<script type="text/javascript" src="UpgradeBackground.js"></script>
 	<script type="text/javascript" src="VibeEngine.js"></script>
+	
+	<!-- Stuff for specifically this game -->
+	<script type="text/javascript" src="AlienFighter.js"></script>
+	<script type="text/javascript" src="AlienSaucer.js"></script>
+	<script type="text/javascript" src="AlienScout.js"></script>
+	<script type="text/javascript" src="Asteroid.js"></script>
+	<script type="text/javascript" src="AsteroidSpawn.js"></script>
+	<script type="text/javascript" src="GameConfig.js"></script>
+	<script type="text/javascript" src="Laser.js"></script>
+	<script type="text/javascript" src="Minimap.js"></script>
+	<script type="text/javascript" src="Missile.js"></script>
+	<script type="text/javascript" src="MissileCruiser.js"></script>
+	<script type="text/javascript" src="NPCAIUtils.js"></script>
+	<script type="text/javascript" src="Plasma.js"></script>
+	<script type="text/javascript" src="Player.js"></script>
+	<script type="text/javascript" src="SpawnSystem.js"></script>
+	<script type="text/javascript" src="UpgradeBackground.js"></script>
 	<script type="text/javascript" src="Wormhole.js"></script>
     <script type="text/javascript" src="Game.js"></script>
 </head>
