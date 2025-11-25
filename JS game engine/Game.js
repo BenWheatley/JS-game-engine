@@ -738,4 +738,8 @@ class Game {
 			this.npcs
 		);
 	}
+	
+	_cheat_clearLevel() {
+		this.npcs = [];
+	}
 }
