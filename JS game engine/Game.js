@@ -91,6 +91,9 @@ class Game {
 		context.font = '12px "Press Start 2P"';
 		context.textAlign = 'left';
 		context.strokeAndFillText(`Score: ${this.score}`, 10, 60);
+		
+		// Draw level (same style)
+		context.strokeAndFillText(`Level: ${this.currentLevel}`, 10, 80);
 
 		// Mini-map
 		this.minimap.draw(context, {
