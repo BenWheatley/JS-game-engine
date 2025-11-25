@@ -1,6 +1,48 @@
 class Game {
-	constructor() {
+	/**
+	* Gameplay state enum values
+	* Note: Menu visibility is tracked by MenuSystem
+	*/
+	static States = {
+		PLAYING: 'playing',
+		PAUSED: 'paused',
+		UPGRADING: 'upgrading'  // Special state for upgrade menu - time passes but player doesn't control
+	};
+
+	constructor(canvas) {
+		this.canvas = canvas;
 		this.upgradeBackground = new UpgradeBackground();
+		
+		// Player and entities
+		this.player = new Player();
+		this.npcs = [];
+		this.playerProjectiles = [];
+		this.npcProjectiles = [];
+		this.wormhole = null;
+
+		// Systems
+		this.particleSystem = new ParticleSystem();
+		this.minimap = new Minimap(canvas.width, canvas.height);
+
+		// Gameplay state (null when in menus, PLAYING during gameplay, PAUSED when paused)
+		this.currentState = null;
+		this.score = 0;
+		this.currentLevel = 0;
+
+		// Timing
+		this.gameTime = 0; // Accumulated deltaTime (pauses when game paused)
+		this.lastShotTime = {
+			laser: 0,
+			plasma: 0,
+			missile: 0
+		}; // Game time of last shot per projectile type
+
+		// Achievement tracking
+		this.achievementStats = {
+		  damageTakenThisWave: 0 // Damage taken in current wave (for untouchable)
+		};
+		
+		this.advanceLevel();
 	}
 
 	// Render loop
@@ -11,7 +53,7 @@ class Game {
 		this.renderGamespaceElements();
 
 		// Special rendering for upgrade menu
-		if (gameState.currentState === GameState.States.UPGRADING) {
+		if (this.currentState === Game.States.UPGRADING) {
 			this.upgradeBackground.draw(context, canvas.width, canvas.height, 0, 128, 255, 255);
 		} else {
 			this.renderHUD();
@@ -22,7 +64,7 @@ class Game {
 	renderHUD() {
 		// HUD - render in screen space
 		// Health bar
-		const healthBarWidth = gameState.player.getMaxHealth() * 0.85;
+		const healthBarWidth = this.player.getMaxHealth() * 0.85;
 		const healthBarHeight = GameConfig.HUD.HEALTH_BAR_HEIGHT;
 		const healthBarX = GameConfig.HUD.HEALTH_BAR_X;
 		const healthBarY = GameConfig.HUD.HEALTH_BAR_Y;
@@ -32,7 +74,7 @@ class Game {
 		context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
 
 		// Draw health bar foreground (green - shows current health)
-		const healthPercentage = Math.max(0, Math.min(1, gameState.player.health / gameState.player.getMaxHealth()));
+		const healthPercentage = Math.max(0, Math.min(1, this.player.health / this.player.getMaxHealth()));
 		const currentHealthWidth = healthBarWidth * healthPercentage;
 		context.fillStyle = GameConfig.HUD.HEALTH_BAR_FG_COLOR;
 		context.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
@@ -46,13 +88,13 @@ class Game {
 		context.fillStyle = '#FFFFFF';
 		context.font = '12px "Press Start 2P"';
 		context.textAlign = 'left';
-		context.fillText(`Score: ${gameState.score}`, 10, 60);
+		context.fillText(`Score: ${this.score}`, 10, 60);
 
 		// Mini-map
-		gameState.minimap.draw(context, {
-			npcs: gameState.npcs,
-			wormhole: gameState.wormhole
-		}, gameState.player.sprite.position);
+		this.minimap.draw(context, {
+			npcs: this.npcs,
+			wormhole: this.wormhole
+		}, this.player.sprite.position);
 	}
 	
 	renderGamespaceElements() {
@@ -62,8 +104,8 @@ class Game {
 
 		context.save();
 		context.translate(
-			canvas.width/2-gameState.player.sprite.position.x,
-			canvas.height/2-gameState.player.sprite.position.y
+			canvas.width/2-this.player.sprite.position.x,
+			canvas.height/2-this.player.sprite.position.y
 		);
 
 		// Draw tiled background
@@ -71,10 +113,10 @@ class Game {
 		const tileHeight = backgroundTileSize.y * 0.85;
 
 		// Calculate which tiles are visible
-		const startX = Math.floor((gameState.player.sprite.position.x - canvas.width) / tileWidth) * tileWidth;
-		const startY = Math.floor((gameState.player.sprite.position.y - canvas.height) / tileHeight) * tileHeight;
-		const endX = Math.ceil((gameState.player.sprite.position.x + canvas.width) / tileWidth) * tileWidth;
-		const endY = Math.ceil((gameState.player.sprite.position.y + canvas.height) / tileHeight) * tileHeight;
+		const startX = Math.floor((this.player.sprite.position.x - canvas.width) / tileWidth) * tileWidth;
+		const startY = Math.floor((this.player.sprite.position.y - canvas.height) / tileHeight) * tileHeight;
+		const endX = Math.ceil((this.player.sprite.position.x + canvas.width) / tileWidth) * tileWidth;
+		const endY = Math.ceil((this.player.sprite.position.y + canvas.height) / tileHeight) * tileHeight;
 
 		// Draw tiles
 		context.globalCompositeOperation = 'lighten';
@@ -89,36 +131,36 @@ class Game {
 		context.globalCompositeOperation = 'source-over';
 
 		// Z-order: Wormhole first (bottom layer)
-		if (gameState.wormhole) {
-			gameState.wormhole.draw();
+		if (this.wormhole) {
+			this.wormhole.draw();
 		}
 
 		// Shots
-		for (const projectile of gameState.playerProjectiles) {
+		for (const projectile of this.playerProjectiles) {
 			projectile.draw();
 		}
-		for (const projectile of gameState.npcProjectiles) {
+		for (const projectile of this.npcProjectiles) {
 			projectile.draw();
 		}
 
 		// NPCs
-		for (const npc of gameState.npcs) {
+		for (const npc of this.npcs) {
 			npc.draw();
 		}
 
 		// Particles
-		gameState.particleSystem.draw(context);
+		this.particleSystem.draw(context);
 
 		// Player last (top layer) - don't draw if dead
-		if (gameState.player.health > 0) {
-			gameState.player.draw();
+		if (this.player.health > 0) {
+			this.player.draw();
 		}
 
 		context.restore();
 	}
 	
 	renderWormholeMessageAndArrow() {
-		if (!gameState.wormhole) {
+		if (!this.wormhole) {
 			return;
 		}
 		
@@ -135,8 +177,8 @@ class Game {
 		context.fillText('Wormhole detected!', canvas.width / 2, wormhole_text_top);
 
 		// Calculate direction to wormhole
-		const dx = gameState.wormhole.position.x - gameState.player.sprite.position.x;
-		const dy = gameState.wormhole.position.y - gameState.player.sprite.position.y;
+		const dx = this.wormhole.position.x - this.player.sprite.position.x;
+		const dy = this.wormhole.position.y - this.player.sprite.position.y;
 		const angle = Math.atan2(dy, dx);
 
 		// Check if wormhole is on-screen
@@ -186,10 +228,10 @@ class Game {
 	
 	// Helper: Update all projectiles
 	updateAllProjectiles() {
-		for (const projectile of gameState.playerProjectiles) {
+		for (const projectile of this.playerProjectiles) {
 			projectile.update();
 		}
-		for (const projectile of gameState.npcProjectiles) {
+		for (const projectile of this.npcProjectiles) {
 			projectile.update();
 		}
 	}
@@ -203,11 +245,11 @@ class Game {
 
 	// Helper: Despawn projectiles that are too far from player (uses same logic as NPC wrapping)
 	despawnDistantProjectiles(wrapDistance) {
-		gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile =>
-			!this.isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
+		this.playerProjectiles = this.playerProjectiles.filter(projectile =>
+			!this.isBeyondWrapDistance(projectile.sprite.position, this.player.sprite.position, wrapDistance)
 		);
-		gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile =>
-			!this.isBeyondWrapDistance(projectile.sprite.position, gameState.player.sprite.position, wrapDistance)
+		this.npcProjectiles = this.npcProjectiles.filter(projectile =>
+			!this.isBeyondWrapDistance(projectile.sprite.position, this.player.sprite.position, wrapDistance)
 		);
 	}
 		
@@ -224,11 +266,11 @@ class Game {
 	
 	// Player shooting function
 	shoot() {
-		const weaponStats = gameState.player.getWeaponStats();
+		const weaponStats = this.player.getWeaponStats();
 		const spreadRadians = weaponStats.spreadAngle * (Math.PI / 180);
 		const shotPosition = new Vector2D(
-			gameState.player.sprite.position.x,
-			gameState.player.sprite.position.y
+			this.player.sprite.position.x,
+			this.player.sprite.position.y
 		);
 
 		// Determine which weapon types are ready to fire
@@ -244,7 +286,7 @@ class Game {
 			const effectiveCooldown = weaponStats.fireRate * cooldownMultiplier;
 
 			// Check if this weapon type is ready to fire
-			if (gameState.gameTime > gameState.lastShotTime[projectileType] + effectiveCooldown) {
+			if (this.gameTime > this.lastShotTime[projectileType] + effectiveCooldown) {
 				weaponTypesReady.add(projectileType);
 			}
 		}
@@ -257,7 +299,7 @@ class Game {
 				// Only fire if this weapon type is ready
 				if (weaponTypesReady.has(projectileType)) {
 					// Calculate angle for this shot
-					let shotAngle = gameState.player.sprite.rotation;
+					let shotAngle = this.player.sprite.rotation;
 					if (weaponStats.projectileTypes.length > 1) {
 						// Distribute shots evenly across the spread angle
 						const angleOffset = (i - (weaponStats.projectileTypes.length - 1) / 2) * spreadRadians;
@@ -279,13 +321,13 @@ class Game {
 						DebugLogger.log(`Unexpected projectileType: ${projectileType}`);
 					}
 
-					gameState.playerProjectiles.push(newShot);
+					this.playerProjectiles.push(newShot);
 				}
 			}
 
 			// Update last shot time for all weapon types that fired
 			for (const weaponType of weaponTypesReady) {
-				gameState.lastShotTime[weaponType] = gameState.gameTime;
+				this.lastShotTime[weaponType] = this.gameTime;
 			}
 
 			// Play sound
@@ -296,10 +338,10 @@ class Game {
 	// Helper function for handling NPC destruction
 	handleNPCDestroyed(npc) {
 		// Add score
-		gameState.score += npc.scoreValue;
+		this.score += npc.scoreValue;
 
 		// Spawn explosion particles
-		gameState.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor);
+		this.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor);
 
 		// Handle spawns (e.g., asteroid fragments)
 		// Note: hitResult.spawns is handled in the shot collision code path
@@ -326,50 +368,50 @@ class Game {
 		this.handlePauseInput();
 
 		// Update upgrade background animation if in upgrading state
-		if (gameState.currentState === GameState.States.UPGRADING) {
+		if (this.currentState === Game.States.UPGRADING) {
 			this.upgradeBackground.update(deltaTime);
 			return;
 		}
 
 		// Only update game logic during active gameplay
-		if (gameState.currentState !== GameState.States.PLAYING) {
+		if (this.currentState !== Game.States.PLAYING) {
 			return;
 		}
 		// Accumulate game time (only advances during gameplay, not when paused)
-		gameState.gameTime += deltaTime;
+		this.gameTime += deltaTime;
 
 		// Only process player input if player is alive
-		if (gameState.player.health > 0) {
+		if (this.player.health > 0) {
 			if (engine.keyDown["ArrowLeft"]) {
-				gameState.player.turnLeft(deltaTime);
+				this.player.turnLeft(deltaTime);
 			}
 			if (engine.keyDown["ArrowRight"]) {
-				gameState.player.turnRight(deltaTime);
+				this.player.turnRight(deltaTime);
 			}
 			if (engine.keyDown["ArrowUp"]) {
-				gameState.player.accelerate(deltaTime);
+				this.player.accelerate(deltaTime);
 			}
 			if (engine.keyDown["ArrowDown"]) {
-				gameState.player.reverseThrust(deltaTime);
+				this.player.reverseThrust(deltaTime);
 			}
 			if (engine.keyDown[" "]) {
 				this.shoot();
 			}
 
-			gameState.player.update(deltaTime);
-			gameState.player.updateShieldRegen(deltaTime); // Update shield regeneration
+			this.player.update(deltaTime);
+			this.player.updateShieldRegen(deltaTime); // Update shield regeneration
 		}
 
 		// Update all NPCs with unified loop
-		for (const npc of gameState.npcs) {
+		for (const npc of this.npcs) {
 			// All NPCs accept playerPosition (asteroids ignore it)
-			npc.update(deltaTime, gameState.player.sprite.position);
+			npc.update(deltaTime, this.player.sprite.position);
 
 			// Handle NPC shooting (unified)
 			if (npc.tryShoot) {
-				const shootResult = npc.tryShoot(gameState.gameTime);
+				const shootResult = npc.tryShoot(this.gameTime);
 				if (shootResult && shootResult.shots) {
-					gameState.npcProjectiles.push(...shootResult.shots);
+					this.npcProjectiles.push(...shootResult.shots);
 					if (shootResult.sound) {
 						soundManager.play(shootResult.sound, shootResult.volume);
 					}
@@ -381,16 +423,16 @@ class Game {
 		this.updateAllProjectiles();
 
 		// Update particles
-		gameState.particleSystem.update(deltaTime);
+		this.particleSystem.update(deltaTime);
 
 		// Update wormhole if it exists
-		if (gameState.wormhole) {
-			gameState.wormhole.update(deltaTime);
-			gameState.wormhole.wrap(gameState.player.sprite.position);
+		if (this.wormhole) {
+			this.wormhole.update(deltaTime);
+			this.wormhole.wrap(this.player.sprite.position);
 		}
 
 		// Wave-based spawning: Spawn wormhole when wave cleared
-		gameState.trySpawnWormhole();
+		this.trySpawnWormhole();
 
 		// Collision detection
 		const npcsToRemove = new Set();
@@ -398,22 +440,22 @@ class Game {
 		const npcProjectilesToRemove = new Set();
 
 		// Check player shot collisions with all NPCs (unified loop)
-		for (const shot of gameState.playerProjectiles) {
-			for (const npc of gameState.npcs) {
+		for (const shot of this.playerProjectiles) {
+			for (const npc of this.npcs) {
 				if (CollisionDetection.checkAABB(shot, npc)) {
 					playerProjectilesToRemove.add(shot);
 
 					// Spawn impact particles and sound from shot properties
 					if (shot.particleColor) {
-						gameState.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
+						this.particleSystem.spawnImpact(shot.sprite.position, shot.particleColor);
 					}
 					if (shot.hitSound) {
 						soundManager.play(shot.hitSound, shot.hitVolume);
 					}
 
 					// Check if NPC is offscreen for Sniper achievement
-					const npcScreenX = npc.sprite.position.x - gameState.player.sprite.position.x + canvas.width / 2;
-					const npcScreenY = npc.sprite.position.y - gameState.player.sprite.position.y + canvas.height / 2;
+					const npcScreenX = npc.sprite.position.x - this.player.sprite.position.x + canvas.width / 2;
+					const npcScreenY = npc.sprite.position.y - this.player.sprite.position.y + canvas.height / 2;
 					const isOffscreen = npcScreenX < 0 || npcScreenX > canvas.width ||
 										npcScreenY < 0 || npcScreenY > canvas.height;
 
@@ -430,7 +472,7 @@ class Game {
 
 						// Handle spawns (specific to asteroid splitting)
 						if (hitResult.spawns) {
-							gameState.npcs.push(...hitResult.spawns);
+							this.npcs.push(...hitResult.spawns);
 						}
 					}
 					if (hitResult.sound) {
@@ -441,21 +483,21 @@ class Game {
 		}
 
 		// Check player-NPC collisions (unified loop) - only if player is alive
-		if (gameState.player.health > 0) {
-			for (const npc of gameState.npcs) {
-				if (CollisionDetection.checkAABB(gameState.player, npc)) {
+		if (this.player.health > 0) {
+			for (const npc of this.npcs) {
+				if (CollisionDetection.checkAABB(this.player, npc)) {
 					npcsToRemove.add(npc);
 
 					const collisionResult = npc.onCollideWithPlayer();
-					DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, NPC health: ${npc.health}, collision damage: ${collisionResult.damage}, player health before: ${gameState.player.health}`);
+					DebugLogger.log(`Player-NPC collision! NPC type: ${npc.constructor.name}, NPC health: ${npc.health}, collision damage: ${collisionResult.damage}, player health before: ${this.player.health}`);
 
 					// Handle NPC destruction (score, particles, centurion achievement)
 					this.handleNPCDestroyed(npc);
 
 					// Apply damage to player
-					gameState.player.health -= collisionResult.damage;
-					gameState.player.onDamage(); // Reset shield regen timer
-					DebugLogger.log(`Player health after: ${gameState.player.health}`);
+					this.player.health -= collisionResult.damage;
+					this.player.onDamage(); // Reset shield regen timer
+					DebugLogger.log(`Player health after: ${this.player.health}`);
 
 					if (collisionResult.sound) {
 						soundManager.play(collisionResult.sound, collisionResult.volume);
@@ -465,51 +507,51 @@ class Game {
 					achievementManager.progress('demolition_derby', 1);
 
 					// Track damage taken for untouchable achievement
-					gameState.achievementStats.damageTakenThisWave += collisionResult.damage;
+					this.achievementStats.damageTakenThisWave += collisionResult.damage;
 				}
 			}
 		}
 
 		// Check NPC projectile-player collisions (unified loop) - only if player is alive
-		if (gameState.player.health > 0) {
-			for (const projectile of gameState.npcProjectiles) {
-				if (CollisionDetection.checkAABB(gameState.player, projectile)) {
+		if (this.player.health > 0) {
+			for (const projectile of this.npcProjectiles) {
+				if (CollisionDetection.checkAABB(this.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
 
 					const hitResult = projectile.onHitPlayer();
-					gameState.player.health -= hitResult.damage;
-					gameState.player.onDamage(); // Reset shield regen timer
-					DebugLogger.log(`Player hit by projectile! Health: ${gameState.player.health}`);
+					this.player.health -= hitResult.damage;
+					this.player.onDamage(); // Reset shield regen timer
+					DebugLogger.log(`Player hit by projectile! Health: ${this.player.health}`);
 
 					if (hitResult.sound) {
 						soundManager.play(hitResult.sound, hitResult.volume);
 					}
 
 					if (hitResult.particleColor) {
-						gameState.particleSystem.spawnExplosion(projectile.sprite.position, hitResult.particleColor);
+						this.particleSystem.spawnExplosion(projectile.sprite.position, hitResult.particleColor);
 					}
 
 					// Track damage taken for untouchable achievement
-					gameState.achievementStats.damageTakenThisWave += hitResult.damage;
+					this.achievementStats.damageTakenThisWave += hitResult.damage;
 				}
 			}
 		}
 
 		// Check player-wormhole collision (show upgrade menu) - only if player is alive
-		if (gameState.player.health > 0 && gameState.wormhole && CollisionDetection.checkCircle(gameState.wormhole, gameState.player)) {
+		if (this.player.health > 0 && this.wormhole && CollisionDetection.checkCircle(this.wormhole, this.player)) {
 			showUpgradeMenu();
 			soundManager.play('achievement', 0.5); // Play a sound effect
 		}
 
 		// Remove collided entities (unified filtering)
-		gameState.npcs = gameState.npcs.filter(npc => !npcsToRemove.has(npc));
-		gameState.playerProjectiles = gameState.playerProjectiles.filter(projectile => !playerProjectilesToRemove.has(projectile));
-		gameState.npcProjectiles = gameState.npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
+		this.npcs = this.npcs.filter(npc => !npcsToRemove.has(npc));
+		this.playerProjectiles = this.playerProjectiles.filter(projectile => !playerProjectilesToRemove.has(projectile));
+		this.npcProjectiles = this.npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
 
 		// Check for game over - only trigger once
-		if (gameState.player.health <= 0 && gameState.player.health > -1000) {
+		if (this.player.health <= 0 && this.player.health > -1000) {
 			this.gameOver();
-			gameState.player.health = -1000; // Sentinel value to prevent retriggering
+			this.player.health = -1000; // Sentinel value to prevent retriggering
 			// Don't return - let the game continue running
 		}
 
@@ -517,9 +559,9 @@ class Game {
 		const wrapDistance = GameConfig.WORLD.NPC_WRAP_DISTANCE; // Minimap range - wrap NPCs at this distance
 
 		// Wrap all NPCs around minimap edges
-		for (const npc of gameState.npcs) {
-			npc.sprite.position.x = this.wrapCoordinate(npc.sprite.position.x, gameState.player.sprite.position.x, wrapDistance);
-			npc.sprite.position.y = this.wrapCoordinate(npc.sprite.position.y, gameState.player.sprite.position.y, wrapDistance);
+		for (const npc of this.npcs) {
+			npc.sprite.position.x = this.wrapCoordinate(npc.sprite.position.x, this.player.sprite.position.x, wrapDistance);
+			npc.sprite.position.y = this.wrapCoordinate(npc.sprite.position.y, this.player.sprite.position.y, wrapDistance);
 		}
 
 		// Despawn projectiles that are too far from player
@@ -547,8 +589,8 @@ class Game {
 			);
 			const size = minSize + Math.random() * (maxSize - minSize);
 
-			gameState.particleSystem.particles.push(new Particle(
-				new Vector2D(gameState.player.sprite.position.x, gameState.player.sprite.position.y),
+			this.particleSystem.particles.push(new Particle(
+				new Vector2D(this.player.sprite.position.x, this.player.sprite.position.y),
 				velocity,
 				lifetime,
 				explosionColor,
@@ -563,24 +605,24 @@ class Game {
 
 	resumeFromUpgrade() {
 		// Resume game and advance level
-		gameState.currentState = GameState.States.PLAYING;
+		this.currentState = Game.States.PLAYING;
 		menuSystem.hideMenu();
 		setCursorVisibility(false);
-		gameState.advanceLevel();
+		this.advanceLevel();
 
 		// Update wave progression achievements
-		achievementManager.setProgress('warp_speed', gameState.currentLevel);
-		achievementManager.setProgress('deep_space', gameState.currentLevel);
-		achievementManager.setProgress('into_the_void', gameState.currentLevel);
+		achievementManager.setProgress('warp_speed', this.currentLevel);
+		achievementManager.setProgress('deep_space', this.currentLevel);
+		achievementManager.setProgress('into_the_void', this.currentLevel);
 	}
 	
 	// Handle ESC key for pause/resume (checked every frame)
 	handlePauseInput() {
 		if (engine.keyDown["Escape"]) {
 			engine.keyDown["Escape"] = false;
-			if (gameState.currentState === GameState.States.PLAYING) {
+			if (this.currentState === Game.States.PLAYING) {
 				pauseGame();
-			} else if (gameState.currentState === GameState.States.PAUSED) {
+			} else if (this.currentState === Game.States.PAUSED) {
 				resumeGame();
 			}
 		}
@@ -588,7 +630,7 @@ class Game {
 
 	checkGamepadInput(deltaTime) {
 		// Don't process gamepad input if player is dead
-		if (gameState.player.health <= 0) {
+		if (this.player.health <= 0) {
 			return;
 		}
 
@@ -602,9 +644,9 @@ class Game {
 			const leftStickX = gamepad.axes[0];
 			if (Math.abs(leftStickX) > deadzone) {
 				if (leftStickX < 0) {
-					gameState.player.turnLeft(deltaTime * Math.abs(leftStickX));
+					this.player.turnLeft(deltaTime * Math.abs(leftStickX));
 				} else {
-					gameState.player.turnRight(deltaTime * leftStickX);
+					this.player.turnRight(deltaTime * leftStickX);
 				}
 			}
 
@@ -612,22 +654,22 @@ class Game {
 			const rightStickY = gamepad.axes[3];
 			if (rightStickY < -deadzone) {
 				// Right stick pushed up: forward thrust
-				gameState.player.accelerate(deltaTime * Math.abs(rightStickY));
+				this.player.accelerate(deltaTime * Math.abs(rightStickY));
 			} else if (rightStickY > deadzone) {
 				// Right stick pulled down: reverse thrust
-				gameState.player.reverseThrust(deltaTime * rightStickY);
+				this.player.reverseThrust(deltaTime * rightStickY);
 			}
 
 			// Button 7 (RT/R2): Forward thrust
 			if (gamepad.buttons[7] && gamepad.buttons[7].pressed) {
 				const triggerValue = gamepad.buttons[7].value || 1.0;
-				gameState.player.accelerate(deltaTime * triggerValue);
+				this.player.accelerate(deltaTime * triggerValue);
 			}
 
 			// Button 6 (LT/L2): Reverse thrust
 			if (gamepad.buttons[6] && gamepad.buttons[6].pressed) {
 				const triggerValue = gamepad.buttons[6].value || 1.0;
-				gameState.player.reverseThrust(deltaTime * triggerValue);
+				this.player.reverseThrust(deltaTime * triggerValue);
 			}
 
 			// Button 0 (A/Cross): Shoot
@@ -646,5 +688,57 @@ class Game {
 				gamepad.buttons[9].wasPressed = false;
 			}
 		}
+	}
+
+	/**
+	* Counts total NPCs currently alive
+	* @returns {number} Number of NPCs
+	*/
+	countNPCs() {
+		return this.npcs.length;
+	}
+
+	/**
+	* Advances to the next level
+	* Spawns wormhole when all NPCs are cleared
+	*/
+	trySpawnWormhole() {
+		if (this.countNPCs() === 0 && !this.wormhole) {
+			DebugLogger.log(`Wave ${this.currentLevel} cleared! Wormhole spawning...`);
+			const wormholeSize = 27 * 3;
+			const position = SpawnSystem.getOffscreenSpawnPosition(
+				this.player.sprite.position,
+				this.canvas.width,
+				this.canvas.height,
+				wormholeSize,
+				28 * 3
+			);
+			this.wormhole = new Wormhole(position);
+		}
+	}
+
+	/**
+	* Advances to next level via wormhole
+	* Clears all projectiles and spawns new wave
+	*/
+	advanceLevel() {
+		this.currentLevel++;
+		DebugLogger.log(`Advancing to wave ${this.currentLevel}`);
+		this.wormhole = null;
+
+		// Clear all projectiles when transitioning levels
+		this.playerProjectiles = [];
+		this.npcProjectiles = [];
+
+		// Reset wave-specific achievement tracking
+		this.achievementStats.damageTakenThisWave = 0;
+
+		SpawnSystem.spawnWave(
+			this.currentLevel,
+			this.player.sprite.position,
+			this.canvas.width,
+			this.canvas.height,
+			this.npcs
+		);
 	}
 }

@@ -31,7 +31,6 @@
 	<script type="text/javascript" src="AsteroidSpawn.js"></script>
 	<script type="text/javascript" src="CollisionDetection.js"></script>
 	<script type="text/javascript" src="GameConfig.js"></script>
-	<script type="text/javascript" src="GameState.js"></script>
 	<script type="text/javascript" src="HighScoreManager.js"></script>
 	<script type="text/javascript" src="Laser.js"></script>
 	<script type="text/javascript" src="MenuSystem.js"></script>
@@ -89,7 +88,6 @@
 		const preferencesManager = new PreferencesManager();
 		const soundManager = SoundManager.init(preferencesManager);
 		const musicPlayer = new MusicPlayer();
-		const gameState = new GameState(canvas);
 		let game = null;
 
 		// Preload assets
@@ -115,16 +113,15 @@
 			// Resume audio context on user interaction (required by browser autoplay policies)
 			await SoundManager.resumeAudioContext();
 
-			game = new Game();
-			gameState.reset();
-			gameState.currentState = GameState.States.PLAYING;
+			game = new Game(canvas);
+			game.currentState = Game.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			setCursorVisibility(false);
 		}
 
 		function returnToMenu() {
-			gameState.currentState = null; // No longer in active gameplay
+			game.currentState = null; // No longer in active gameplay
 			// Don't stop music - keep playing in menus
 			setCursorVisibility(true);
 			showMainMenu();
@@ -182,8 +179,8 @@
 			// Helper to save score and stop game (shared by all buttons)
 			const saveAndStopGame = () => {
 				const name = playerName.trim() || 'Anonymous';
-				highScoreManager.saveHighScore(name, gameState.score);
-				gameState.currentState = null;
+				highScoreManager.saveHighScore(name, game.score);
+				game.currentState = null;
 				game = null;
 			};
 
@@ -230,20 +227,20 @@
 						}
 					}
 				],
-				instructions: `Final Score: ${gameState.score}`
+				instructions: `Final Score: ${game.score}`
 			});
 		}
 
 		function pauseGame() {
-			if (gameState.currentState === GameState.States.PLAYING) {
-				gameState.currentState = GameState.States.PAUSED;
+			if (game.currentState === Game.States.PLAYING) {
+				game.currentState = Game.States.PAUSED;
 				canvas.classList.remove('hide-cursor');
 				showPauseMenu();
 			}
 		}
 
 		function resumeGame() {
-			gameState.currentState = GameState.States.PLAYING;
+			game.currentState = Game.States.PLAYING;
 			menuSystem.hideMenu();
 			musicPlayer.play();
 			setCursorVisibility(false);
@@ -266,7 +263,7 @@
 						type: 'button',
 						label: 'Quit',
 						action: () => {
-							if (gameState.score > 0) {
+							if (game.score > 0) {
 								game.gameOver();
 							} else {
 								returnToMenu();
@@ -280,12 +277,12 @@
 
 		function showUpgradeMenu() {
 			// Check Untouchable achievement before advancing
-			if (gameState.achievementStats.damageTakenThisWave === 0) {
+			if (game.achievementStats.damageTakenThisWave === 0) {
 				achievementManager.unlock('untouchable');
 			}
 
 			// Set upgrading state - time passes but player has no control
-			gameState.currentState = GameState.States.UPGRADING;
+			game.currentState = Game.States.UPGRADING;
 			setCursorVisibility(true);
 			setMenuOverlayMode(true); // Transparent overlay for pause
 
@@ -294,9 +291,9 @@
 			const maxEngineLevel = GameConfig.UPGRADES.ENGINE.length - 1;
 			const maxShieldLevel = GameConfig.UPGRADES.SHIELD.length - 1;
 
-			const weaponMaxed = gameState.player.weaponLevel >= maxWeaponLevel;
-			const engineMaxed = gameState.player.engineLevel >= maxEngineLevel;
-			const shieldMaxed = gameState.player.shieldLevel >= maxShieldLevel;
+			const weaponMaxed = game.player.weaponLevel >= maxWeaponLevel;
+			const engineMaxed = game.player.engineLevel >= maxEngineLevel;
+			const shieldMaxed = game.player.shieldLevel >= maxShieldLevel;
 			const allMaxed = weaponMaxed && engineMaxed && shieldMaxed;
 
 			const items = [];
@@ -308,8 +305,8 @@
 					label: 'Heal and Continue',
 					action: () => {
 						// Heal to full health
-						gameState.player.health = gameState.player.getMaxHealth();
-						DebugLogger.log(`Healed to full health: ${gameState.player.health}`);
+						game.player.health = game.player.getMaxHealth();
+						DebugLogger.log(`Healed to full health: ${game.player.health}`);
 						game.resumeFromUpgrade();
 					}
 				});
@@ -319,16 +316,16 @@
 					type: 'button',
 					label: isMaxed
 						? `${name} Upgrade (MAX LEVEL)`
-						: `${name} Upgrade (Level ${gameState.player[levelProp]} → ${gameState.player[levelProp] + 1})`,
+						: `${name} Upgrade (Level ${game.player[levelProp]} → ${game.player[levelProp] + 1})`,
 					disabled: isMaxed,
 					action: () => {
-						gameState.player[levelProp]++;
+						game.player[levelProp]++;
 						if (applyFn) applyFn();
-						DebugLogger.log(`${name} upgraded to level ${gameState.player[levelProp]}`);
-						achievementManager.setProgress(achievementId, gameState.player[levelProp]);
-						if (gameState.player.weaponLevel === 10 &&
-							gameState.player.engineLevel === 10 &&
-							gameState.player.shieldLevel === 10) {
+						DebugLogger.log(`${name} upgraded to level ${game.player[levelProp]}`);
+						achievementManager.setProgress(achievementId, game.player[levelProp]);
+						if (game.player.weaponLevel === 10 &&
+							game.player.engineLevel === 10 &&
+							game.player.shieldLevel === 10) {
 							achievementManager.unlock('ultimate_weapon');
 						}
 						game.resumeFromUpgrade();
@@ -338,7 +335,7 @@
 				// Show upgrade buttons (disabled if maxed)
 				items.push(createUpgradeButton('Weapon', 'weaponLevel', 'fully_armed', weaponMaxed));
 				items.push(createUpgradeButton('Engine', 'engineLevel', 'speed_demon', engineMaxed));
-				items.push(createUpgradeButton('Shield', 'shieldLevel', 'fortress', shieldMaxed, () => gameState.player.applyShieldUpgrade()));
+				items.push(createUpgradeButton('Shield', 'shieldLevel', 'fortress', shieldMaxed, () => game.player.applyShieldUpgrade()));
 			}
 
 			menuSystem.showMenu(MenuSystem.MenuTypes.UPGRADE, {
