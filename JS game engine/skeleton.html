@@ -181,7 +181,6 @@
 				const name = playerName.trim() || 'Anonymous';
 				highScoreManager.saveHighScore(name, game.score);
 				game.currentState = null;
-				game = null;
 			};
 
 			// Function to submit the score (shared between button and Enter key)
