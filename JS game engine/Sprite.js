@@ -80,3 +80,5 @@ class Sprite {
 		Sprite._context = context;
 	}
 }
+
+export { Sprite };

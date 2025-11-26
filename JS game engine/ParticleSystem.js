@@ -76,3 +76,5 @@ class ParticleSystem {
 		this.particles = [];
 	}
 }
+
+export { ParticleSystem };

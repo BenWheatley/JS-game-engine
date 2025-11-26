@@ -102,3 +102,5 @@ class MusicPlayer {
     return this.musicData !== null;
   }
 }
+
+export { MusicPlayer };

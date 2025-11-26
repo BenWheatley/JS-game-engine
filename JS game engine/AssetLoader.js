@@ -91,3 +91,5 @@ class AssetLoader {
     DebugLogger.log('Music loaded');
   }
 }
+
+export { AssetLoader };

@@ -3,7 +3,11 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(gh run:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(for file in AchievementManager AssetLoader CollisionDetection HighScoreManager MenuSystem MusicPlayer Particle ParticleSystem PreferencesManager SimpleMusic SoundManager)",
+      "Bash(do echo -e \"\\nexport { $file };\")",
+      "Bash(\"/Users/benwheatley/Documents/Code/JS-game-engine/JS game engine/$file.js\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

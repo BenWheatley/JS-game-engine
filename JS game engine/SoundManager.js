@@ -110,3 +110,5 @@ class SoundManager {
     return Object.keys(SoundManager.sounds).length > 0;
   }
 }
+
+export { SoundManager };

@@ -122,3 +122,5 @@ class PreferencesManager {
     this.save();
   }
 }
+
+export { PreferencesManager };

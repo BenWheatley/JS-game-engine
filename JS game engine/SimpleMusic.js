@@ -148,3 +148,5 @@ class Note {
     return `${noteLetter}${octave}`;
   }
 }
+
+export { SimpleMusic };

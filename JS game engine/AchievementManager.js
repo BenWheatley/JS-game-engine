@@ -244,3 +244,5 @@ class AchievementManager {
     DebugLogger.log('All achievements reset');
   }
 }
+
+export { AchievementManager };

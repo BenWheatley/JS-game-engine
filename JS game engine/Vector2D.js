@@ -102,3 +102,5 @@ class Vector2D {
         return "(" + this.x + ", " + this.y + ")";
     }
 }
+
+export { Vector2D };

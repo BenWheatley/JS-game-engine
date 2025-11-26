@@ -28,3 +28,5 @@ class Projectile {
     };
   }
 }
+
+export { Projectile };

@@ -183,3 +183,5 @@ class HighScoreManager {
     });
   }
 }
+
+export { HighScoreManager };
