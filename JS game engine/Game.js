@@ -9,7 +9,7 @@ import { Plasma } from './Plasma.js';
 import { Missile } from './Missile.js';
 import { Laser } from './Laser.js';
 
-class Game {
+class Game extends EventTarget {
 	/**
 	* Gameplay state enum values
 	* Note: Menu visibility is tracked by MenuSystem
@@ -21,6 +21,7 @@ class Game {
 	};
 
 	constructor(canvas) {
+		super();
 		this.canvas = canvas;
 		this.upgradeBackground = new UpgradeBackground();
 		
@@ -547,7 +548,7 @@ class Game {
 
 		// Check player-wormhole collision (show upgrade menu) - only if player is alive
 		if (this.player.health > 0 && this.wormhole && CollisionDetection.checkCircle(this.wormhole, this.player)) {
-			showUpgradeMenu();
+			this.dispatchEvent(new Event('upgrade-menu-requested'));
 			soundManager.play('achievement', 0.5); // Play a sound effect
 		}
 
@@ -607,15 +608,14 @@ class Game {
 		}
 
 		// Don't stop music - keep playing in menus
-		setCursorVisibility(true);
-		showGameOverMenu();
+		this.dispatchEvent(new Event('game-over'));
 	}
 
 	resumeFromUpgrade() {
 		// Resume game and advance level
 		this.currentState = Game.States.PLAYING;
 		menuSystem.hideMenu();
-		setCursorVisibility(false);
+		this.dispatchEvent(new Event('resume-from-upgrade'));
 		this.advanceLevel();
 
 		// Update wave progression achievements
@@ -629,9 +629,9 @@ class Game {
 		if (engine.keyDown["Escape"]) {
 			engine.keyDown["Escape"] = false;
 			if (this.currentState === Game.States.PLAYING) {
-				pauseGame();
+				this.dispatchEvent(new Event('pause-requested'));
 			} else if (this.currentState === Game.States.PAUSED) {
-				resumeGame();
+				this.dispatchEvent(new Event('resume-requested'));
 			}
 		}
 	}
@@ -689,7 +689,7 @@ class Game {
 			if (gamepad.buttons[9] && gamepad.buttons[9].pressed) {
 				// Debounce by checking if button was just pressed
 				if (!gamepad.buttons[9].wasPressed) {
-					pauseGame();
+					this.dispatchEvent(new Event('pause-requested'));
 					gamepad.buttons[9].wasPressed = true;
 				}
 			} else if (gamepad.buttons[9]) {

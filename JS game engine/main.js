@@ -81,6 +81,18 @@ async function startGame() {
 
 	game = new Game(canvas);
 	window.game = game; // Update global reference
+
+	// Set up event listeners for game events
+	game.addEventListener('pause-requested', pauseGame);
+	game.addEventListener('resume-requested', resumeGame);
+	game.addEventListener('upgrade-menu-requested', showUpgradeMenu);
+	game.addEventListener('game-over', () => {
+		setCursorVisibility(true);
+		showGameOverMenu();
+	});
+	game.addEventListener('resume-from-upgrade', () => {
+		setCursorVisibility(false);
+	});
 	game.currentState = Game.States.PLAYING;
 	menuSystem.hideMenu();
 	musicPlayer.play();
