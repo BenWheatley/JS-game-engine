@@ -4,6 +4,8 @@
  * Optimized hyperspace tunnel background effect for game engines
  * Based on Perlin noise in polar coordinates with precomputed lookup tables
  */
+// UpgradeBackground doesn't need any imports - it's self-contained
+
 class UpgradeBackground {
 	constructor() {
 		this.time = 0;
@@ -195,3 +197,5 @@ class UpgradeBackground {
 		context.drawImage(this.lowResCanvas, 0, 0, canvasWidth, canvasHeight);
 	}
 }
+
+export { UpgradeBackground };

@@ -6,6 +6,9 @@
  * - Uniform off-screen spawn position calculation
  * - NPC instantiation and placement
  */
+import { Vector2D } from './VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
+
 class SpawnSystem {
   /**
    * Gets the wave definition for a given level
@@ -144,3 +147,5 @@ class SpawnSystem {
     }
   }
 }
+
+export { SpawnSystem };

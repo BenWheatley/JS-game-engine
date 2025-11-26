@@ -1,3 +1,11 @@
+import { ParticleSystem, CollisionDetection, DebugLogger } from './VibeEngine.js';
+import { UpgradeBackground } from './UpgradeBackground.js';
+import { Player } from './Player.js';
+import { Minimap } from './Minimap.js';
+import { SpawnSystem } from './SpawnSystem.js';
+import { Wormhole } from './Wormhole.js';
+import { GameConfig } from './GameConfig.js';
+
 class Game {
 	/**
 	* Gameplay state enum values
@@ -743,3 +751,5 @@ class Game {
 		this.npcs = [];
 	}
 }
+
+export { Game };

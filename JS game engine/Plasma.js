@@ -1,3 +1,5 @@
+import { Projectile, Vector2D } from './VibeEngine.js';
+
 class Plasma extends Projectile {
 	static imageUrl = 'plasma.png';
 	static size = new Vector2D(18, 31);
@@ -19,3 +21,4 @@ class Plasma extends Projectile {
 		};
 	}
 }
+export { Plasma };

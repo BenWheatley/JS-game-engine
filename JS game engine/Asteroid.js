@@ -1,3 +1,8 @@
+import { GameEntity } from './GameEntity.js';
+import { GameConfig } from './GameConfig.js';
+import { AsteroidSpawn } from './AsteroidSpawn.js';
+import { Vector2D } from './VibeEngine.js';
+
 class Asteroid extends GameEntity {
   constructor(position, playerPosition) {
     const config = GameConfig.ASTEROID_BIG;
@@ -73,3 +78,5 @@ class Asteroid extends GameEntity {
     this.sprite.rotation += GameConfig.ASTEROID.ROTATION_SPEED_LARGE;
   }
 }
+
+export { Asteroid };

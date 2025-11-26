@@ -1,3 +1,5 @@
+import { Projectile, Vector2D } from './VibeEngine.js';
+
 class Missile extends Projectile {
   static imageUrl = 'missile.png';
   static size = new Vector2D(16, 34);
@@ -19,3 +21,4 @@ class Missile extends Projectile {
     };
   }
 }
+export { Missile };

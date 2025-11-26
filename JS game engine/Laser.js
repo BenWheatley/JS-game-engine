@@ -1,3 +1,5 @@
+import { Projectile, Vector2D } from './VibeEngine.js';
+
 class Laser extends Projectile {
 	static imageUrl = 'laser.png';
 	static size = new Vector2D(10, 10);
@@ -11,3 +13,4 @@ class Laser extends Projectile {
 		this.particleColor = GameConfig.LASER.PARTICLE_COLOR;
 	}
 }
+export { Laser };

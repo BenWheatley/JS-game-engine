@@ -7,6 +7,11 @@
  * - Stops completely for 2 seconds at target
  * - Repeats
  */
+import { NPC } from './NPC.js';
+import { GameConfig } from './GameConfig.js';
+import { Plasma } from './Plasma.js';
+import { NPCAIUtils } from './NPCAIUtils.js';
+
 class AlienSaucer extends NPC {
   static States = {
     MOVING: 'moving',
@@ -174,3 +179,5 @@ class AlienSaucer extends NPC {
     // Note: Don't call super.update() because we're not using velocity-based movement
   }
 }
+
+export { AlienSaucer };

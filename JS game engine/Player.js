@@ -1,3 +1,8 @@
+import { GameEntity } from './GameEntity.js';
+import { Vector2D } from './VibeEngine.js';
+import { Laser } from './Laser.js';
+import { GameConfig } from './GameConfig.js';
+
 class Player extends GameEntity {
   static imageUrl = 'player-ship.png';
   static size = new Vector2D(42, 43);
@@ -130,3 +135,5 @@ class Player extends GameEntity {
     }
   }
 }
+
+export { Player };
