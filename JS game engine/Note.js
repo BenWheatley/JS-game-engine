@@ -149,4 +149,4 @@ class Note {
   }
 }
 
-export { SimpleMusic };
+export { Note };

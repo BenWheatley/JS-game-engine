@@ -3,7 +3,9 @@ import { DebugLogger } from './DebugLogger.js';
 import './CanvasRenderingContext2D-extensions.js';
 import { Vector2D } from './Vector2D.js';
 import { Sprite } from './Sprite.js';
+import { GameEntity } from './GameEntity.js';
 import { Projectile } from './Projectile.js';
+import { NPC } from './NPC.js';
 import { Particle } from './Particle.js';
 import { ParticleSystem } from './ParticleSystem.js';
 import { CollisionDetection } from './CollisionDetection.js';
@@ -11,7 +13,7 @@ import { AssetLoader } from './AssetLoader.js';
 import { PreferencesManager } from './PreferencesManager.js';
 import { SoundManager } from './SoundManager.js';
 import { MusicPlayer } from './MusicPlayer.js';
-import { SimpleMusic } from './SimpleMusic.js';
+import { Note } from './Note.js';
 import { MenuSystem } from './MenuSystem.js';
 import { AchievementManager } from './AchievementManager.js';
 import { HighScoreManager } from './HighScoreManager.js';
@@ -181,7 +183,7 @@ export {
 	PreferencesManager,
 	SoundManager,
 	MusicPlayer,
-	SimpleMusic,
+	Note,
 	MenuSystem,
 	AchievementManager,
 	HighScoreManager
