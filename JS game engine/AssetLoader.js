@@ -1,4 +1,5 @@
 import { DebugLogger } from './DebugLogger.js';
+import { Sprite } from './Sprite.js';
 
 /**
  * AssetLoader - Centralized asset loading system
