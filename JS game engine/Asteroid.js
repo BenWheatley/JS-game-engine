@@ -1,7 +1,7 @@
 import { GameEntity } from './GameEntity.js';
 import { GameConfig } from './GameConfig.js';
 import { AsteroidSpawn } from './AsteroidSpawn.js';
-import { Vector2D } from './VibeEngine.js';
+import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
 
 class Asteroid extends GameEntity {
   constructor(position, playerPosition) {

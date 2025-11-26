@@ -1,5 +1,5 @@
 import { GameEntity } from './GameEntity.js';
-import { Vector2D } from './VibeEngine.js';
+import { Vector2D } from './VibeEngine/VibeEngine.js';
 import { Laser } from './Laser.js';
 import { GameConfig } from './GameConfig.js';
 

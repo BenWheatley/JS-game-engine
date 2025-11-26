@@ -1,4 +1,5 @@
-import { Projectile, Vector2D } from './VibeEngine.js';
+import { Projectile, Vector2D } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
 
 class Missile extends Projectile {
   static imageUrl = 'missile.png';

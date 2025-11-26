@@ -1,4 +1,4 @@
-import { ParticleSystem, CollisionDetection, DebugLogger } from './VibeEngine.js';
+import { ParticleSystem, CollisionDetection, DebugLogger } from './VibeEngine/VibeEngine.js';
 import { UpgradeBackground } from './UpgradeBackground.js';
 import { Player } from './Player.js';
 import { Minimap } from './Minimap.js';

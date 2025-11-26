@@ -4,7 +4,7 @@
  * This module contains common AI logic used across multiple NPC types
  * to avoid code duplication and centralize AI behavior patterns.
  */
-import { Vector2D } from './VibeEngine.js';
+import { Vector2D } from './VibeEngine/VibeEngine.js';
 import { GameConfig } from './GameConfig.js';
 
 class NPCAIUtils {

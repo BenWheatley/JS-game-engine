@@ -12,7 +12,7 @@ import {
 	MusicPlayer,
 	AssetLoader,
 	Note
-} from './VibeEngine.js';
+} from './VibeEngine/VibeEngine.js';
 import { GameConfig } from './GameConfig.js';
 import { Game } from './Game.js';
 

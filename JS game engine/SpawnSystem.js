@@ -6,7 +6,7 @@
  * - Uniform off-screen spawn position calculation
  * - NPC instantiation and placement
  */
-import { Vector2D } from './VibeEngine.js';
+import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
 import { GameConfig } from './GameConfig.js';
 
 class SpawnSystem {

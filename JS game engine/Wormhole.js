@@ -1,4 +1,5 @@
-import { Vector2D, Sprite } from './VibeEngine.js';
+import { Vector2D, Sprite } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
 
 class Wormhole {
 	constructor(position) {

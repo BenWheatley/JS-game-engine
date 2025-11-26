@@ -1,5 +1,6 @@
 import { GameEntity } from './GameEntity.js';
-import { Vector2D } from './VibeEngine.js';
+import { Vector2D } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
 
 class NPC extends GameEntity {
   static imageUrl = 'player-ship.png'; // placeholder image; if you see this in the game, should be clear it's not the player

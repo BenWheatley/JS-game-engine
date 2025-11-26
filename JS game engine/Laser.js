@@ -1,4 +1,5 @@
-import { Projectile, Vector2D } from './VibeEngine.js';
+import { Projectile, Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
 
 class Laser extends Projectile {
 	static imageUrl = 'laser.png';
