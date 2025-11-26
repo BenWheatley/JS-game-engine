@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 class Sprite {
 	constructor(imageUrl, position, size) {
 		this.imageUrl = imageUrl;
