@@ -2,6 +2,7 @@ import { NPC } from './NPC.js';
 import { GameConfig } from './GameConfig.js';
 import { Plasma } from './Plasma.js';
 import { NPCAIUtils } from './NPCAIUtils.js';
+import { Vector2D } from './VibeEngine/VibeEngine.js';
 
 class AlienScout extends NPC {
   constructor(position, playerPosition, canvasWidth, canvasHeight) {

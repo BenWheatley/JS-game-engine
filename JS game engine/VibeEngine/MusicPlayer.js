@@ -1,4 +1,5 @@
 import { DebugLogger } from './DebugLogger.js';
+import { Note } from './Note.js';
 
 class MusicPlayer {
   constructor(preferencesManager) {

@@ -62,7 +62,4 @@ class GameEntity {
   }
 }
 
-// Make GameEntity available globally for non-module game scripts
-window.GameEntity = GameEntity;
-
 export { GameEntity };

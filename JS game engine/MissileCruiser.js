@@ -2,7 +2,7 @@ import { NPC } from './NPC.js';
 import { GameConfig } from './GameConfig.js';
 import { Missile } from './Missile.js';
 import { NPCAIUtils } from './NPCAIUtils.js';
-import { DebugLogger } from './VibeEngine/VibeEngine.js';
+import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
 
 class MissileCruiser extends NPC {
   constructor(position, playerPosition, canvasWidth, canvasHeight) {

@@ -1,5 +1,5 @@
 import { GameEntity } from './GameEntity.js';
-import { Vector2D } from './VibeEngine/VibeEngine.js';
+import { Vector2D, Sprite } from './VibeEngine/VibeEngine.js';
 import { GameConfig } from './GameConfig.js';
 import { NPCAIUtils } from './NPCAIUtils.js';
 
@@ -153,8 +153,5 @@ class NPC extends GameEntity {
     }
   }
 }
-
-// Make NPC available globally for non-module game scripts
-window.NPC = NPC;
 
 export { NPC };

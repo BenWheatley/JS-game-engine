@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 class Note {
   static notes = {};
   static baseFrequency = 440;
