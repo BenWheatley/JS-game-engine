@@ -1,3 +1,6 @@
+import { GameEntity } from './GameEntity.js';
+import { Vector2D } from './VibeEngine.js';
+
 class NPC extends GameEntity {
   static imageUrl = 'player-ship.png'; // placeholder image; if you see this in the game, should be clear it's not the player
   static size = new Vector2D(42, 43);
@@ -148,3 +151,8 @@ class NPC extends GameEntity {
     }
   }
 }
+
+// Make NPC available globally for non-module game scripts
+window.NPC = NPC;
+
+export { NPC };

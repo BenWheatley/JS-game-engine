@@ -1,3 +1,5 @@
+import { Sprite } from './VibeEngine.js';
+
 class GameEntity {
   constructor(position, rotation, velocity, size, imageUrl) {
     this.sprite = new Sprite(imageUrl, position, size);
@@ -59,3 +61,8 @@ class GameEntity {
     };
   }
 }
+
+// Make GameEntity available globally for non-module game scripts
+window.GameEntity = GameEntity;
+
+export { GameEntity };
