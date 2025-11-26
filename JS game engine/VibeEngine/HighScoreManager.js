@@ -1,3 +1,5 @@
+import { MenuSystem } from './MenuSystem.js';
+
 /**
  * HighScoreManager - Manages high score storage, retrieval, and display
  *
@@ -8,8 +10,9 @@
  * - High scores menu display with smart truncation
  */
 class HighScoreManager {
-  constructor(menuSystem) {
+  constructor(menuSystem, showMainMenuCallback) {
     this.menuSystem = menuSystem;
+    this.showMainMenuCallback = showMainMenuCallback;
     this.storageKey = 'highScores';
   }
 
@@ -173,11 +176,7 @@ class HighScoreManager {
         {
           type: 'button',
           label: 'Main Menu',
-          action: () => {
-            if (typeof showMainMenu === 'function') {
-              showMainMenu();
-            }
-          }
+          action: () => this.showMainMenuCallback()
         }
       ]
     });

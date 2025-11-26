@@ -37,7 +37,7 @@ const menuSystem = new MenuSystem(
 );
 
 // Initialize globals:
-const highScoreManager = new HighScoreManager(menuSystem);
+const highScoreManager = new HighScoreManager(menuSystem, showMainMenu);
 const achievementManager = new AchievementManager(menuSystem);
 const preferencesManager = new PreferencesManager();
 const soundManager = SoundManager.init(preferencesManager);
