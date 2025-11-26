@@ -8,6 +8,11 @@
  */
 import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
 import { GameConfig } from './GameConfig.js';
+import { AlienScout } from './AlienScout.js';
+import { AlienFighter } from './AlienFighter.js';
+import { AlienSaucer } from './AlienSaucer.js';
+import { MissileCruiser } from './MissileCruiser.js';
+import { Asteroid } from './Asteroid.js';
 
 class SpawnSystem {
   /**

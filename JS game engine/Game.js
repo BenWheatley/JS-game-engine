@@ -1,10 +1,13 @@
-import { ParticleSystem, CollisionDetection, DebugLogger } from './VibeEngine/VibeEngine.js';
+import { ParticleSystem, CollisionDetection, DebugLogger, Vector2D, Particle } from './VibeEngine/VibeEngine.js';
 import { UpgradeBackground } from './UpgradeBackground.js';
 import { Player } from './Player.js';
 import { Minimap } from './Minimap.js';
 import { SpawnSystem } from './SpawnSystem.js';
 import { Wormhole } from './Wormhole.js';
 import { GameConfig } from './GameConfig.js';
+import { Plasma } from './Plasma.js';
+import { Missile } from './Missile.js';
+import { Laser } from './Laser.js';
 
 class Game {
 	/**
