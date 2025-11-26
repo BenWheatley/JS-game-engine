@@ -1,3 +1,5 @@
+import { Particle } from './Particle.js';
+
 class ParticleSystem {
 	constructor() {
 		this.particles = [];

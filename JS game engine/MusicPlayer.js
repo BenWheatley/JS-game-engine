@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 class MusicPlayer {
   constructor(preferencesManager) {
     this.musicData = null;

@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 /**
  * AssetLoader - Centralized asset loading system
  *

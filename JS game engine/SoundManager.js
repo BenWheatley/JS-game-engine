@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 class SoundManager {
   static instance = null;
   static sounds = {};

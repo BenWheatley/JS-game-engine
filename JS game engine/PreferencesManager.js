@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 /**
  * PreferencesManager - Centralized preferences and settings management
  *

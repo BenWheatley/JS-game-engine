@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 /**
  * AchievementManager - Tracks and persists player achievements
  *

@@ -1,3 +1,5 @@
+import { Sprite } from './Sprite.js';
+
 class Projectile {
   constructor(position, velocity, imageUrl, size, damage) {
     this.sprite = new Sprite(imageUrl, position, size);
