@@ -1,4 +1,5 @@
 import { DebugLogger } from './DebugLogger.js';
+import { SoundManager } from './SoundManager.js';
 
 class Note {
   static notes = {};
