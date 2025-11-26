@@ -57,7 +57,9 @@
 			<div class="menu-instructions" id="menuInstructions"></div>
 		</div>
 	</div>
-	<script type="text/javascript" defer>
+	<script type="text/javascript">
+		// Wait for the module to load and populate window with engine classes
+		window.addEventListener('DOMContentLoaded', () => {
 		const canvasName = "gameCanvas";
 		// Get the canvas element
 		const canvas = document.getElementById(canvasName);
@@ -470,6 +472,7 @@
 		// Show main menu and start game loop
 		showMainMenu();
 		engine.start(update, render, () => Sprite.stillLoading());
+		}); // End DOMContentLoaded
 	</script>
 </body>
 </html>
