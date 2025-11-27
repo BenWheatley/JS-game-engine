@@ -66,7 +66,8 @@ class MusicPlayer {
 
   onPlaybackEnd() {
     if (this.shouldLoop && this.isPlaying) {
-      // Clear timeouts and restart
+      // Clear all scheduled timeouts before restarting
+      this.scheduledTimeouts.forEach(timeout => clearTimeout(timeout));
       this.scheduledTimeouts = [];
       this.isPlaying = false; // Reset flag before calling play()
       this.play();
