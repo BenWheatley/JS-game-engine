@@ -228,6 +228,62 @@ const GameConfig = {
     COLLISION_VOLUME: 0.6               // Volume for collision sound
   },
 
+  // Alien Battleship (Siege Destroyer) - Heavy ship with charge-up beam weapon
+  ALIEN_BATTLESHIP: {
+    IMAGE_URL: 'alien-battleship.png',
+    WIDTH: 96,
+    HEIGHT: 96,
+    HEALTH: 450,
+    SCORE_VALUE: 550,
+    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    FORWARD_ACCELERATION: 0.0005,       // Slow acceleration
+    MAX_SPEED: 0.05,                    // 0.5x player speed
+    ROTATIONAL_SPEED: Math.PI / 1800,   // Slow rotation
+    CHARGE_DURATION: 1500,              // Milliseconds to charge beam before firing
+    BEAM_DURATION: 1000,                // Milliseconds beam stays active
+    BEAM_COOLDOWN: 4000,                // Milliseconds between beam attacks
+    BEAM_DAMAGE: 75,                    // Damage dealt by beam
+    BEAM_WIDTH: 50,                     // Beam width in pixels
+    BEAM_LENGTH: 800,                   // Beam length in pixels
+    CHARGE_SOUND: 'charge',             // Sound effect during charge-up (TODO: add asset)
+    CHARGE_VOLUME: 0.4,                 // Volume for charge sound
+    BEAM_SOUND: 'beam',                 // Sound effect during beam fire (TODO: add asset)
+    BEAM_VOLUME: 0.5,                   // Volume for beam sound
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.5,                    // Volume for hit sound
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.7,              // Volume for destruction sound
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.8               // Volume for collision sound
+  },
+
+  // Alien Carrier - Spawns fighters when on-screen
+  ALIEN_CARRIER: {
+    IMAGE_URL: 'alien-carrier.png',
+    WIDTH: 128,
+    HEIGHT: 128,
+    HEALTH: 600,
+    SCORE_VALUE: 800,
+    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    FORWARD_ACCELERATION: 0.0002,       // Very slow acceleration
+    MAX_SPEED: 0.02,                    // 0.2x player speed (slowest ship)
+    ROTATIONAL_SPEED: Math.PI / 2400,   // Very slow rotation
+    SPAWN_COOLDOWN: 8000,               // Milliseconds between fighter spawns
+    SPAWN_COUNT: 2,                     // Number of fighters spawned per cycle
+    MAX_SPAWNED_FIGHTERS: 6,            // Maximum active spawned fighters
+    VISIBILITY_MARGIN: -50,             // Negative margin = must be on-screen (not off-screen)
+    SPAWN_SOUND: 'spawn',               // Sound effect when spawning (TODO: add asset)
+    SPAWN_VOLUME: 0.4,                  // Volume for spawn sound
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.6,                    // Volume for hit sound
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.8,              // Volume for destruction sound
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.9               // Volume for collision sound
+  },
+
   // Asteroid - Large destructible obstacle
   ASTEROID_BIG: {
     IMAGE_URL: 'asteroid-big.png',
