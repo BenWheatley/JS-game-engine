@@ -442,6 +442,14 @@ function setMenuOverlayMode(isPauseMode) {
 
 // Wrapper functions for game loop
 function update(deltaTime) {
+	// Handle gamepad input for menu navigation
+	const gamepads = navigator.getGamepads();
+	for (const gamepad of gamepads) {
+		if (gamepad) {
+			menuSystem.handleGamepadInput(gamepad);
+		}
+	}
+
 	if (game != null) {
 		game.update(deltaTime, {
 			engine,
