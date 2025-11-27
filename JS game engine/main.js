@@ -5,6 +5,7 @@ import {
 	Vector2D,
 	Sprite,
 	MenuSystem,
+	DialogSystem,
 	HighScoreManager,
 	AchievementManager,
 	PreferencesManager,
@@ -36,6 +37,15 @@ const menuSystem = new MenuSystem(
 	document.getElementById('menuInstructions')
 );
 
+// Initialize dialog system
+const dialogSystem = new DialogSystem(
+	document.getElementById('dialogOverlay'),
+	document.getElementById('dialogIcon'),
+	document.getElementById('dialogTitle'),
+	document.getElementById('dialogMessage'),
+	document.getElementById('dialogButtons')
+);
+
 // Initialize globals:
 const highScoreManager = new HighScoreManager(menuSystem, showMainMenu);
 const achievementManager = new AchievementManager(menuSystem);
@@ -61,6 +71,20 @@ let backgroundSprite = new Sprite(
 );
 
 musicPlayer.play();
+
+// Listen for fullscreen errors from engine
+engine.addEventListener('fullscreen-error', (e) => {
+	dialogSystem.showDialog(DialogSystem.DialogTypes.ERROR, {
+		title: 'Fullscreen Unavailable',
+		message: 'Your browser does not allow fullscreen mode from controller input.\n\nPlease use your mouse or keyboard to enable fullscreen.',
+		buttons: [
+			{
+				label: 'OK',
+				action: () => dialogSystem.hideDialog()
+			}
+		]
+	});
+});
 
 // Export globals that Game.js needs to access
 window.game = game;
@@ -414,7 +438,8 @@ function getFullscreenCheckbox() {
 		onChange: async (checked) => {
 			if (checked && !VibeEngine.instance.isFullScreen) {
 				const success = await VibeEngine.instance.enterFullScreen();
-				// If fullscreen failed (gamepad not user gesture), revert checkbox
+				// If fullscreen failed, revert checkbox
+				// (Error dialog will be shown by fullscreen-error event listener)
 				if (!success) {
 					// Find the fullscreen checkbox and uncheck it
 					const allCheckboxes = document.querySelectorAll('.menu-checkbox');
@@ -454,11 +479,12 @@ function setMenuOverlayMode(isPauseMode) {
 
 // Wrapper functions for game loop
 function update(deltaTime) {
-	// Handle gamepad input for menu navigation
+	// Handle gamepad input for menu and dialog navigation
 	const gamepads = navigator.getGamepads();
 	for (const gamepad of gamepads) {
 		if (gamepad) {
 			menuSystem.handleGamepadInput(gamepad);
+			dialogSystem.handleGamepadInput(gamepad);
 		}
 	}
 

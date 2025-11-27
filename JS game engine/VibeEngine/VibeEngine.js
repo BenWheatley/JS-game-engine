@@ -15,9 +15,11 @@ import { MusicPlayer } from './MusicPlayer.js';
 import { MenuSystem } from './MenuSystem.js';
 import { AchievementManager } from './AchievementManager.js';
 import { HighScoreManager } from './HighScoreManager.js';
+import { DialogSystem } from './DialogSystem.js';
 
-class VibeEngine {
+class VibeEngine extends EventTarget {
 	constructor(document, canvasName) {
+		super();
 		if (!VibeEngine.instance) {
 			this._document = document;
 			this._canvas = document.getElementById(canvasName);
@@ -95,6 +97,15 @@ class VibeEngine {
 		} catch (error) {
 			// Fullscreen request was rejected (e.g., not a user gesture)
 			DebugLogger.log('Fullscreen request denied:', error.message);
+
+			// Dispatch event for game to handle
+			this.dispatchEvent(new CustomEvent('fullscreen-error', {
+				detail: {
+					message: error.message,
+					reason: 'browser-restriction'
+				}
+			}));
+
 			return false;
 		}
 		return true;
@@ -191,6 +202,7 @@ export {
 	MusicPlayer,
 	Note,
 	MenuSystem,
+	DialogSystem,
 	AchievementManager,
 	HighScoreManager
 };
