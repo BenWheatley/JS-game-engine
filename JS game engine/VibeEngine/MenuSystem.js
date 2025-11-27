@@ -21,7 +21,7 @@ class MenuSystem {
     this.currentMenuType = null;
 
     // Gamepad navigation state
-    this.selectedIndex = 0;
+    this.selectedIndex = -1; // -1 means no selection (default state for mouse users)
     this.lastGamepadState = {
       dpadUp: false,
       dpadDown: false,
@@ -43,7 +43,7 @@ class MenuSystem {
 
     // Clear existing items
     this.buttonsElement.innerHTML = '';
-    this.selectedIndex = 0;
+    this.selectedIndex = -1; // Reset to no selection
 
     // Create menu items
     menuConfig.items.forEach(itemConfig => {
@@ -80,7 +80,7 @@ class MenuSystem {
     // Show overlay
     this.overlayElement.classList.remove('hidden');
 
-    // Highlight first selectable item if using gamepad
+    // Don't highlight anything by default - gamepad input will trigger first highlight
     this.updateSelection();
   }
 
@@ -411,6 +411,9 @@ class MenuSystem {
       item.element.classList.remove('gamepad-selected');
     });
 
+    // If selectedIndex is -1 (no selection), don't highlight anything
+    if (this.selectedIndex === -1) return;
+
     // Clamp selectedIndex to valid range
     this.selectedIndex = Math.max(0, Math.min(this.selectedIndex, items.length - 1));
 
@@ -427,7 +430,12 @@ class MenuSystem {
     const items = this.getSelectableItems();
     if (items.length === 0) return;
 
-    this.selectedIndex = (this.selectedIndex + 1) % items.length;
+    // If no selection, start at first item
+    if (this.selectedIndex === -1) {
+      this.selectedIndex = 0;
+    } else {
+      this.selectedIndex = (this.selectedIndex + 1) % items.length;
+    }
     this.updateSelection();
   }
 
@@ -438,7 +446,12 @@ class MenuSystem {
     const items = this.getSelectableItems();
     if (items.length === 0) return;
 
-    this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
+    // If no selection, start at first item
+    if (this.selectedIndex === -1) {
+      this.selectedIndex = 0;
+    } else {
+      this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
+    }
     this.updateSelection();
   }
 
@@ -446,6 +459,9 @@ class MenuSystem {
    * Activate currently selected item
    */
   activateSelected() {
+    // Can't activate if nothing is selected
+    if (this.selectedIndex === -1) return;
+
     const items = this.getSelectableItems();
     const selectedItem = items[this.selectedIndex];
     if (!selectedItem) return;
