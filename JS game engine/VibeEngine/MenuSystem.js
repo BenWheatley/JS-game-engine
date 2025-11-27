@@ -355,31 +355,36 @@ class MenuSystem {
 
   /**
    * Get all selectable items (buttons, checkboxes, sliders - not text inputs or lists)
+   * Returns items in DOM order (top to bottom as displayed)
    * @returns {Array} Array of selectable item elements with metadata
    */
   getSelectableItems() {
     const items = [];
 
-    // Buttons (not disabled)
-    this.buttonsElement.querySelectorAll('.menu-button:not(:disabled)').forEach(el => {
-      items.push({ element: el, type: 'button' });
-    });
-
-    // Checkboxes (target the container for selection visual)
-    this.buttonsElement.querySelectorAll('.menu-checkbox-container').forEach(el => {
-      items.push({ element: el, type: 'checkbox', input: el.querySelector('.menu-checkbox') });
-    });
-
-    // Sliders (target the container for selection visual)
-    this.buttonsElement.querySelectorAll('.menu-slider-container').forEach(el => {
-      items.push({
-        element: el,
-        type: 'slider',
-        input: el.querySelector('.menu-slider'),
-        valueDisplay: el.querySelector('.menu-slider-value'),
-        config: null // Will need to store config reference
-      });
-    });
+    // Traverse children in DOM order to maintain visual order
+    for (const child of this.buttonsElement.children) {
+      // Buttons (not disabled)
+      if (child.classList.contains('menu-button') && !child.disabled) {
+        items.push({ element: child, type: 'button' });
+      }
+      // Checkboxes (target the container for selection visual)
+      else if (child.classList.contains('menu-checkbox-container')) {
+        items.push({
+          element: child,
+          type: 'checkbox',
+          input: child.querySelector('.menu-checkbox')
+        });
+      }
+      // Sliders (target the container for selection visual)
+      else if (child.classList.contains('menu-slider-container')) {
+        items.push({
+          element: child,
+          type: 'slider',
+          input: child.querySelector('.menu-slider'),
+          valueDisplay: child.querySelector('.menu-slider-value')
+        });
+      }
+    }
 
     return items;
   }

@@ -411,9 +411,21 @@ function getFullscreenCheckbox() {
 		type: 'checkbox',
 		label: 'Fullscreen',
 		checked: VibeEngine.instance.isFullScreen,
-		onChange: (checked) => {
+		onChange: async (checked) => {
 			if (checked && !VibeEngine.instance.isFullScreen) {
-				VibeEngine.instance.enterFullScreen();
+				const success = await VibeEngine.instance.enterFullScreen();
+				// If fullscreen failed (gamepad not user gesture), revert checkbox
+				if (!success) {
+					// Find the fullscreen checkbox and uncheck it
+					const allCheckboxes = document.querySelectorAll('.menu-checkbox');
+					for (const cb of allCheckboxes) {
+						const label = cb.nextElementSibling;
+						if (label && label.textContent.includes('Fullscreen')) {
+							cb.checked = false;
+							break;
+						}
+					}
+				}
 			} else if (!checked && VibeEngine.instance.isFullScreen) {
 				VibeEngine.instance.exitFullScreen();
 			}
