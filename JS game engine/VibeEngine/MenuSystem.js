@@ -21,10 +21,12 @@ class MenuSystem {
     this.currentMenuType = null;
 
     // Gamepad navigation state
-    this.selectedIndex = 0;
+    this.selectedIndex = -1; // -1 means no selection (default state for mouse users)
     this.lastGamepadState = {
       dpadUp: false,
       dpadDown: false,
+      dpadLeft: false,
+      dpadRight: false,
       buttonA: false
     };
   }
@@ -41,7 +43,7 @@ class MenuSystem {
 
     // Clear existing items
     this.buttonsElement.innerHTML = '';
-    this.selectedIndex = 0;
+    this.selectedIndex = -1; // Reset to no selection
 
     // Create menu items
     menuConfig.items.forEach(itemConfig => {
@@ -78,7 +80,7 @@ class MenuSystem {
     // Show overlay
     this.overlayElement.classList.remove('hidden');
 
-    // Highlight first selectable item if using gamepad
+    // Don't highlight anything by default - gamepad input will trigger first highlight
     this.updateSelection();
   }
 
@@ -93,6 +95,9 @@ class MenuSystem {
       button.disabled = true;
       button.classList.add('disabled');
     }
+
+    // Clear gamepad selection on mouse hover
+    button.addEventListener('mouseenter', () => this.clearGamepadSelection());
 
     this.buttonsElement.appendChild(button);
   }
@@ -123,6 +128,9 @@ class MenuSystem {
     valueDisplay.className = 'menu-slider-value';
     valueDisplay.textContent = slider.value + (config.suffix || '');
 
+    // Clear gamepad selection on mouse hover
+    container.addEventListener('mouseenter', () => this.clearGamepadSelection());
+
     sliderWrapper.appendChild(slider);
     sliderWrapper.appendChild(valueDisplay);
     container.appendChild(label);
@@ -147,6 +155,9 @@ class MenuSystem {
     label.className = 'menu-checkbox-label';
     label.htmlFor = checkbox.id;
     label.textContent = config.label;
+
+    // Clear gamepad selection on mouse hover
+    container.addEventListener('mouseenter', () => this.clearGamepadSelection());
 
     container.appendChild(checkbox);
     container.appendChild(label);
@@ -343,51 +354,104 @@ class MenuSystem {
   }
 
   /**
-   * Get all selectable buttons (not disabled)
-   * @returns {NodeList} List of selectable button elements
+   * Get all selectable items (buttons, checkboxes, sliders - not text inputs or lists)
+   * Returns items in DOM order (top to bottom as displayed)
+   * @returns {Array} Array of selectable item elements with metadata
    */
-  getSelectableButtons() {
-    return this.buttonsElement.querySelectorAll('.menu-button:not(:disabled)');
+  getSelectableItems() {
+    const items = [];
+
+    // Traverse children in DOM order to maintain visual order
+    for (const child of this.buttonsElement.children) {
+      // Buttons (not disabled)
+      if (child.classList.contains('menu-button') && !child.disabled) {
+        items.push({ element: child, type: 'button' });
+      }
+      // Checkboxes (target the container for selection visual)
+      else if (child.classList.contains('menu-checkbox-container')) {
+        items.push({
+          element: child,
+          type: 'checkbox',
+          input: child.querySelector('.menu-checkbox')
+        });
+      }
+      // Sliders (target the container for selection visual)
+      else if (child.classList.contains('menu-slider-container')) {
+        items.push({
+          element: child,
+          type: 'slider',
+          input: child.querySelector('.menu-slider'),
+          valueDisplay: child.querySelector('.menu-slider-value')
+        });
+      }
+    }
+
+    return items;
+  }
+
+  /**
+   * Clear gamepad selection (when mouse is used)
+   */
+  clearGamepadSelection() {
+    const items = this.getSelectableItems();
+    items.forEach(item => {
+      item.element.classList.remove('gamepad-selected');
+    });
   }
 
   /**
    * Update visual highlighting for currently selected item
    */
   updateSelection() {
-    const buttons = this.getSelectableButtons();
-    if (buttons.length === 0) return;
+    const items = this.getSelectableItems();
+    if (items.length === 0) return;
 
     // Remove highlight from all items
-    buttons.forEach(button => {
-      button.classList.remove('gamepad-selected');
+    items.forEach(item => {
+      item.element.classList.remove('gamepad-selected');
     });
 
+    // If selectedIndex is -1 (no selection), don't highlight anything
+    if (this.selectedIndex === -1) return;
+
     // Clamp selectedIndex to valid range
-    this.selectedIndex = Math.max(0, Math.min(this.selectedIndex, buttons.length - 1));
+    this.selectedIndex = Math.max(0, Math.min(this.selectedIndex, items.length - 1));
 
     // Add highlight to selected item
-    buttons[this.selectedIndex].classList.add('gamepad-selected');
+    if (items[this.selectedIndex]) {
+      items[this.selectedIndex].element.classList.add('gamepad-selected');
+    }
   }
 
   /**
-   * Navigate to next menu item
+   * Navigate to next menu item (down/left)
    */
   selectNext() {
-    const buttons = this.getSelectableButtons();
-    if (buttons.length === 0) return;
+    const items = this.getSelectableItems();
+    if (items.length === 0) return;
 
-    this.selectedIndex = (this.selectedIndex + 1) % buttons.length;
+    // If no selection, start at first item
+    if (this.selectedIndex === -1) {
+      this.selectedIndex = 0;
+    } else {
+      this.selectedIndex = (this.selectedIndex + 1) % items.length;
+    }
     this.updateSelection();
   }
 
   /**
-   * Navigate to previous menu item
+   * Navigate to previous menu item (up/right)
    */
   selectPrevious() {
-    const buttons = this.getSelectableButtons();
-    if (buttons.length === 0) return;
+    const items = this.getSelectableItems();
+    if (items.length === 0) return;
 
-    this.selectedIndex = (this.selectedIndex - 1 + buttons.length) % buttons.length;
+    // If no selection, start at first item
+    if (this.selectedIndex === -1) {
+      this.selectedIndex = 0;
+    } else {
+      this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
+    }
     this.updateSelection();
   }
 
@@ -395,49 +459,149 @@ class MenuSystem {
    * Activate currently selected item
    */
   activateSelected() {
-    const buttons = this.getSelectableButtons();
-    if (buttons[this.selectedIndex]) {
-      buttons[this.selectedIndex].click();
+    // Can't activate if nothing is selected
+    if (this.selectedIndex === -1) return;
+
+    const items = this.getSelectableItems();
+    const selectedItem = items[this.selectedIndex];
+    if (!selectedItem) return;
+
+    switch (selectedItem.type) {
+      case 'button':
+        selectedItem.element.click();
+        break;
+
+      case 'checkbox':
+        // Toggle checkbox state
+        selectedItem.input.checked = !selectedItem.input.checked;
+        // Trigger change event to call onChange callback
+        selectedItem.input.dispatchEvent(new Event('change'));
+        break;
+
+      case 'slider':
+        // Cycle through preset values: 0, 25, 50, 75, 100
+        const presets = [0, 25, 50, 75, 100];
+        const currentValue = parseInt(selectedItem.input.value);
+
+        // Find next preset value
+        let nextPreset = presets[0]; // Default to 0
+        for (let i = 0; i < presets.length; i++) {
+          if (currentValue < presets[i]) {
+            nextPreset = presets[i];
+            break;
+          }
+        }
+        // If we're at or above the last preset, wrap to first
+        if (currentValue >= presets[presets.length - 1]) {
+          nextPreset = presets[0];
+        }
+
+        // Update slider value
+        selectedItem.input.value = nextPreset;
+        // Update display
+        const suffix = selectedItem.valueDisplay.textContent.replace(/\d+/g, '').trim();
+        selectedItem.valueDisplay.textContent = nextPreset + (suffix || '');
+        // Trigger input event to call onChange callback
+        selectedItem.input.dispatchEvent(new Event('input'));
+        break;
     }
   }
 
   /**
    * Handle gamepad input for menu navigation
+   * Called each frame from game loop
    * @param {Gamepad} gamepad - The gamepad object
    */
   handleGamepadInput(gamepad) {
-    if (!this.isVisible() || this.getSelectableButtons().length === 0) {
+    if (!this.isVisible()) {
       return;
     }
 
-    // D-pad or left stick for navigation
-    // D-pad: buttons[12] = up, buttons[13] = down
-    // Left stick: axes[1] < -0.5 = up, axes[1] > 0.5 = down
+    // D-pad or stick for navigation
+    // D-pad: buttons[12]=up, [13]=down, [14]=left, [15]=right
+    // Left stick: axes[1] for up/down, axes[0] for left/right
     const dpadUp = gamepad.buttons[12]?.pressed || false;
     const dpadDown = gamepad.buttons[13]?.pressed || false;
+    const dpadLeft = gamepad.buttons[14]?.pressed || false;
+    const dpadRight = gamepad.buttons[15]?.pressed || false;
+
     const stickUp = gamepad.axes[1] < -0.5;
     const stickDown = gamepad.axes[1] > 0.5;
+    const stickLeft = gamepad.axes[0] < -0.5;
+    const stickRight = gamepad.axes[0] > 0.5;
 
     const upPressed = dpadUp || stickUp;
     const downPressed = dpadDown || stickDown;
+    const leftPressed = dpadLeft || stickLeft;
+    const rightPressed = dpadRight || stickRight;
 
     // A button (buttons[0]) to activate
     const buttonA = gamepad.buttons[0]?.pressed || false;
 
-    // Detect rising edge (button just pressed, wasn't pressed before)
-    if (upPressed && !this.lastGamepadState.dpadUp) {
-      this.selectPrevious();
-    }
-    if (downPressed && !this.lastGamepadState.dpadDown) {
-      this.selectNext();
-    }
-    if (buttonA && !this.lastGamepadState.buttonA) {
-      this.activateSelected();
+    // Check if there's a scrollable container in the current menu
+    // Only treat it as scrollable if it has overflow-y: auto and content that can scroll
+    const scrollableContainer = this.buttonsElement.querySelector('.menu-achievement-list-container');
+    const hasSelectableItems = this.getSelectableItems().length > 0;
+
+    // Check if container is actually scrollable (has overflow content)
+    const isScrollable = scrollableContainer &&
+                        scrollableContainer.scrollHeight > scrollableContainer.clientHeight;
+
+    if (isScrollable && this.selectedIndex === -1) {
+      // Scrollable menu mode with no button selected - use D-pad up/down to scroll content
+      const scrollSpeed = 30; // pixels per input
+      const isAtTop = scrollableContainer.scrollTop === 0;
+      const isAtBottom = scrollableContainer.scrollTop + scrollableContainer.clientHeight >= scrollableContainer.scrollHeight;
+
+      // Detect rising edge for scrolling
+      if (upPressed && !this.lastGamepadState.dpadUp) {
+        if (isAtTop && hasSelectableItems) {
+          // At top - select previous button
+          this.selectPrevious();
+        } else {
+          scrollableContainer.scrollTop -= scrollSpeed;
+        }
+      }
+      if (downPressed && !this.lastGamepadState.dpadDown) {
+        if (isAtBottom && hasSelectableItems) {
+          // At bottom - select next button
+          this.selectNext();
+        } else {
+          scrollableContainer.scrollTop += scrollSpeed;
+        }
+      }
+
+      // Allow left/right to select the Back button
+      if ((leftPressed && !this.lastGamepadState.dpadLeft) ||
+          (rightPressed && !this.lastGamepadState.dpadRight)) {
+        if (hasSelectableItems) {
+          this.selectNext(); // Select first (and likely only) button
+        }
+      }
+    } else if (hasSelectableItems) {
+      // Button navigation mode - use D-pad to navigate items
+      // Detect rising edge (button just pressed, wasn't pressed before)
+      // Up/Right: select previous item
+      if ((upPressed && !this.lastGamepadState.dpadUp) ||
+          (rightPressed && !this.lastGamepadState.dpadRight)) {
+        this.selectPrevious();
+      }
+      // Down/Left: select next item
+      if ((downPressed && !this.lastGamepadState.dpadDown) ||
+          (leftPressed && !this.lastGamepadState.dpadLeft)) {
+        this.selectNext();
+      }
+      // A button: activate selected item
+      if (buttonA && !this.lastGamepadState.buttonA) {
+        this.activateSelected();
+      }
     }
 
     // Update last state
     this.lastGamepadState.dpadUp = upPressed;
     this.lastGamepadState.dpadDown = downPressed;
+    this.lastGamepadState.dpadLeft = leftPressed;
+    this.lastGamepadState.dpadRight = rightPressed;
     this.lastGamepadState.buttonA = buttonA;
   }
 }

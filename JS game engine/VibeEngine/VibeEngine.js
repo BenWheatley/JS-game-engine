@@ -15,9 +15,11 @@ import { MusicPlayer } from './MusicPlayer.js';
 import { MenuSystem } from './MenuSystem.js';
 import { AchievementManager } from './AchievementManager.js';
 import { HighScoreManager } from './HighScoreManager.js';
+import { DialogSystem } from './DialogSystem.js';
 
-class VibeEngine {
+class VibeEngine extends EventTarget {
 	constructor(document, canvasName) {
+		super();
 		if (!VibeEngine.instance) {
 			this._document = document;
 			this._canvas = document.getElementById(canvasName);
@@ -71,25 +73,42 @@ class VibeEngine {
 	get mousePos() { return this._mousePos; }
 	get keyDown() { return this._keyDown; }
 	
-	enterFullScreen() {
+	async enterFullScreen() {
 		const element = this._document.documentElement;
-		if (element.requestFullscreen) {
-			element.requestFullscreen();
-		} else if (element.mozRequestFullScreen) { // Firefox
-			element.mozRequestFullScreen();
-		} else if (element.webkitRequestFullscreen) { // Chrome, Safari, Opera
-			element.webkitRequestFullscreen();
-		} else if (element.msRequestFullscreen) { // IE/Edge
-			element.msRequestFullscreen();
-		}
+		try {
+			if (element.requestFullscreen) {
+				await element.requestFullscreen();
+			} else if (element.mozRequestFullScreen) { // Firefox
+				await element.mozRequestFullScreen();
+			} else if (element.webkitRequestFullscreen) { // Chrome, Safari, Opera
+				await element.webkitRequestFullscreen();
+			} else if (element.msRequestFullscreen) { // IE/Edge
+				await element.msRequestFullscreen();
+			}
 
-		// make canvas full screen
-		var style = this._canvas.style;
-		style.position = 'fixed';
-		style.top = '0';
-		style.left = '0';
-		style.width = '100%';
-		style.height = '100%';
+			// Only apply canvas styles if fullscreen succeeded
+			// (The fullscreenchange event handler will also do this, but applying it here ensures immediate feedback)
+			const style = this._canvas.style;
+			style.position = 'fixed';
+			style.top = '0';
+			style.left = '0';
+			style.width = '100%';
+			style.height = '100%';
+		} catch (error) {
+			// Fullscreen request was rejected (e.g., not a user gesture)
+			DebugLogger.log('Fullscreen request denied:', error.message);
+
+			// Dispatch event for game to handle
+			this.dispatchEvent(new CustomEvent('fullscreen-error', {
+				detail: {
+					message: error.message,
+					reason: 'browser-restriction'
+				}
+			}));
+
+			return false;
+		}
+		return true;
 	}
 	
 	exitFullScreen() {
@@ -183,6 +202,7 @@ export {
 	MusicPlayer,
 	Note,
 	MenuSystem,
+	DialogSystem,
 	AchievementManager,
 	HighScoreManager
 };

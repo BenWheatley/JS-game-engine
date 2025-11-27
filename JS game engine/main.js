@@ -5,6 +5,7 @@ import {
 	Vector2D,
 	Sprite,
 	MenuSystem,
+	DialogSystem,
 	HighScoreManager,
 	AchievementManager,
 	PreferencesManager,
@@ -36,6 +37,15 @@ const menuSystem = new MenuSystem(
 	document.getElementById('menuInstructions')
 );
 
+// Initialize dialog system
+const dialogSystem = new DialogSystem(
+	document.getElementById('dialogOverlay'),
+	document.getElementById('dialogIcon'),
+	document.getElementById('dialogTitle'),
+	document.getElementById('dialogMessage'),
+	document.getElementById('dialogButtons')
+);
+
 // Initialize globals:
 const highScoreManager = new HighScoreManager(menuSystem, showMainMenu);
 const achievementManager = new AchievementManager(menuSystem);
@@ -61,6 +71,20 @@ let backgroundSprite = new Sprite(
 );
 
 musicPlayer.play();
+
+// Listen for fullscreen errors from engine
+engine.addEventListener('fullscreen-error', (e) => {
+	dialogSystem.showDialog(DialogSystem.DialogTypes.ERROR, {
+		title: 'Fullscreen Unavailable',
+		message: 'Your browser does not allow fullscreen mode from controller input.\n\nPlease use your mouse or keyboard to enable fullscreen.',
+		buttons: [
+			{
+				label: 'OK',
+				action: () => dialogSystem.hideDialog()
+			}
+		]
+	});
+});
 
 // Export globals that Game.js needs to access
 window.game = game;
@@ -411,9 +435,22 @@ function getFullscreenCheckbox() {
 		type: 'checkbox',
 		label: 'Fullscreen',
 		checked: VibeEngine.instance.isFullScreen,
-		onChange: (checked) => {
+		onChange: async (checked) => {
 			if (checked && !VibeEngine.instance.isFullScreen) {
-				VibeEngine.instance.enterFullScreen();
+				const success = await VibeEngine.instance.enterFullScreen();
+				// If fullscreen failed, revert checkbox
+				// (Error dialog will be shown by fullscreen-error event listener)
+				if (!success) {
+					// Find the fullscreen checkbox and uncheck it
+					const allCheckboxes = document.querySelectorAll('.menu-checkbox');
+					for (const cb of allCheckboxes) {
+						const label = cb.nextElementSibling;
+						if (label && label.textContent.includes('Fullscreen')) {
+							cb.checked = false;
+							break;
+						}
+					}
+				}
 			} else if (!checked && VibeEngine.instance.isFullScreen) {
 				VibeEngine.instance.exitFullScreen();
 			}
@@ -442,6 +479,21 @@ function setMenuOverlayMode(isPauseMode) {
 
 // Wrapper functions for game loop
 function update(deltaTime) {
+	// Handle gamepad input for menu and dialog navigation
+	// Dialogs are modal - they block menu input when visible
+	const gamepads = navigator.getGamepads();
+	for (const gamepad of gamepads) {
+		if (gamepad) {
+			if (dialogSystem.isVisible()) {
+				// Dialog is modal - only process dialog input
+				dialogSystem.handleGamepadInput(gamepad);
+			} else {
+				// No dialog - process menu input normally
+				menuSystem.handleGamepadInput(gamepad);
+			}
+		}
+	}
+
 	if (game != null) {
 		game.update(deltaTime, {
 			engine,

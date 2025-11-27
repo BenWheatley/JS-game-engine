@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Dialog System Test</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css.css" />
+	<script type="module">
+		import { DialogSystem } from './VibeEngine/VibeEngine.js';
+
+		// Initialize dialog system when DOM is ready
+		document.addEventListener('DOMContentLoaded', () => {
+			const dialogSystem = new DialogSystem(
+				document.getElementById('dialogOverlay'),
+				document.getElementById('dialogIcon'),
+				document.getElementById('dialogTitle'),
+				document.getElementById('dialogMessage'),
+				document.getElementById('dialogButtons')
+			);
+
+			// Gamepad polling for dialog navigation
+			function pollGamepad() {
+				const gamepads = navigator.getGamepads();
+				for (const gamepad of gamepads) {
+					if (gamepad) {
+						dialogSystem.handleGamepadInput(gamepad);
+					}
+				}
+				requestAnimationFrame(pollGamepad);
+			}
+			pollGamepad();
+
+			// Error dialog test
+			document.getElementById('testError').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.ERROR, {
+					title: 'Critical Error',
+					message: 'Something went terribly wrong!\n\nThis is a multi-line error message to test text wrapping and formatting.',
+					buttons: [
+						{
+							label: 'OK',
+							action: () => dialogSystem.hideDialog()
+						}
+					]
+				});
+			});
+
+			// Warning dialog test
+			document.getElementById('testWarning').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.WARNING, {
+					title: 'Warning',
+					message: 'This action cannot be undone.\n\nAre you sure you want to proceed?',
+					buttons: [
+						{
+							label: 'Cancel',
+							action: () => dialogSystem.hideDialog()
+						},
+						{
+							label: 'Continue',
+							action: () => {
+								alert('You clicked Continue!');
+								dialogSystem.hideDialog();
+							}
+						}
+					]
+				});
+			});
+
+			// Info dialog test
+			document.getElementById('testInfo').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.INFO, {
+					title: 'Information',
+					message: 'This is an informational message.\n\nIt provides helpful context or tips to the player.',
+					buttons: [
+						{
+							label: 'Got It',
+							action: () => dialogSystem.hideDialog()
+						}
+					]
+				});
+			});
+
+			// Confirm dialog test
+			document.getElementById('testConfirm').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.CONFIRM, {
+					title: 'Confirm Action',
+					message: 'Do you want to save your progress?',
+					buttons: [
+						{
+							label: 'No',
+							action: () => {
+								alert('Progress not saved');
+								dialogSystem.hideDialog();
+							}
+						},
+						{
+							label: 'Yes',
+							action: () => {
+								alert('Progress saved!');
+								dialogSystem.hideDialog();
+							}
+						}
+					]
+				});
+			});
+
+			// Long message test
+			document.getElementById('testLongMessage').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.INFO, {
+					title: 'Long Message Test',
+					message: 'This is a very long message to test how the dialog handles extensive text content.\n\nIt includes multiple paragraphs and line breaks to ensure proper formatting and readability.\n\nThe dialog should remain readable and properly styled even with substantial amounts of text.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+					buttons: [
+						{
+							label: 'Close',
+							action: () => dialogSystem.hideDialog()
+						}
+					]
+				});
+			});
+
+			// Many buttons test
+			document.getElementById('testManyButtons').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.INFO, {
+					title: 'Multiple Choices',
+					message: 'Choose your difficulty level:',
+					buttons: [
+						{
+							label: 'Easy',
+							action: () => {
+								alert('Easy mode selected');
+								dialogSystem.hideDialog();
+							}
+						},
+						{
+							label: 'Normal',
+							action: () => {
+								alert('Normal mode selected');
+								dialogSystem.hideDialog();
+							}
+						},
+						{
+							label: 'Hard',
+							action: () => {
+								alert('Hard mode selected');
+								dialogSystem.hideDialog();
+							}
+						},
+						{
+							label: 'Extreme',
+							action: () => {
+								alert('Extreme mode selected');
+								dialogSystem.hideDialog();
+							}
+						}
+					]
+				});
+			});
+
+			// Fullscreen error (real-world example)
+			document.getElementById('testFullscreenError').addEventListener('click', () => {
+				dialogSystem.showDialog(DialogSystem.DialogTypes.ERROR, {
+					title: 'Fullscreen Unavailable',
+					message: 'Your browser does not allow fullscreen mode from controller input.\n\nPlease use your mouse or keyboard to enable fullscreen.',
+					buttons: [
+						{
+							label: 'OK',
+							action: () => dialogSystem.hideDialog()
+						}
+					]
+				});
+			});
+		});
+	</script>
+	<style>
+		body {
+			margin: 0;
+			padding: 40px;
+			background: #000;
+			color: white;
+			font-family: 'Press Start 2P', cursive;
+		}
+
+		h1 {
+			font-size: 24px;
+			margin-bottom: 30px;
+			text-align: center;
+		}
+
+		.test-container {
+			max-width: 800px;
+			margin: 0 auto;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 20px;
+		}
+
+		.test-button {
+			background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+			border: 2px solid #666;
+			color: #fff;
+			padding: 20px;
+			font-size: 12px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+		}
+
+		.test-button:hover {
+			background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%);
+			border-color: #888;
+			transform: translateY(-2px);
+			box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+		}
+
+		.test-button:active {
+			transform: translateY(0);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+		}
+
+		.instructions {
+			text-align: center;
+			margin-top: 40px;
+			font-size: 10px;
+			color: #999;
+			line-height: 1.8;
+		}
+
+		/* Ensure dialog appears above test content */
+		#dialogOverlay {
+			z-index: 9999;
+		}
+	</style>
+</head>
+<body>
+	<h1>Dialog System Test</h1>
+
+	<div class="test-container">
+		<button id="testError" class="test-button">Test Error Dialog</button>
+		<button id="testWarning" class="test-button">Test Warning Dialog</button>
+		<button id="testInfo" class="test-button">Test Info Dialog</button>
+		<button id="testConfirm" class="test-button">Test Confirm Dialog</button>
+		<button id="testLongMessage" class="test-button">Test Long Message</button>
+		<button id="testManyButtons" class="test-button">Test Many Buttons</button>
+		<button id="testFullscreenError" class="test-button">Test Fullscreen Error</button>
+	</div>
+
+	<div class="instructions">
+		Click any button to test different dialog types and scenarios.<br>
+		Use your mouse or gamepad (A button, left/right navigation) to interact with dialogs.<br>
+		Each dialog type has unique styling and color-coding.
+	</div>
+
+	<!-- Dialog System HTML -->
+	<div id="dialogOverlay" class="dialog-overlay hidden">
+		<div class="dialog-box">
+			<div class="dialog-icon" id="dialogIcon">⚠️</div>
+			<div class="dialog-title" id="dialogTitle">Error</div>
+			<div class="dialog-message" id="dialogMessage">An error occurred.</div>
+			<div class="dialog-buttons" id="dialogButtons"></div>
+		</div>
+	</div>
+</body>
+</html>
