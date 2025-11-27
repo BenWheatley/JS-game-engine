@@ -154,17 +154,7 @@ Dedicated high score system with:
 - Event-driven integration with game state
 
 #### **AchievementManager.js** - Achievement System
-Tracks and persists 9 achievements:
-- **First Blood**: Destroy first enemy
-- **Centurion**: Destroy 100 enemies
-- **Sniper**: Kill enemy while off-screen
-- **Untouchable**: Complete wave without taking damage
-- **Tank**: Complete wave while taking 200+ damage
-- **Warp Speed**: Reach wave 5
-- **Cosmic Voyager**: Reach wave 10
-- **Triple Threat**: Unlock all 3 upgrade paths
-- **Fully Upgraded**: Max out all upgrades (20 total)
-- LocalStorage persistence with timestamps
+- Tracks and persists achievements using LocalStorage
 - Visual notifications on unlock
 
 #### **ParticleSystem.js** - Visual Effects
@@ -180,15 +170,9 @@ Particle effects system providing:
 Wormhole-based level transitions:
 - Spawns when all NPCs are destroyed
 - Player must enter to advance to next level
-- Smooth rotation animation (0.5 Hz)
-- Wraps at world boundaries like NPCs
-- Rendered on minimap as hollow white circle
 - On-screen directional indicator when off-screen
 
 #### **Minimap.js** - Radar Display
-Enhanced minimap system with:
-- 150x150px radar in top-right corner
-- Player-centered view (1000 unit range)
 - Entity filtering by type (asteroids, enemies, wormhole)
 - Different rendering for large/small asteroids
 - Color coding (player: blue, enemies: red, asteroids: white, wormhole: white hollow)
@@ -231,21 +215,18 @@ The included demo showcases a fully-featured space shooter with:
 - **Game Over Menu**: Name input, high score submission, restart/menu options
 - **High Scores Menu**: Top 10 scores with name, score, date/time, most recent highlighted in red
 - **Achievements Menu**: 9 achievements with unlock status, descriptions, and timestamps
-- **Upgrade Menu**: 3 upgrade paths (Weapon/Engine/Shield) with 6-8 levels each
+- **Upgrade Menu**: 3 upgrade paths (Weapon/Engine/Shield) with 10 levels each
 - Dynamic menu generation using MenuSystem.js configuration objects
 - Event-driven state transitions
 
 **Gameplay Features:**
-- **Wave-based Progression**: Difficulty increases each level, spawn counts grow exponentially
+- **Wave-based Progression**: Difficulty increases each level
 - **Wormhole Level Transitions**: Clear all NPCs → wormhole spawns → enter to advance
-- **Upgrade System**: Choose weapon/engine/shield upgrades between waves (20 total levels)
-- **Shield Regeneration**: Auto-heal after 3 seconds without damage (with upgrades)
-- **Achievement System**: 9 achievements tracking various milestones and playstyles
+- **Upgrade System**: Choose weapon/engine/shield upgrades between waves
+- **Achievement System**
 - **Particle Effects**: Visual feedback for impacts, explosions, with color customization
 - **Game State Manager**: Event-driven architecture with clean state transitions
-- **Player-Centered Camera**: Scrolling camera follows ship movement through infinite space
-- **Unified Entity System**: NPCs and projectiles managed in consolidated arrays for efficiency
-- **Rate-Limited Weapons**: Shot cooldown respects game time (pauses when game pauses)
+- **Player-Centered Camera**: Scrolling camera follows ship movement
 - **Asset Preloading**: All sprites and sounds loaded before game starts
 - **Full Gamepad Support**: Analog controls with deadzone handling for smooth movement
 - **Sound Effects**: Volume control for laser, explosions, hits, missile launcher
@@ -259,38 +240,6 @@ The included demo showcases a fully-featured space shooter with:
 - **Asteroids** (3 HP, 200 pts): Split into 3 smaller fragments when destroyed, multi-hit
 - **Asteroid Spawns** (1 HP, 50 pts): Small fragments from destroyed asteroids
 
-**HUD Features:**
-- **Health Bar**: Graphical bar (100px wide, green/red, white border) showing current HP
-- **Score Display**: Current score in top-left
-- **Wave Level Display**: Current wave number (top center, appears when wormhole spawns)
-- **Wormhole Indicator**: "Wormhole detected!" message and directional arrow when wormhole is off-screen
-- **Mini-Map**: 150x150px radar in top-right showing:
-  - Player as blue dot (always centered)
-  - Asteroids as white squares (size-differentiated)
-  - All enemy types as red squares
-  - Wormhole as hollow white circle
-  - 1000 unit range from player
-  - Border rendered on top for clean visual hierarchy
-
-**Collision & Combat:**
-- **AABB Collision Detection**: Axis-aligned bounding box checks for all entities
-- **Unified Collision System**: Single loop handles all NPC vs projectile interactions
-- **Multi-Hit Enemies**: Missile Cruisers (200 HP) and Asteroids (variable) require multiple hits
-- **Particle Effects**: Impact sparks and explosions on all collisions with color customization
-- **Asteroid Splitting**: Large asteroids split into 3 smaller pieces with velocity conservation
-- **Enemy Projectiles**: Plasma shots (25 damage) and missiles (50 damage) from NPCs
-- **Collision Damage**: Based on entity type (asteroids: 50/25, NPCs: health value)
-- **Visual Feedback**: Different particle colors for different entity types (asteroid spawns: orange)
-
-**Persistence:**
-- **High Scores**: Stored in localStorage with name, score, and timestamp
-  - Top 10 displayed normally
-  - Scores ranked 11+ show positions 1-8, "…", then recent score at position 10
-  - Most recent score highlighted in bold red
-- **Preferences**: Volume settings (music/SFX) saved to localStorage
-  - Default volume: 100%
-  - Settings persist across sessions
-
 **Game Loop:**
 - Delta-time based updates for frame-rate independent movement
 - Separate render and update phases
@@ -298,22 +247,6 @@ The included demo showcases a fully-featured space shooter with:
 
 **Collision System:**
 - AABB (Axis-Aligned Bounding Box) collision detection
-- Player shots vs enemies: Damage based on shot damage (10) and enemy health
-- Player vs enemies: Collision damage equals enemy health, enemy destroyed
-- Player vs asteroids: 50 damage (large) or 25 damage (small), asteroid destroyed
-- Enemy shots vs player: 25 damage from AlienFighter shots
-- Missiles vs player: 50 damage from MissileCruiser missiles
-- Asteroid splits: Create 3 smaller asteroids with velocities summing to original
-- Game over triggered when player health reaches zero
-
-**Game State System:**
-- **Menu State**: Main menu with start, high scores, and achievements options
-- **Playing State**: Active gameplay with HUD (health bar, score, mini-map)
-- **Paused State**: Pause menu with volume controls, fullscreen, and quit
-- **Game Over State**: Name input and high score submission
-- State transitions handle game reset and cleanup
-- ESC key pauses during gameplay
-- Quitting with score > 0 shows game over screen for high score submission
 
 ## Assets
 
@@ -332,7 +265,6 @@ The included demo showcases a fully-featured space shooter with:
 - `wormhole.png` - Wormhole portal sprite (81x84)
 - `background.png` - Scrolling space background (1536x1024 tileable)
 - `title.png` - Game title image for main menu
-- `interstellar-news-anchors.png` - Additional artwork
 
 **Audio Assets:**
 - `laser_1.2.m4a` - Player weapon firing sound
@@ -344,23 +276,6 @@ The included demo showcases a fully-featured space shooter with:
 - `slow_guitar.mid` - Original MIDI file
 
 ## Known Limitations & TODOs
-
-**Recently Completed:** ✅
-- ~~Difficulty progression~~ - Wave-based spawning with exponential growth
-- ~~Particle effects~~ - Impact and explosion effects implemented
-- ~~Level progression~~ - Wormhole-based level advancement
-- ~~Input sanitization~~ - XSS prevention for high scores
-- ~~Code duplication~~ - Array unification eliminated ~200 lines
-- ~~Game time vs wall-clock~~ - Shot cooldowns now use game time
-- ~~ES6 Module System~~ - Fully modularized with proper imports/exports
-- ~~Upgrade System~~ - 3 upgrade paths with 20 total levels
-- ~~Achievement System~~ - 9 achievements with persistence
-- ~~Shield Regeneration~~ - Auto-healing after damage delay
-
-**Incomplete Features:**
-- **Limited Enemy Variety**: Could use more enemy types with unique behaviors (bombers, drones, bosses)
-- **No Boss Encounters**: Final wave could feature boss enemy with unique mechanics
-- **No Power-ups**: No temporary pickups (health packs, weapon boosts, invincibility)
 
 **Technical Issues:**
 - **No Automated Tests**: Missing unit tests for collision, spawn distribution, etc.
