@@ -480,11 +480,17 @@ function setMenuOverlayMode(isPauseMode) {
 // Wrapper functions for game loop
 function update(deltaTime) {
 	// Handle gamepad input for menu and dialog navigation
+	// Dialogs are modal - they block menu input when visible
 	const gamepads = navigator.getGamepads();
 	for (const gamepad of gamepads) {
 		if (gamepad) {
-			menuSystem.handleGamepadInput(gamepad);
-			dialogSystem.handleGamepadInput(gamepad);
+			if (dialogSystem.isVisible()) {
+				// Dialog is modal - only process dialog input
+				dialogSystem.handleGamepadInput(gamepad);
+			} else {
+				// No dialog - process menu input normally
+				menuSystem.handleGamepadInput(gamepad);
+			}
 		}
 	}
 
