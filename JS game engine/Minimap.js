@@ -4,6 +4,9 @@
  * The minimap shows entities within a certain range of the player, positioned
  * relative to the player's location in the center of the minimap.
  */
+import { Vector2D } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
+
 class Minimap {
   constructor(canvasWidth, canvasHeight) {
     this.canvasWidth = canvasWidth;
@@ -153,3 +156,5 @@ class Minimap {
     context.strokeRect(this.x, this.y, this.size, this.size);
   }
 }
+
+export { Minimap };

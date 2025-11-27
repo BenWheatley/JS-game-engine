@@ -1,3 +1,6 @@
+import { Particle } from './Particle.js';
+import { Vector2D } from './Vector2D.js';
+
 class ParticleSystem {
 	constructor() {
 		this.particles = [];
@@ -76,3 +79,5 @@ class ParticleSystem {
 		this.particles = [];
 	}
 }
+
+export { ParticleSystem };

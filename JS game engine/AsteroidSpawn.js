@@ -1,3 +1,7 @@
+import { GameEntity } from './GameEntity.js';
+import { GameConfig } from './GameConfig.js';
+import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
+
 class AsteroidSpawn extends GameEntity {
   constructor(position, velocity) {
     const config = GameConfig.ASTEROID_SPAWN;
@@ -7,12 +11,6 @@ class AsteroidSpawn extends GameEntity {
     this.health = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
     DebugLogger.log(`AsteroidSpawn created with health: ${this.health}, config.HEALTH: ${config.HEALTH}`);
-  }
-
-  shouldDespawn(playerPosition, screenSize) {
-    const distance = this.sprite.position.dist(playerPosition);
-    const despawnDistance = Math.max(screenSize.x, screenSize.y) * GameConfig.SHARED.DESPAWN_DISTANCE_MULTIPLIER;
-    return distance > despawnDistance;
   }
 
   onHit(damage) {
@@ -98,3 +96,5 @@ class AsteroidSpawn extends GameEntity {
     return spawns;
   }
 }
+
+export { AsteroidSpawn };

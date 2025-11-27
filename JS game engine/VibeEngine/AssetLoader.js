@@ -1,3 +1,6 @@
+import { DebugLogger } from './DebugLogger.js';
+import { Sprite } from './Sprite.js';
+
 /**
  * AssetLoader - Centralized asset loading system
  *
@@ -91,3 +94,5 @@ class AssetLoader {
     DebugLogger.log('Music loaded');
   }
 }
+
+export { AssetLoader };

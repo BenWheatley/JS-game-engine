@@ -1,3 +1,21 @@
+// Import all engine dependencies
+import { DebugLogger } from './DebugLogger.js';
+import './CanvasRenderingContext2D-extensions.js';
+import { Vector2D } from './Vector2D.js';
+import { Sprite } from './Sprite.js';
+import { Projectile } from './Projectile.js';
+import { Particle } from './Particle.js';
+import { ParticleSystem } from './ParticleSystem.js';
+import { CollisionDetection } from './CollisionDetection.js';
+import { AssetLoader } from './AssetLoader.js';
+import { PreferencesManager } from './PreferencesManager.js';
+import { SoundManager } from './SoundManager.js';
+import { Note } from './Note.js';
+import { MusicPlayer } from './MusicPlayer.js';
+import { MenuSystem } from './MenuSystem.js';
+import { AchievementManager } from './AchievementManager.js';
+import { HighScoreManager } from './HighScoreManager.js';
+
 class VibeEngine {
 	constructor(document, canvasName) {
 		if (!VibeEngine.instance) {
@@ -148,3 +166,23 @@ class VibeEngine {
 		return new VibeEngine(document, canvasName);
 	}
 }
+
+// Re-export all engine classes so users only need to import VibeEngine.js
+export {
+	VibeEngine,
+	DebugLogger,
+	Vector2D,
+	Sprite,
+	Projectile,
+	Particle,
+	ParticleSystem,
+	CollisionDetection,
+	AssetLoader,
+	PreferencesManager,
+	SoundManager,
+	MusicPlayer,
+	Note,
+	MenuSystem,
+	AchievementManager,
+	HighScoreManager
+};

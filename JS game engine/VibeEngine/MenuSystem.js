@@ -441,3 +441,5 @@ class MenuSystem {
     this.lastGamepadState.buttonA = buttonA;
   }
 }
+
+export { MenuSystem };

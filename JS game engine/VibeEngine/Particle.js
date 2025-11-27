@@ -41,3 +41,5 @@ class Particle {
 		ctx.fill();
 	}
 }
+
+export { Particle };

@@ -1,3 +1,9 @@
+import { NPC } from './NPC.js';
+import { GameConfig } from './GameConfig.js';
+import { Missile } from './Missile.js';
+import { NPCAIUtils } from './NPCAIUtils.js';
+import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
+
 class MissileCruiser extends NPC {
   constructor(position, playerPosition, canvasWidth, canvasHeight) {
     super(position, playerPosition, canvasWidth, canvasHeight, GameConfig.MISSILE_CRUISER);
@@ -68,3 +74,5 @@ class MissileCruiser extends NPC {
     super.update(deltaTime);
   }
 }
+
+export { MissileCruiser };

@@ -1,3 +1,6 @@
+import { DebugLogger } from './DebugLogger.js';
+import { GameConfig } from '../GameConfig.js';
+
 /**
  * AchievementManager - Tracks and persists player achievements
  *
@@ -244,3 +247,5 @@ class AchievementManager {
     DebugLogger.log('All achievements reset');
   }
 }
+
+export { AchievementManager };

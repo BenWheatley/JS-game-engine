@@ -1,3 +1,6 @@
+import { Vector2D, Sprite } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
+
 class Wormhole {
 	constructor(position) {
 		// Size is 27x28 multiplied by 3
@@ -46,3 +49,5 @@ class Wormhole {
 		this.sprite.draw();
 	}
 }
+
+export { Wormhole };

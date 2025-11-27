@@ -4,6 +4,9 @@
  * This module contains common AI logic used across multiple NPC types
  * to avoid code duplication and centralize AI behavior patterns.
  */
+import { Vector2D } from './VibeEngine/VibeEngine.js';
+import { GameConfig } from './GameConfig.js';
+
 class NPCAIUtils {
   /**
    * Picks a random target position near the player
@@ -39,3 +42,5 @@ class NPCAIUtils {
     return distance < GameConfig.NPC.ARRIVAL_THRESHOLD;
   }
 }
+
+export { NPCAIUtils };

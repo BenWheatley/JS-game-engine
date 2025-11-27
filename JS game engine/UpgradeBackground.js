@@ -1,113 +1,201 @@
 /**
  * UpgradeBackground - Animated wormhole portal effect for upgrade menu
  *
- * Creates a pulsing wormhole portal with concentric circles radiating outward
- * Uses purple/blue/cyan gradient with glow effects
+ * Optimized hyperspace tunnel background effect for game engines
+ * Based on Perlin noise in polar coordinates with precomputed lookup tables
  */
+// UpgradeBackground doesn't need any imports - it's self-contained
+
 class UpgradeBackground {
 	constructor() {
+		this.time = 0;
+		this.MAX_OCTAVE = 8;
+
+		// Render scale factor (1/4 resolution for performance and pixelated look)
+		this.scale = 4;
+
+		// Cached dimensions
+		this.cachedWidth = 0;
+		this.cachedHeight = 0;
+
+		// Precomputed arrays (allocated on first draw)
+		this.pixel_r = null;
+		this.pixel_theta = null;
+		this.noiseTable = null;
+		this.imageData = null;
+		this.lowResCanvas = null;
+		this.lowResContext = null;
+
+		this.thetaToPerlinScale = 128 / Math.PI;
+
+		// Precompute noise lookup table
+		this._initNoiseTable();
+	}
+
+	reset() {
 		this.animationTime = 0;
-		this.pulseSpeed = 0.001; // Speed of pulse animation
-		this.numRings = 8; // Number of concentric rings
 	}
 
-	update(deltaTime) {
-		// Continue animating based on game time
-		this.animationTime += deltaTime;
+	/**
+	 * Initialize the noise lookup table (only needs to be done once)
+	 * @private
+	 */
+	_initNoiseTable() {
+		const MAX_TABLE = 1 << (this.MAX_OCTAVE + 2); // 4×2^octave
+		this.noiseTable = new Float32Array(MAX_TABLE * MAX_TABLE);
+
+		for (let i = 0; i < this.noiseTable.length; i++) {
+			this.noiseTable[i] = this._seededRandom(i);
+		}
 	}
 
-	draw(context, canvasWidth, canvasHeight, playerPosition) {
-		// Save context state
-		context.save();
+	/**
+	 * Precompute pixel geometry for the given canvas dimensions
+	 * @private
+	 */
+	_precomputeGeometry(canvasWidth, canvasHeight) {
+		this.cachedWidth = canvasWidth;
+		this.cachedHeight = canvasHeight;
 
-		// Draw in screen space (not world space)
-		context.resetTransform();
+		const hWidth = canvasWidth / 2;
+		const hHeight = canvasHeight / 2;
+		const centerToCorner = Math.sqrt(hWidth * hWidth + hHeight * hHeight);
+		const tangentScale = Math.PI / (2 * centerToCorner);
 
-		// Get center of screen
-		const centerX = canvasWidth / 2;
-		const centerY = canvasHeight / 2;
+		const pixelCount = canvasWidth * canvasHeight;
+		this.pixel_r = new Float32Array(pixelCount);
+		this.pixel_theta = new Float32Array(pixelCount);
 
-		// Create radial gradient for overall portal glow
-		const maxRadius = Math.max(canvasWidth, canvasHeight);
-		const gradient = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius);
-		gradient.addColorStop(0, 'rgba(100, 50, 200, 0.3)');
-		gradient.addColorStop(0.3, 'rgba(50, 100, 200, 0.2)');
-		gradient.addColorStop(0.6, 'rgba(20, 80, 150, 0.1)');
-		gradient.addColorStop(1, 'rgba(10, 20, 40, 0.05)');
-
-		// Fill background with gradient
-		context.fillStyle = gradient;
-		context.fillRect(0, 0, canvasWidth, canvasHeight);
-
-		// Draw pulsing concentric rings
-		context.globalCompositeOperation = 'lighter'; // Additive blending for glow
-
-		for (let i = 0; i < this.numRings; i++) {
-			// Calculate ring phase (offset each ring's animation)
-			const ringPhase = (this.animationTime * this.pulseSpeed) + (i * 0.3);
-			const pulseOffset = Math.sin(ringPhase) * 0.3 + 1.0; // Oscillate between 0.7 and 1.3
-
-			// Ring radius grows outward, then resets
-			const baseRadius = ((ringPhase % 1.0) * maxRadius * 1.2);
-			const radius = baseRadius * pulseOffset;
-
-			// Fade out as ring expands
-			const fadeProgress = (ringPhase % 1.0);
-			const alpha = Math.max(0, 1 - fadeProgress);
-
-			// Alternate colors between rings
-			const hue = (i % 3 === 0) ? 280 : (i % 3 === 1) ? 240 : 200; // Purple, blue, cyan
-			const ringColor = `hsla(${hue}, 80%, 60%, ${alpha * 0.4})`;
-
-			// Draw ring
-			context.strokeStyle = ringColor;
-			context.lineWidth = 3 + (1 - fadeProgress) * 5; // Thicker when fresh, thinner when fading
-			context.shadowBlur = 20;
-			context.shadowColor = ringColor;
-
-			context.beginPath();
-			context.arc(centerX, centerY, radius, 0, Math.PI * 2);
-			context.stroke();
-
-			// Draw inner glow
-			if (fadeProgress < 0.5) {
-				const innerRadius = Math.max(0, radius - context.lineWidth);
-				if (innerRadius > 0) {
-					context.globalAlpha = (1 - fadeProgress * 2) * 0.3;
-					context.fillStyle = ringColor;
-					context.beginPath();
-					context.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
-					context.fill();
-					context.globalAlpha = 1;
-				}
+		let idx = 0;
+		for (let y = 0; y < canvasHeight; y++) {
+			const dy = y - hHeight;
+			for (let x = 0; x < canvasWidth; x++, idx++) {
+				const dx = x - hWidth;
+				const r = centerToCorner - Math.sqrt(dx * dx + dy * dy);
+				this.pixel_r[idx] = Math.tan(tangentScale * r);
+				this.pixel_theta[idx] = 128 + this.thetaToPerlinScale * Math.atan2(dy, dx);
 			}
 		}
+	}
 
-		// Draw swirling particles around center
-		const particleCount = 30;
-		for (let i = 0; i < particleCount; i++) {
-			const particlePhase = (this.animationTime * this.pulseSpeed * 0.5) + (i / particleCount);
-			const angle = (particlePhase * Math.PI * 2) + (i * Math.PI * 2 / particleCount);
-			const spiralRadius = 100 + Math.sin(particlePhase * 3) * 50;
+	/**
+	 * Seeded pseudo-random number generator
+	 * @private
+	 */
+	_seededRandom(x) {
+		let t = (x << 13) ^ x;
+		t = (x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff;
+		return 128 + 256 * (1 - t / 1073741824.0);
+	}
 
-			const px = centerX + Math.cos(angle) * spiralRadius;
-			const py = centerY + Math.sin(angle) * spiralRadius;
+	/**
+	 * Cosine interpolation for smooth transitions
+	 * @private
+	 */
+	_cosInterp(a, b, x) {
+		const f = (1 - Math.cos(x * Math.PI)) * 0.5;
+		return a * (1 - f) + b * f;
+	}
 
-			const particleAlpha = Math.abs(Math.sin(particlePhase * 2)) * 0.6;
-			context.fillStyle = `rgba(150, 100, 255, ${particleAlpha})`;
-			context.shadowBlur = 10;
-			context.shadowColor = 'rgba(150, 100, 255, 0.8)';
+	/**
+	 * Update animation state
+	 * @param {number} deltaTime - Time elapsed since last update in milliseconds
+	 */
+	update(deltaTime) {
+		this.time += deltaTime / 1000;
+	}
 
-			context.beginPath();
-			context.arc(px, py, 2 + Math.sin(particlePhase * 5) * 1, 0, Math.PI * 2);
-			context.fill();
+	/**
+	 * Draw the hyperspace background
+	 * @param {CanvasRenderingContext2D} context - Canvas 2D context
+	 * @param {number} canvasWidth - Width of canvas
+	 * @param {number} canvasHeight - Height of canvas
+	 * @param {number} r - Red color component (0-255)
+	 * @param {number} g - Green color component (0-255)
+	 * @param {number} b - Blue color component (0-255)
+	 * @param {number} a - Alpha component (0-255)
+	 */
+	draw(context, canvasWidth, canvasHeight, r, g, b, a) {
+		// Calculate low-resolution dimensions
+		const lowResWidth = Math.floor(canvasWidth / this.scale);
+		const lowResHeight = Math.floor(canvasHeight / this.scale);
+
+		// Create or update low-res canvas if needed
+		if (!this.lowResCanvas || this.cachedWidth !== lowResWidth || this.cachedHeight !== lowResHeight) {
+			this.lowResCanvas = document.createElement('canvas');
+			this.lowResCanvas.width = lowResWidth;
+			this.lowResCanvas.height = lowResHeight;
+			this.lowResContext = this.lowResCanvas.getContext('2d');
+
+			this._precomputeGeometry(lowResWidth, lowResHeight);
+			this.imageData = this.lowResContext.createImageData(lowResWidth, lowResHeight);
 		}
 
-		// Reset composite operation and shadow
-		context.globalCompositeOperation = 'source-over';
-		context.shadowBlur = 0;
+		const data = this.imageData.data;
+		const MAX_TABLE = 1 << (this.MAX_OCTAVE + 2);
 
-		// Restore context state
-		context.restore();
+		let index = 0;
+		for (let p = 0; p < this.pixel_r.length; p++) {
+			const radius = this.pixel_r[p];
+			const theta = this.pixel_theta[p];
+			let sum = 0;
+
+			// Accumulate noise across octaves
+			for (let octave = 1; octave < this.MAX_OCTAVE; octave++) {
+				const sf = 1 << octave; // 2^octave (bitwise shift for speed)
+				const w = sf * 4;       // angular wrap width
+				const h = MAX_TABLE;    // radial size
+
+				const t0 = sf * theta / 64;
+				const r0 = sf * radius / 4 + this.time;
+
+				let ti = t0 | 0; // Fast floor for positive numbers
+				let ri = r0 | 0;
+
+				const ft = t0 - ti;
+				const fr = r0 - ri;
+
+				// Correct angular wrap-around (cylindrical topology)
+				ti = ((ti % w) + w) % w;
+				const ti1 = (ti + 1) % w;
+
+				// Precompute indices into the 2D noise table
+				const idx00 = ti + h * ri;
+				const idx01 = ti + h * (ri + 1);
+				const idx10 = ti1 + h * ri;
+				const idx11 = ti1 + h * (ri + 1);
+
+				const i00 = this.noiseTable[idx00 & 0xFFFFF];
+				const i01 = this.noiseTable[idx01 & 0xFFFFF];
+				const i10 = this.noiseTable[idx10 & 0xFFFFF];
+				const i11 = this.noiseTable[idx11 & 0xFFFFF];
+
+				const i_r0 = this._cosInterp(i00, i01, fr);
+				const i_r1 = this._cosInterp(i10, i11, fr);
+
+				sum += this._cosInterp(i_r0, i_r1, ft) * (256 / sf);
+			}
+
+			// Convert noise to intensity 0-1
+			// (yes it really does need both divisions for that, the first 256 is numerical coincidence from the octaves)
+			const intensity = (sum / 256) / 255;
+
+			// Apply color tint based on r, g, b parameters
+			data[index++] = Math.round(intensity * r);
+			data[index++] = Math.round(intensity * g);
+			data[index++] = Math.round(intensity * b);
+			data[index++] = a;
+		}
+
+		// Draw to low-res canvas
+		this.lowResContext.putImageData(this.imageData, 0, 0);
+
+		// Disable image smoothing for pixelated upscaling
+		context.imageSmoothingEnabled = false;
+
+		// Scale up to full canvas size
+		context.drawImage(this.lowResCanvas, 0, 0, canvasWidth, canvasHeight);
 	}
 }
+
+export { UpgradeBackground };

@@ -3,7 +3,19 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(gh run:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(for file in AchievementManager AssetLoader CollisionDetection HighScoreManager MenuSystem MusicPlayer Particle ParticleSystem PreferencesManager SimpleMusic SoundManager)",
+      "Bash(do echo -e \"\\nexport { $file };\")",
+      "Bash(\"/Users/benwheatley/Documents/Code/JS-game-engine/JS game engine/$file.js\")",
+      "Bash(done)",
+      "Bash(for file in Laser.js Missile.js Plasma.js)",
+      "Bash(do)",
+      "Bash(echo \"export { $file%.js };\")",
+      "Bash(\"$file\")",
+      "Bash(for file in Player.js Wormhole.js Minimap.js UpgradeBackground.js SpawnSystem.js NPCAIUtils.js)",
+      "Bash(echo -e \"\\nexport { $file%.js };\")",
+      "Bash(for file in AlienFighter.js AlienSaucer.js AlienScout.js MissileCruiser.js Asteroid.js AsteroidSpawn.js)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

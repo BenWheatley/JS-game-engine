@@ -9,7 +9,6 @@ const GameConfig = {
   // Shared constants used across multiple entity types
   SHARED: {
     SPAWN_MARGIN_MULTIPLIER: 2,         // Spawn distance as multiple of sprite size (offscreen)
-    DESPAWN_DISTANCE_MULTIPLIER: 3,     // Distance from player before entity despawns (screen sizes)
     SPRITE_UP_ANGLE_OFFSET: Math.PI / 2 // Sprite faces up at rotation 0, add 90° to get direction
   },
 
@@ -33,10 +32,9 @@ const GameConfig = {
 
   // Player physics and controls
   PLAYER: {
-    INITIAL_HEALTH: 100,                // Starting health points
     FORWARD_ACCELERATION: 0.002,        // Forward thrust acceleration per millisecond
     BACKWARD_ACCELERATION: 0.0002,      // Reverse thrust acceleration per millisecond (10% of forward)
-    MAX_SPEED: 0.08,                    // Maximum velocity magnitude
+    MAX_SPEED: 0.1,                    // Maximum velocity magnitude
     ROTATIONAL_SPEED: Math.PI / 1000 * 1.1, // Radians per millisecond (rotation speed)
     FIRE_RATE: 500,                     // Milliseconds between shots (fire cooldown)
     GAMEPAD_DEADZONE: 0.15              // Analog stick deadzone to prevent drift
@@ -283,7 +281,6 @@ const GameConfig = {
     get NPC_WRAP_DISTANCE() {
       return GameConfig.MINIMAP.RANGE;  // Automatically uses minimap range
     },
-    PROJECTILE_DESPAWN_MULTIPLIER: 2    // Projectile despawn distance as multiple of screen size
   },
 
   // Projectile types
@@ -391,3 +388,5 @@ const GameConfig = {
     }
   ]
 };
+
+export { GameConfig };

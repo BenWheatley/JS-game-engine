@@ -51,3 +51,5 @@ class CollisionDetection {
     return distance < collisionRadius;
   }
 }
+
+export { CollisionDetection };

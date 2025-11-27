@@ -1,3 +1,5 @@
+import { DebugLogger } from './DebugLogger.js';
+
 /**
  * PreferencesManager - Centralized preferences and settings management
  *
@@ -122,3 +124,5 @@ class PreferencesManager {
     this.save();
   }
 }
+
+export { PreferencesManager };

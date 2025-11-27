@@ -48,3 +48,5 @@ class DebugLogger {
     }
   }
 }
+
+export { DebugLogger };

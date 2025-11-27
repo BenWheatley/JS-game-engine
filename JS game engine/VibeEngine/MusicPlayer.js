@@ -1,10 +1,14 @@
+import { DebugLogger } from './DebugLogger.js';
+import { Note } from './Note.js';
+
 class MusicPlayer {
-  constructor() {
+  constructor(preferencesManager) {
     this.musicData = null;
     this.isPlaying = false;
     this.shouldLoop = true;
     this.scheduledTimeouts = [];
     this.startTime = 0;
+    this.preferencesManager = preferencesManager;
   }
 
   async loadMusic(url) {
@@ -24,9 +28,6 @@ class MusicPlayer {
     if (!this.musicData || this.isPlaying) {
       return;
     }
-
-    // Initialize audio context if needed
-    Note.initAudioContext();
 
     this.isPlaying = true;
     this.startTime = Date.now();
@@ -104,3 +105,5 @@ class MusicPlayer {
     return this.musicData !== null;
   }
 }
+
+export { MusicPlayer };

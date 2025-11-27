@@ -1,3 +1,6 @@
+import { DebugLogger } from './DebugLogger.js';
+import { SoundManager } from './SoundManager.js';
+
 class Note {
   static notes = {};
   static baseFrequency = 440;
@@ -10,12 +13,6 @@ class Note {
       return SoundManager.audioContext;
     }
     return null;
-  }
-
-  static initAudioContext() {
-    // No-op: AudioContext is now managed by SoundManager
-    // This method is kept for backwards compatibility
-    return Note.audioContext;
   }
 
   static setVolume(volume) {
@@ -154,3 +151,5 @@ class Note {
     return `${noteLetter}${octave}`;
   }
 }
+
+export { Note };

@@ -1,3 +1,8 @@
+import { GameEntity } from './GameEntity.js';
+import { GameConfig } from './GameConfig.js';
+import { AsteroidSpawn } from './AsteroidSpawn.js';
+import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
+
 class Asteroid extends GameEntity {
   constructor(position, playerPosition) {
     const config = GameConfig.ASTEROID_BIG;
@@ -26,12 +31,6 @@ class Asteroid extends GameEntity {
 
     // Convert back to vector
     return new Vector2D(Math.cos(finalAngle), Math.sin(finalAngle));
-  }
-
-  shouldDespawn(playerPosition, screenSize) {
-    const distance = this.sprite.position.dist(playerPosition);
-    const despawnDistance = Math.max(screenSize.x, screenSize.y) * GameConfig.SHARED.DESPAWN_DISTANCE_MULTIPLIER;
-    return distance > despawnDistance;
   }
 
   onHit(damage) {
@@ -79,3 +78,5 @@ class Asteroid extends GameEntity {
     this.sprite.rotation += GameConfig.ASTEROID.ROTATION_SPEED_LARGE;
   }
 }
+
+export { Asteroid };

@@ -1,3 +1,5 @@
+import { Sprite } from './VibeEngine/VibeEngine.js';
+
 class GameEntity {
   constructor(position, rotation, velocity, size, imageUrl) {
     this.sprite = new Sprite(imageUrl, position, size);
@@ -59,3 +61,5 @@ class GameEntity {
     };
   }
 }
+
+export { GameEntity };
