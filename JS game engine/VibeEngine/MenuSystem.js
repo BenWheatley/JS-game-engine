@@ -513,7 +513,7 @@ class MenuSystem {
    * @param {Gamepad} gamepad - The gamepad object
    */
   handleGamepadInput(gamepad) {
-    if (!this.isVisible() || this.getSelectableItems().length === 0) {
+    if (!this.isVisible()) {
       return;
     }
 
@@ -538,20 +538,63 @@ class MenuSystem {
     // A button (buttons[0]) to activate
     const buttonA = gamepad.buttons[0]?.pressed || false;
 
-    // Detect rising edge (button just pressed, wasn't pressed before)
-    // Up/Right: select previous item
-    if ((upPressed && !this.lastGamepadState.dpadUp) ||
-        (rightPressed && !this.lastGamepadState.dpadRight)) {
-      this.selectPrevious();
-    }
-    // Down/Left: select next item
-    if ((downPressed && !this.lastGamepadState.dpadDown) ||
-        (leftPressed && !this.lastGamepadState.dpadLeft)) {
-      this.selectNext();
-    }
-    // A button: activate selected item
-    if (buttonA && !this.lastGamepadState.buttonA) {
-      this.activateSelected();
+    // Check if there's a scrollable container in the current menu
+    // Only treat it as scrollable if it has overflow-y: auto and content that can scroll
+    const scrollableContainer = this.buttonsElement.querySelector('.menu-achievement-list-container');
+    const hasSelectableItems = this.getSelectableItems().length > 0;
+
+    // Check if container is actually scrollable (has overflow content)
+    const isScrollable = scrollableContainer &&
+                        scrollableContainer.scrollHeight > scrollableContainer.clientHeight;
+
+    if (isScrollable && this.selectedIndex === -1) {
+      // Scrollable menu mode with no button selected - use D-pad up/down to scroll content
+      const scrollSpeed = 30; // pixels per input
+      const isAtTop = scrollableContainer.scrollTop === 0;
+      const isAtBottom = scrollableContainer.scrollTop + scrollableContainer.clientHeight >= scrollableContainer.scrollHeight;
+
+      // Detect rising edge for scrolling
+      if (upPressed && !this.lastGamepadState.dpadUp) {
+        if (isAtTop && hasSelectableItems) {
+          // At top - select previous button
+          this.selectPrevious();
+        } else {
+          scrollableContainer.scrollTop -= scrollSpeed;
+        }
+      }
+      if (downPressed && !this.lastGamepadState.dpadDown) {
+        if (isAtBottom && hasSelectableItems) {
+          // At bottom - select next button
+          this.selectNext();
+        } else {
+          scrollableContainer.scrollTop += scrollSpeed;
+        }
+      }
+
+      // Allow left/right to select the Back button
+      if ((leftPressed && !this.lastGamepadState.dpadLeft) ||
+          (rightPressed && !this.lastGamepadState.dpadRight)) {
+        if (hasSelectableItems) {
+          this.selectNext(); // Select first (and likely only) button
+        }
+      }
+    } else if (hasSelectableItems) {
+      // Button navigation mode - use D-pad to navigate items
+      // Detect rising edge (button just pressed, wasn't pressed before)
+      // Up/Right: select previous item
+      if ((upPressed && !this.lastGamepadState.dpadUp) ||
+          (rightPressed && !this.lastGamepadState.dpadRight)) {
+        this.selectPrevious();
+      }
+      // Down/Left: select next item
+      if ((downPressed && !this.lastGamepadState.dpadDown) ||
+          (leftPressed && !this.lastGamepadState.dpadLeft)) {
+        this.selectNext();
+      }
+      // A button: activate selected item
+      if (buttonA && !this.lastGamepadState.buttonA) {
+        this.activateSelected();
+      }
     }
 
     // Update last state
