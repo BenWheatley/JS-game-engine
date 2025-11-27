@@ -1,6 +1,6 @@
-# JavaScript 2D Game Engine
+# JavaScript 2D Game Engine - VibeEngine
 
-A lightweight, browser-based 2D game engine built with vanilla JavaScript and HTML5 Canvas. Originally created as a collaboration with ChatGPT to explore AI-assisted game development.
+A lightweight, browser-based 2D game engine built with vanilla JavaScript ES6 modules and HTML5 Canvas. Originally created as a collaboration with ChatGPT to explore AI-assisted game development, now fully modularized.
 
 ## Demo
 
@@ -10,9 +10,11 @@ Use arrow keys to move, spacebar to shoot, and ESC to pause.
 
 ## Architecture
 
-### Core Engine Components
+This engine uses **ES6 modules** with explicit imports/exports. All engine components are in the `VibeEngine/` directory and can be imported via the barrel export `VibeEngine.js`.
 
-#### **GPTEngine.js** - Main Engine
+### Core Engine Components (VibeEngine/)
+
+#### **VibeEngine.js** - Main Engine
 Singleton-pattern engine providing core game infrastructure:
 - **Input System**: Keyboard, mouse, and gamepad input handling
 - **Fullscreen API**: Cross-browser fullscreen support with toggle functionality
@@ -37,6 +39,8 @@ Abstract base class providing:
 - Position, rotation, and velocity properties
 - Physics-based movement updates
 - Sprite management and rendering
+- Collision detection hooks (onHit, onCollideWithPlayer)
+- Minimap rendering interface (getMinimapInfo)
 
 ### Game Objects
 
@@ -45,8 +49,11 @@ Fully implemented player character with:
 - Thrust-based movement (forward/backward acceleration)
 - Rotation controls (left/right turning)
 - Maximum speed clamping
-- Health: 100 HP
-- Configurable physics constants
+- Health: 100-200 HP (shield upgrades)
+- **3 Upgrade Paths**:
+  - **Weapon**: Fire rate (1.0s → 0.1s) and spread angle (0° → 20°)
+  - **Engine**: Speed (1.0x → 1.8x), acceleration (1.0x → 1.6x), rotation (1.0x → 1.5x)
+  - **Shield**: Max health (100 → 200 HP), regen rate (0 → 10 HP/s), regen delay (∞ → 3s)
 
 **Menu Controls:**
 - Spacebar or A Button: Start game
@@ -144,7 +151,21 @@ Dedicated high score system with:
 - Smart display logic (top 10, or top 8 + ellipsis + most recent)
 - Most recent score highlighted
 - Automatic sorting by score descending
-- Separation of concerns from main game logic
+- Event-driven integration with game state
+
+#### **AchievementManager.js** - Achievement System
+Tracks and persists 9 achievements:
+- **First Blood**: Destroy first enemy
+- **Centurion**: Destroy 100 enemies
+- **Sniper**: Kill enemy while off-screen
+- **Untouchable**: Complete wave without taking damage
+- **Tank**: Complete wave while taking 200+ damage
+- **Warp Speed**: Reach wave 5
+- **Cosmic Voyager**: Reach wave 10
+- **Triple Threat**: Unlock all 3 upgrade paths
+- **Fully Upgraded**: Max out all upgrades (20 total)
+- LocalStorage persistence with timestamps
+- Visual notifications on unlock
 
 #### **ParticleSystem.js** - Visual Effects
 Particle effects system providing:
@@ -173,7 +194,7 @@ Enhanced minimap system with:
 - Color coding (player: blue, enemies: red, asteroids: white, wormhole: white hollow)
 - Border rendered on top of entities for clean look
 
-#### **SimpleMusic.js** - Music System
+#### **Note.js** - Music System
 Web Audio API integration featuring:
 - Note-to-frequency conversion (supports standard notation like "A4", "C#5")
 - MIDI pitch number to note name conversion
@@ -205,31 +226,37 @@ Plays background music from MIDI data:
 The included demo showcases a fully-featured space shooter with:
 
 **Menu System:**
-- **Main Menu**: Start game, view high scores, achievements placeholder
+- **Main Menu**: Start game, view high scores, view achievements
 - **Pause Menu**: Resume, volume controls (music/SFX), fullscreen toggle, quit
 - **Game Over Menu**: Name input, high score submission, restart/menu options
 - **High Scores Menu**: Top 10 scores with name, score, date/time, most recent highlighted in red
+- **Achievements Menu**: 9 achievements with unlock status, descriptions, and timestamps
+- **Upgrade Menu**: 3 upgrade paths (Weapon/Engine/Shield) with 6-8 levels each
 - Dynamic menu generation using MenuSystem.js configuration objects
+- Event-driven state transitions
 
 **Gameplay Features:**
 - **Wave-based Progression**: Difficulty increases each level, spawn counts grow exponentially
 - **Wormhole Level Transitions**: Clear all NPCs → wormhole spawns → enter to advance
+- **Upgrade System**: Choose weapon/engine/shield upgrades between waves (20 total levels)
+- **Shield Regeneration**: Auto-heal after 3 seconds without damage (with upgrades)
+- **Achievement System**: 9 achievements tracking various milestones and playstyles
 - **Particle Effects**: Visual feedback for impacts, explosions, with color customization
-- **Game State Manager**: Menu, playing, paused, and game over states with smooth transitions
+- **Game State Manager**: Event-driven architecture with clean state transitions
 - **Player-Centered Camera**: Scrolling camera follows ship movement through infinite space
 - **Unified Entity System**: NPCs and projectiles managed in consolidated arrays for efficiency
 - **Rate-Limited Weapons**: Shot cooldown respects game time (pauses when game pauses)
-- **Asset Preloading**: All sprites loaded before game starts, loading state displayed
+- **Asset Preloading**: All sprites and sounds loaded before game starts
 - **Full Gamepad Support**: Analog controls with deadzone handling for smooth movement
 - **Sound Effects**: Volume control for laser, explosions, hits, missile launcher
 - **Background Music**: Looping MIDI-based music with volume control during gameplay
 
 **Enemy Types:**
-- **Basic Aliens** (100 HP, 100 pts): Simple downward movement
 - **Alien Scouts** (100 HP, 100 pts): State machine AI, seeks random positions near player
-- **Alien Fighters** (100 HP, 200 pts): 2x speed, shoots at player every 2 seconds
+- **Alien Fighters** (100 HP, 200 pts): 2x speed, shoots plasma every 2 seconds
+- **Alien Saucers** (150 HP, 250 pts): Curved ease-in-out movement, fires 8-way ring after stopping
 - **Missile Cruisers** (200 HP, 300 pts): Slow, tanky, fires powerful missiles every 4 seconds
-- **Asteroids** (1 HP, 200 pts): Split into 3 smaller fragments when destroyed
+- **Asteroids** (3 HP, 200 pts): Split into 3 smaller fragments when destroyed, multi-hit
 - **Asteroid Spawns** (1 HP, 50 pts): Small fragments from destroyed asteroids
 
 **HUD Features:**
@@ -325,21 +352,24 @@ The included demo showcases a fully-featured space shooter with:
 - ~~Input sanitization~~ - XSS prevention for high scores
 - ~~Code duplication~~ - Array unification eliminated ~200 lines
 - ~~Game time vs wall-clock~~ - Shot cooldowns now use game time
+- ~~ES6 Module System~~ - Fully modularized with proper imports/exports
+- ~~Upgrade System~~ - 3 upgrade paths with 20 total levels
+- ~~Achievement System~~ - 9 achievements with persistence
+- ~~Shield Regeneration~~ - Auto-healing after damage delay
 
 **Incomplete Features:**
-- **No Power-ups**: No health packs, weapon upgrades, or shields
 - **Limited Enemy Variety**: Could use more enemy types with unique behaviors (bombers, drones, bosses)
 - **No Boss Encounters**: Final wave could feature boss enemy with unique mechanics
-- **No Achievements System**: Placeholder in menu but not implemented
+- **No Power-ups**: No temporary pickups (health packs, weapon boosts, invincibility)
 
 **Technical Issues:**
-- **Monolithic Main File**: skeleton.html still ~1100 lines (extraction in progress)
 - **No Automated Tests**: Missing unit tests for collision, spawn distribution, etc.
 - **No Build Process**: No minification, bundling, or source maps
 - **Collision Detection**: Basic AABB O(n²) (acceptable for current scale, could optimize with QuadTree)
 - **No Screen Shake**: Missing camera shake for impacts
 - **Limited Audio**: No engine sounds or ambient space audio
 - **No Mobile Support**: No touch controls for mobile devices
+- **Global References**: Some globals (engine, menuSystem, soundManager) still used in Game.js - should use dependency injection
 
 ## Getting Started
 
@@ -355,58 +385,66 @@ The included demo showcases a fully-featured space shooter with:
 
 ```
 JS game engine/
-├── GPTEngine.js          # Core engine singleton
-├── Vector2D.js           # 2D vector mathematics
-├── Sprite.js             # Sprite rendering system
-├── GameEntity.js         # Base game object class
-├── GameConfig.js         # Centralized configuration constants
-├── NPC.js                # Base NPC/enemy class
-├── NPCAIUtils.js         # Shared AI utilities for NPCs
-├── Player.js             # Player ship implementation
-├── Alien.js              # Basic enemy ship class
-├── AlienScout.js         # Scout ship with AI
-├── AlienFighter.js       # Fighter ship with shooting
-├── MissileCruiser.js     # Tanky ship with missiles
-├── Asteroid.js           # Large asteroids
-├── AsteroidSpawn.js      # Small asteroid fragments
-├── Projectile.js         # Base projectile class
-├── Laser.js              # Player laser projectiles
-├── Plasma.js             # Enemy plasma projectiles
-├── Missile.js            # Missile projectiles
-├── Wormhole.js           # Level transition portals
-├── ParticleSystem.js     # Visual effects system
-├── Particle.js           # Individual particle class
-├── SimpleMusic.js        # Web Audio API wrapper for music synthesis
-├── MusicPlayer.js        # Background music player for MIDI data
-├── SoundManager.js       # Sound effects manager
-├── MenuSystem.js         # Dynamic menu system
-├── HighScoreManager.js   # High score persistence and display
-├── Minimap.js            # Radar display system
-├── css.css               # Menu and UI styling
-├── skeleton.html         # Demo game (~1100 lines, being refactored)
-├── soundtest.html        # Audio system test
-├── *.png                 # Visual assets (sprites)
-├── *.m4a                 # Sound effect files
-└── slow_guitar.json      # Background music data
+├── VibeEngine/                    # Engine modules (ES6)
+│   ├── VibeEngine.js              # Barrel export for all engine classes
+│   ├── Vector2D.js                # 2D vector mathematics
+│   ├── Sprite.js                  # Sprite rendering system
+│   ├── Projectile.js              # Base projectile class
+│   ├── Particle.js                # Individual particle class
+│   ├── ParticleSystem.js          # Visual effects system
+│   ├── CollisionDetection.js      # AABB collision detection
+│   ├── Note.js                    # Web Audio API wrapper for music
+│   ├── MusicPlayer.js             # MIDI player using Note.js
+│   ├── SoundManager.js            # Sound effects manager
+│   ├── MenuSystem.js              # Dynamic menu system
+│   ├── HighScoreManager.js        # High score persistence
+│   ├── AchievementManager.js      # Achievement tracking
+│   ├── PreferencesManager.js      # Settings persistence
+│   ├── AssetLoader.js             # Preload sprites and sounds
+│   └── DebugLogger.js             # Conditional debug logging
+├── main.js                        # Game entry point (ES6 module)
+├── Game.js                        # Game class (extends EventTarget)
+├── GameEntity.js                  # Base game object class
+├── GameConfig.js                  # Centralized configuration
+├── NPC.js                         # Base NPC/enemy class
+├── NPCAIUtils.js                  # Shared AI utilities
+├── SpawnSystem.js                 # Wave-based enemy spawning
+├── Player.js                      # Player ship with upgrades
+├── AlienScout.js                  # Scout ship with AI
+├── AlienFighter.js                # Fighter ship with plasma
+├── AlienSaucer.js                 # Saucer with 8-way attack
+├── MissileCruiser.js              # Tanky ship with missiles
+├── Asteroid.js                    # Multi-hit asteroids
+├── AsteroidSpawn.js               # Small asteroid fragments
+├── Laser.js                       # Player laser projectiles
+├── Plasma.js                      # Enemy plasma projectiles
+├── Missile.js                     # Missile projectiles
+├── Wormhole.js                    # Level transition portals
+├── Minimap.js                     # Radar display system
+├── UpgradeBackground.js           # Animated upgrade menu background
+├── css.css                        # Menu and UI styling
+├── skeleton.html                  # Demo game HTML
+├── *.png                          # Visual assets (sprites)
+├── *.m4a                          # Sound effect files
+└── slow_guitar.json               # Background music data
 ```
 
 ## Next Steps
 
 **Immediate Priorities:**
-1. **Continue Refactoring**: Extract SpawnSystem.js and CollisionSystem.js from skeleton.html
+1. **Remove Globals**: Refactor Game.js to accept engine, menuSystem, soundManager via constructor
 2. **Add Error Handling**: Try-catch for localStorage operations
-3. **Move Magic Numbers**: Collision damage values to GameConfig.js
-4. **Optimize Assets**: Resize oversized sprites (energy-blast.png, alien-ship.png)
+3. **ESLint Integration**: Add linting to development workflow
+4. **Optimize Assets**: Resize oversized sprites if any remain
 
 **Feature Development:**
-5. Add power-ups (health packs, weapon upgrades, shields, temporary invincibility)
+5. Add temporary power-ups (health packs, damage boost, invincibility, score multipliers)
 6. Add more enemy types (bombers, drones, boss enemies with unique mechanics)
-7. Implement achievements system (currently placeholder in menu)
-8. Add visual effects (screen shake on hits, muzzle flash, damage indicators, thruster trails)
-9. Add more sound variety (engine sounds, ambient space sounds, additional music tracks)
-10. Implement combo system (score multipliers for consecutive kills)
-11. Add different weapon types (spread shot, laser beam, homing missiles)
-12. Mobile touch controls for broader accessibility
+7. Add visual effects (screen shake on hits, muzzle flash, damage indicators, thruster trails)
+8. Add more sound variety (engine sounds, ambient space sounds, additional music tracks)
+9. Implement combo system (score multipliers for consecutive kills without taking damage)
+10. Mobile touch controls for broader accessibility
+11. Boss encounters at milestone waves (5, 10, 15, etc.)
 
 **Technical Improvements:**
 13. Add automated testing (Vitest/Jest for collision, spawn, input sanitization)
@@ -436,7 +474,7 @@ This project was developed through AI collaboration:
 - Volume controls and preferences
 - Enhanced game states (pause menu, game over flow)
 
-**Phase 3 - Polish & Refactoring (Claude Code - November 2025):**
+**Phase 3 - Polish & Refactoring (Claude Code - November 2024):**
 - **Array Unification**: Consolidated entity arrays (eliminated ~200 lines of duplication)
 - **Particle System**: Impact and explosion effects with color customization
 - **Wormhole Progression**: Wave-based level advancement with visual indicators
@@ -445,6 +483,17 @@ This project was developed through AI collaboration:
 - **Bug Fixes**: Game timing (Date.now → gameTime), audio system (dual AudioContext), spawn positioning
 - **Architecture Improvements**: Unified collision system, instanceof-based polymorphism
 - **Enhanced Minimap**: Entity filtering, wormhole rendering, improved visual hierarchy
+
+**Phase 4 - ES6 Modules & Systems (Claude Code - November 2024):**
+- **ES6 Module System**: Converted all files to ES6 modules with explicit imports/exports
+- **Engine Organization**: Moved all engine files to `VibeEngine/` directory
+- **Upgrade System**: 3 upgrade paths (Weapon/Engine/Shield) with 20 total levels
+- **Achievement System**: 9 achievements with localStorage persistence
+- **Shield Regeneration**: Auto-healing system with configurable delay and rate
+- **Event-Driven Architecture**: Game class extends EventTarget for clean state management
+- **Alien Saucer**: New enemy with curved movement and 8-way ring attack
+- **Code Extraction**: SpawnSystem.js, main.js, UpgradeBackground.js separated from skeleton.html
+- **Import Resolution**: Fixed all circular dependencies and missing imports
 
 ## License
 
