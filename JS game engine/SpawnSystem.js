@@ -4,15 +4,10 @@
  * Responsibilities:
  * - Wave definition scaling based on level
  * - Uniform off-screen spawn position calculation
- * - NPC instantiation and placement
+ * - Dynamic NPC instantiation using config-driven entity types
  */
 import { Vector2D, DebugLogger } from './VibeEngine/VibeEngine.js';
 import { GameConfig } from './GameConfig.js';
-import { AlienScout } from './AlienScout.js';
-import { AlienFighter } from './AlienFighter.js';
-import { AlienSaucer } from './AlienSaucer.js';
-import { MissileCruiser } from './MissileCruiser.js';
-import { Asteroid } from './Asteroid.js';
 
 class SpawnSystem {
   /**
@@ -30,13 +25,13 @@ class SpawnSystem {
     if (level > GameConfig.SPAWNING.WAVES.length) {
       const levelsOver = level - GameConfig.SPAWNING.WAVES.length;
       const scaleFactor = Math.pow(GameConfig.SPAWNING.SCALING_FACTOR, levelsOver);
-      return {
-        alienScouts: Math.floor(baseWave.alienScouts * scaleFactor),
-        alienFighters: Math.floor(baseWave.alienFighters * scaleFactor),
-        missileCruisers: Math.floor(baseWave.missileCruisers * scaleFactor),
-        alienSaucers: Math.floor((baseWave.alienSaucers || 0) * scaleFactor),
-        asteroids: Math.floor(baseWave.asteroids * scaleFactor)
-      };
+
+      // Scale all entity types dynamically
+      const scaledWave = {};
+      for (const entityType in baseWave) {
+        scaledWave[entityType] = Math.floor(baseWave[entityType] * scaleFactor);
+      }
+      return scaledWave;
     }
 
     return baseWave;
@@ -100,6 +95,7 @@ class SpawnSystem {
 
   /**
    * Spawns a complete wave of NPCs for the given level
+   * Uses dynamic class instantiation based on GameConfig.SPAWNING.ENTITY_TYPES
    * @param {number} level - Wave level (1-based)
    * @param {Vector2D} playerPos - Player position for spawn calculations
    * @param {number} canvasWidth - Canvas width
@@ -111,44 +107,33 @@ class SpawnSystem {
 
     DebugLogger.log(`Spawning Wave ${level}:`, wave);
 
-    // Spawn alien scouts
-    for (let i = 0; i < wave.alienScouts; i++) {
-      const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
-        GameConfig.ALIEN_SCOUT.WIDTH, GameConfig.ALIEN_SCOUT.HEIGHT);
-      const scout = new AlienScout(position, playerPos, canvasWidth, canvasHeight);
-      npcsArray.push(scout);
-    }
+    // Dynamically spawn all entity types defined in the wave
+    for (const [entityType, count] of Object.entries(wave)) {
+      const entityDef = GameConfig.SPAWNING.ENTITY_TYPES[entityType];
 
-    // Spawn alien fighters
-    for (let i = 0; i < wave.alienFighters; i++) {
-      const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
-        GameConfig.ALIEN_FIGHTER.WIDTH, GameConfig.ALIEN_FIGHTER.HEIGHT);
-      const fighter = new AlienFighter(position, playerPos, canvasWidth, canvasHeight);
-      npcsArray.push(fighter);
-    }
+      // Skip if entity type not defined in ENTITY_TYPES map
+      if (!entityDef) {
+        DebugLogger.warn(`Unknown entity type: ${entityType}`);
+        continue;
+      }
 
-    // Spawn missile cruisers
-    for (let i = 0; i < wave.missileCruisers; i++) {
-      const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
-        GameConfig.MISSILE_CRUISER.WIDTH, GameConfig.MISSILE_CRUISER.HEIGHT);
-      const cruiser = new MissileCruiser(position, playerPos, canvasWidth, canvasHeight);
-      npcsArray.push(cruiser);
-    }
+      // Get config for this entity type
+      const entityConfig = GameConfig[entityDef.config];
 
-    // Spawn alien saucers
-    for (let i = 0; i < (wave.alienSaucers || 0); i++) {
-      const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
-        GameConfig.ALIEN_SAUCER.WIDTH, GameConfig.ALIEN_SAUCER.HEIGHT);
-      const saucer = new AlienSaucer(position, playerPos, canvasWidth, canvasHeight);
-      npcsArray.push(saucer);
-    }
+      // Spawn the specified count
+      for (let i = 0; i < count; i++) {
+        const position = SpawnSystem.getOffscreenSpawnPosition(
+          playerPos,
+          canvasWidth,
+          canvasHeight,
+          entityConfig.WIDTH,
+          entityConfig.HEIGHT
+        );
 
-    // Spawn asteroids
-    for (let i = 0; i < wave.asteroids; i++) {
-      const position = SpawnSystem.getOffscreenSpawnPosition(playerPos, canvasWidth, canvasHeight,
-        GameConfig.ASTEROID_BIG.WIDTH, GameConfig.ASTEROID_BIG.HEIGHT);
-      const asteroid = new Asteroid(position, playerPos);
-      npcsArray.push(asteroid);
+        // Instantiate using the class reference from config
+        const entity = new entityDef.class(position, playerPos, canvasWidth, canvasHeight);
+        npcsArray.push(entity);
+      }
     }
   }
 }

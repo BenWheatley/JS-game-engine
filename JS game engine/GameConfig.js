@@ -5,6 +5,15 @@
  * Organizing constants here makes it easy to tune game balance and behavior.
  */
 
+// Import entity classes for dynamic instantiation
+import { AlienScout } from './AlienScout.js';
+import { AlienFighter } from './AlienFighter.js';
+import { MissileCruiser } from './MissileCruiser.js';
+import { AlienSaucer } from './AlienSaucer.js';
+import { AlienBattleship } from './AlienBattleship.js';
+import { AlienCarrier } from './AlienCarrier.js';
+import { Asteroid } from './Asteroid.js';
+
 const GameConfig = {
   // Shared constants used across multiple entity types
   SHARED: {
@@ -106,41 +115,52 @@ const GameConfig = {
   // Wave-based spawning system - defines enemy composition per level
   SPAWNING: {
     // Level progression - defines what spawns at each level
-    // Each level specifies counts for: scouts, fighters, cruisers, saucers, asteroids
+    // Each level specifies counts for: scouts, fighters, cruisers, saucers, battleships, carriers, asteroids
     WAVES: [
       // Level 1: Tutorial - Easy start
-      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, asteroids: 2 },
+      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 2 },
 
       // Level 2: Introduce fighters
-      { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, asteroids: 3 },
+      { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 3 },
 
       // Level 3: More enemies
-      { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, asteroids: 4 },
+      { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
 
       // Level 4: Introduce alien saucers
-      { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, asteroids: 4 },
+      { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
 
       // Level 5: Ramping up
-      { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, asteroids: 5 },
+      { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 5 },
 
       // Level 6: Heavy combat
-      { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, asteroids: 6 },
+      { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
 
       // Level 7: Elite wave
-      { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, asteroids: 6 },
+      { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
 
       // Level 8: Introduce missile cruisers
-      { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, asteroids: 7 },
+      { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 7 },
 
       // Level 9: Near impossible
-      { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, asteroids: 8 },
+      { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 8 },
 
       // Level 10+: Repeating pattern with scaling
-      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, asteroids: 10 }
+      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 10 }
     ],
 
     // Scaling factor for levels beyond the wave definitions
-    SCALING_FACTOR: 1.15                // Multiply enemy counts by this for each level beyond wave array
+    SCALING_FACTOR: 1.15,               // Multiply enemy counts by this for each level beyond wave array
+
+    // Entity type mapping - maps wave keys to entity classes and configs
+    ENTITY_TYPES: {
+      alienScouts: { class: AlienScout, config: 'ALIEN_SCOUT' },
+      alienFighters: { class: AlienFighter, config: 'ALIEN_FIGHTER' },
+      missileCruisers: { class: MissileCruiser, config: 'MISSILE_CRUISER' },
+      alienSaucers: { class: AlienSaucer, config: 'ALIEN_SAUCER' },
+      alienBattleships: { class: AlienBattleship, config: 'ALIEN_BATTLESHIP' },
+      alienCarriers: { class: AlienCarrier, config: 'ALIEN_CARRIER' },
+      asteroids: { class: Asteroid, config: 'ASTEROID_BIG' }
+    }
   },
 
   // Alien Scout - Basic enemy that flies around
