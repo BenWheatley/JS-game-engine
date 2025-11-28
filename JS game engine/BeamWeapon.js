@@ -74,18 +74,14 @@ class BeamWeapon {
 	/**
 	 * Draw the beam
 	 * @param {CanvasRenderingContext2D} context - Canvas context
-	 * @param {Vector2D} camera - Camera position for world-to-screen conversion
 	 */
-	draw(context, camera) {
+	draw(context) {
 		if (!this.active) return;
 
 		context.save();
 
-		// Translate to beam origin (world to screen)
-		const screenX = this.origin.x - camera.x;
-		const screenY = this.origin.y - camera.y;
-
-		context.translate(screenX, screenY);
+		// Translate to beam origin (canvas is already in world space)
+		context.translate(this.origin.x, this.origin.y);
 		context.rotate(this.rotation);
 
 		// Draw gradient beam (Option 1: Thick Gradient Beam)
@@ -127,17 +123,13 @@ class BeamWeapon {
 	/**
 	 * Draw charge-up telegraph (warning indicator before beam fires)
 	 * @param {CanvasRenderingContext2D} context - Canvas context
-	 * @param {Vector2D} camera - Camera position for world-to-screen conversion
 	 * @param {number} chargeProgress - Progress from 0 to 1 (0 = just started, 1 = fully charged)
 	 */
-	drawChargeTelegraph(context, camera, chargeProgress) {
+	drawChargeTelegraph(context, chargeProgress) {
 		context.save();
 
-		// Translate to beam origin (world to screen)
-		const screenX = this.origin.x - camera.x;
-		const screenY = this.origin.y - camera.y;
-
-		context.translate(screenX, screenY);
+		// Translate to beam origin (canvas is already in world space)
+		context.translate(this.origin.x, this.origin.y);
 		context.rotate(this.rotation);
 
 		// Draw thin flashing red laser pointer line
