@@ -12,20 +12,6 @@ class MissileCruiser extends NPC {
     this.lastShotTime = 0;
   }
 
-  accelerate(deltaTime) {
-    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.MISSILE_CRUISER.FORWARD_ACCELERATION);
-    const velocityChange = accelerationVector.mul(deltaTime);
-    this.velocity = this.velocity.add(velocityChange);
-    this.clampSpeed();
-  }
-
-  clampSpeed() {
-    const speed = this.velocity.mag();
-    if (speed > GameConfig.MISSILE_CRUISER.MAX_SPEED) {
-      this.velocity = this.velocity.norm().mul(GameConfig.MISSILE_CRUISER.MAX_SPEED);
-    }
-  }
-
   tryShoot(gameTime) {
     if (gameTime - this.lastShotTime > GameConfig.MISSILE_CRUISER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;
