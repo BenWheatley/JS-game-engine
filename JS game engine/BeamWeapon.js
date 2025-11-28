@@ -10,9 +10,8 @@ class BeamWeapon {
 		this.rotation = rotation;      // Direction in radians
 		this.width = width;            // Beam width in pixels
 		this.length = length;          // Beam length in pixels
-		this.damage = GameConfig.ALIEN_BATTLESHIP.BEAM_DAMAGE;
+		this.damagePerSecond = GameConfig.ALIEN_BATTLESHIP.BEAM_DAMAGE_PER_SECOND;
 		this.active = false;           // Whether beam is currently firing
-		this.hasHitPlayer = false;     // Track if player was hit this activation
 	}
 
 	/**
@@ -20,7 +19,6 @@ class BeamWeapon {
 	 */
 	activate() {
 		this.active = true;
-		this.hasHitPlayer = false;
 	}
 
 	/**
@@ -28,7 +26,6 @@ class BeamWeapon {
 	 */
 	deactivate() {
 		this.active = false;
-		this.hasHitPlayer = false;
 	}
 
 	/**

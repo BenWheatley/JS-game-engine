@@ -106,14 +106,16 @@ class AlienBattleship extends NPC {
 	/**
 	 * Check if beam hits player and return damage event
 	 * @param {Vector2D} playerPosition - Player position
+	 * @param {number} deltaTime - Time delta in milliseconds for damage calculation
 	 * @returns {Object|null} Damage event {damage} if player was hit
 	 */
-	checkBeamHit(playerPosition) {
-		if (this.attackState === 'firing' && !this.beam.hasHitPlayer) {
+	checkBeamHit(playerPosition, deltaTime) {
+		if (this.attackState === 'firing') {
 			if (this.beam.intersectsPoint(playerPosition)) {
-				this.beam.hasHitPlayer = true; // Only hit once per beam activation
+				// Calculate damage based on time in beam (damage per second * fraction of second)
+				const damage = this.beam.damagePerSecond * (deltaTime / 1000);
 				return {
-					damage: GameConfig.ALIEN_BATTLESHIP.BEAM_DAMAGE
+					damage: damage
 				};
 			}
 		}

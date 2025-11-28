@@ -260,14 +260,14 @@ const GameConfig = {
     MAX_SPEED: 0.05,                    // 0.5x player speed
     ROTATIONAL_SPEED: Math.PI / 1800,   // Slow rotation
     CHARGE_DURATION: 1500,              // Milliseconds to charge beam before firing
-    BEAM_DURATION: 1000,                // Milliseconds beam stays active
+    BEAM_DURATION: 2000,                // Milliseconds beam stays active
     BEAM_COOLDOWN: 4000,                // Milliseconds between beam attacks
-    BEAM_DAMAGE: 75,                    // Damage dealt by beam
+    BEAM_DAMAGE_PER_SECOND: 100,        // Damage per second while beam is active
     BEAM_WIDTH: 50,                     // Beam width in pixels
     BEAM_LENGTH: 2400,                  // Beam length in pixels
-    CHARGE_SOUND: 'charge',             // Sound effect during charge-up (TODO: add asset)
+    CHARGE_SOUND: 'sine_sweep_80_to_120', // Sound effect during charge-up
     CHARGE_VOLUME: 0.4,                 // Volume for charge sound
-    BEAM_SOUND: 'beam',                 // Sound effect during beam fire (TODO: add asset)
+    BEAM_SOUND: 'battleship-mega-laser', // Sound effect during beam fire
     BEAM_VOLUME: 0.5,                   // Volume for beam sound
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
     HIT_VOLUME: 0.5,                    // Volume for hit sound

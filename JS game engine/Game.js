@@ -460,15 +460,12 @@ class Game extends EventTarget {
 
 			// Handle battleship beam damage (only if player is alive)
 			if (this.player.health > 0 && npc instanceof AlienBattleship) {
-				const beamHit = npc.checkBeamHit(this.player.sprite.position);
+				const beamHit = npc.checkBeamHit(this.player.sprite.position, deltaTime);
 				if (beamHit) {
 					this.player.health -= beamHit.damage;
 					this.player.onDamage(); // Reset shield regen timer
-					DebugLogger.log(`Player hit by battleship beam! Damage: ${beamHit.damage}, Health: ${this.player.health}`);
-					// TODO: Play beam hit sound when asset is available
-					// if (beamHit.sound) {
-					//   soundManager.play(beamHit.sound, beamHit.volume);
-					// }
+					DebugLogger.log(`Player hit by battleship beam! Damage: ${beamHit.damage.toFixed(2)}, Health: ${this.player.health.toFixed(2)}`);
+					// Note: No sound per-frame - beam sound plays once when firing starts
 
 					// Track damage taken for untouchable achievement
 					this.achievementStats.damageTakenThisWave += beamHit.damage;
