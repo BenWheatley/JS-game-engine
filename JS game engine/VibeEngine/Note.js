@@ -57,6 +57,11 @@ class Note {
   }
 
   async start() {
+    // Skip oscillator creation when muted (prevents clicks/pops in background)
+    if (Note.volume === 0) {
+      return;
+    }
+
     if (!Note.audioContext) {
       DebugLogger.error('AudioContext not available - SoundManager may not be initialized');
       return;

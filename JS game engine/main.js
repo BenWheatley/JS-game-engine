@@ -72,6 +72,21 @@ let backgroundSprite = new Sprite(
 
 musicPlayer.play();
 
+// Pause music when tab is backgrounded to prevent timer accumulation and audio artifacts
+document.addEventListener('visibilitychange', () => {
+	if (document.hidden) {
+		// Tab is now hidden - pause music
+		if (musicPlayer.isPlaying) {
+			musicPlayer.pause();
+		}
+	} else {
+		// Tab is now visible - resume music if it should be playing
+		if (!musicPlayer.isPlaying && musicPlayer.loaded) {
+			musicPlayer.play();
+		}
+	}
+});
+
 // Listen for fullscreen errors from engine
 engine.addEventListener('fullscreen-error', (e) => {
 	dialogSystem.showDialog(DialogSystem.DialogTypes.ERROR, {
