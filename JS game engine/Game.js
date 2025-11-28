@@ -163,17 +163,8 @@ class Game extends EventTarget {
 		}
 
 		// NPCs
-		const camera = new Vector2D(
-			this.player.sprite.position.x - canvas.width / 2,
-			this.player.sprite.position.y - canvas.height / 2
-		);
 		for (const npc of this.npcs) {
-			// Battleships need camera for beam rendering
-			if (npc instanceof AlienBattleship) {
-				npc.draw(context, camera);
-			} else {
-				npc.draw();
-			}
+			npc.draw();
 		}
 
 		// Particles

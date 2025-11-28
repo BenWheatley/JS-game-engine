@@ -152,24 +152,23 @@ class AlienBattleship extends NPC {
 	/**
 	 * Draw the battleship and its beam/telegraph
 	 * @param {CanvasRenderingContext2D} context - Canvas context
-	 * @param {Vector2D} camera - Camera position
 	 */
-	draw(context, camera) {
+	draw(context) {
 		// Draw charge telegraph if charging
 		if (this.attackState === 'charging') {
 			const chargeProgress = (Date.now() - this.stateStartTime) / GameConfig.ALIEN_BATTLESHIP.CHARGE_DURATION;
 			this.beam.origin = this.sprite.position;
 			// Remove sprite offset since beam uses standard canvas rotation (0 = right)
 			this.beam.rotation = this.sprite.rotation - GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
-			this.beam.drawChargeTelegraph(context, camera, chargeProgress);
+			this.beam.drawChargeTelegraph(context, chargeProgress);
 		}
 
 		// Draw sprite
-		super.draw(context, camera);
+		super.draw();
 
 		// Draw beam if firing
 		if (this.attackState === 'firing') {
-			this.beam.draw(context, camera);
+			this.beam.draw(context);
 		}
 	}
 }
