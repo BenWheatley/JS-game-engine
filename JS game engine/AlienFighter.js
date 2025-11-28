@@ -13,20 +13,6 @@ class AlienFighter extends NPC {
     this.shots = []; // Track shots fired by this fighter
   }
 
-  accelerate(deltaTime) {
-    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.ALIEN_FIGHTER.FORWARD_ACCELERATION);
-    const velocityChange = accelerationVector.mul(deltaTime);
-    this.velocity = this.velocity.add(velocityChange);
-    this.clampSpeed();
-  }
-
-  clampSpeed() {
-    const speed = this.velocity.mag();
-    if (speed > GameConfig.ALIEN_FIGHTER.MAX_SPEED) {
-      this.velocity = this.velocity.norm().mul(GameConfig.ALIEN_FIGHTER.MAX_SPEED);
-    }
-  }
-
   tryShoot(gameTime) {
     if (gameTime - this.lastShotTime > GameConfig.ALIEN_FIGHTER.SHOT_COOLDOWN) {
       this.lastShotTime = gameTime;

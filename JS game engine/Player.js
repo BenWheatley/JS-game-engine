@@ -62,10 +62,31 @@ class Player extends GameEntity {
   }
 
   /**
-   * Called when player takes damage - resets regen timer
+   * Called when player takes damage - resets regen timer and triggers haptic feedback
+   * @param {number} damage - Amount of damage taken (for haptic scaling)
    */
-  onDamage() {
+  onDamage(damage = 0) {
     this.timeSinceLastDamage = 0;
+
+    // Trigger gamepad haptic feedback if controller is connected
+    if (damage > 0) {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      for (const gamepad of gamepads) {
+        if (gamepad && gamepad.vibrationActuator) {
+          // Scale intensity based on damage (0.1 to 0.8)
+          // Typical max player health is ~300, damage ranges from 10-100
+          const intensity = Math.min(0.8, Math.max(0.1, damage / 100));
+          const duration = Math.min(300, 50 + damage * 2); // 50-300ms based on damage
+
+          gamepad.vibrationActuator.playEffect('dual-rumble', {
+            startDelay: 0,
+            duration: duration,
+            weakMagnitude: intensity * 0.5,
+            strongMagnitude: intensity
+          });
+        }
+      }
+    }
   }
 
   /**

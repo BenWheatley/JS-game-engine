@@ -18,6 +18,9 @@ class NPC extends GameEntity {
     this.maxHealth = config.HEALTH;
     this.scoreValue = config.SCORE_VALUE;
 
+    // Store config reference for movement parameters
+    this.config = config;
+
     // Store config for onHit/onCollideWithPlayer
     this.hitSound = config.HIT_SOUND;
     this.hitVolume = config.HIT_VOLUME;
@@ -63,6 +66,33 @@ class NPC extends GameEntity {
       } else {
         this.sprite.rotation -= Math.min(this.rotationalSpeed * deltaTime, -angleDiff);
       }
+    }
+  }
+
+  /**
+   * Accelerate forward based on config values
+   * Subclasses can override if they need different acceleration logic
+   * @param {number} deltaTime - Time delta in milliseconds
+   */
+  accelerate(deltaTime) {
+    if (!this.config.FORWARD_ACCELERATION) return;
+
+    const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(this.config.FORWARD_ACCELERATION);
+    const velocityChange = accelerationVector.mul(deltaTime);
+    this.velocity = this.velocity.add(velocityChange);
+    this.clampSpeed();
+  }
+
+  /**
+   * Clamp speed to max speed from config
+   * Subclasses can override if they need different speed clamping logic
+   */
+  clampSpeed() {
+    if (!this.config.MAX_SPEED) return;
+
+    const speed = this.velocity.mag();
+    if (speed > this.config.MAX_SPEED) {
+      this.velocity = this.velocity.norm().mul(this.config.MAX_SPEED);
     }
   }
 

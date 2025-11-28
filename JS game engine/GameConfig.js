@@ -5,6 +5,15 @@
  * Organizing constants here makes it easy to tune game balance and behavior.
  */
 
+// Import entity classes for dynamic instantiation
+import { AlienScout } from './AlienScout.js';
+import { AlienFighter } from './AlienFighter.js';
+import { MissileCruiser } from './MissileCruiser.js';
+import { AlienSaucer } from './AlienSaucer.js';
+import { AlienBattleship } from './AlienBattleship.js';
+import { AlienCarrier } from './AlienCarrier.js';
+import { Asteroid } from './Asteroid.js';
+
 const GameConfig = {
   // Shared constants used across multiple entity types
   SHARED: {
@@ -106,41 +115,52 @@ const GameConfig = {
   // Wave-based spawning system - defines enemy composition per level
   SPAWNING: {
     // Level progression - defines what spawns at each level
-    // Each level specifies counts for: scouts, fighters, cruisers, saucers, asteroids
+    // Each level specifies counts for: scouts, fighters, cruisers, saucers, battleships, carriers, asteroids
     WAVES: [
       // Level 1: Tutorial - Easy start
-      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, asteroids: 2 },
+      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 1, alienCarriers: 1, asteroids: 2 },
 
       // Level 2: Introduce fighters
-      { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, asteroids: 3 },
+      { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 3 },
 
       // Level 3: More enemies
-      { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, asteroids: 4 },
+      { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
 
       // Level 4: Introduce alien saucers
-      { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, asteroids: 4 },
+      { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
 
       // Level 5: Ramping up
-      { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, asteroids: 5 },
+      { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 5 },
 
       // Level 6: Heavy combat
-      { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, asteroids: 6 },
+      { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
 
       // Level 7: Elite wave
-      { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, asteroids: 6 },
+      { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
 
       // Level 8: Introduce missile cruisers
-      { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, asteroids: 7 },
+      { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 7 },
 
       // Level 9: Near impossible
-      { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, asteroids: 8 },
+      { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 8 },
 
       // Level 10+: Repeating pattern with scaling
-      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, asteroids: 10 }
+      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 10 }
     ],
 
     // Scaling factor for levels beyond the wave definitions
-    SCALING_FACTOR: 1.15                // Multiply enemy counts by this for each level beyond wave array
+    SCALING_FACTOR: 1.15,               // Multiply enemy counts by this for each level beyond wave array
+
+    // Entity type mapping - maps wave keys to entity classes and configs
+    ENTITY_TYPES: {
+      alienScouts: { class: AlienScout, config: 'ALIEN_SCOUT' },
+      alienFighters: { class: AlienFighter, config: 'ALIEN_FIGHTER' },
+      missileCruisers: { class: MissileCruiser, config: 'MISSILE_CRUISER' },
+      alienSaucers: { class: AlienSaucer, config: 'ALIEN_SAUCER' },
+      alienBattleships: { class: AlienBattleship, config: 'ALIEN_BATTLESHIP' },
+      alienCarriers: { class: AlienCarrier, config: 'ALIEN_CARRIER' },
+      asteroids: { class: Asteroid, config: 'ASTEROID_BIG' }
+    }
   },
 
   // Alien Scout - Basic enemy that flies around
@@ -226,6 +246,62 @@ const GameConfig = {
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.6               // Volume for collision sound
+  },
+
+  // Alien Battleship (Siege Destroyer) - Heavy ship with charge-up beam weapon
+  ALIEN_BATTLESHIP: {
+    IMAGE_URL: 'alien-battleship.png',
+    WIDTH: 96,
+    HEIGHT: 96,
+    HEALTH: 450,
+    SCORE_VALUE: 550,
+    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    FORWARD_ACCELERATION: 0.0005,       // Slow acceleration
+    MAX_SPEED: 0.05,                    // 0.5x player speed
+    ROTATIONAL_SPEED: Math.PI / 1800,   // Slow rotation
+    CHARGE_DURATION: 1500,              // Milliseconds to charge beam before firing
+    BEAM_DURATION: 2000,                // Milliseconds beam stays active
+    BEAM_COOLDOWN: 4000,                // Milliseconds between beam attacks
+    BEAM_DAMAGE_PER_SECOND: 100,        // Damage per second while beam is active
+    BEAM_WIDTH: 50,                     // Beam width in pixels
+    BEAM_LENGTH: 2400,                  // Beam length in pixels
+    CHARGE_SOUND: 'sine_sweep_80_to_120', // Sound effect during charge-up
+    CHARGE_VOLUME: 0.4,                 // Volume for charge sound
+    BEAM_SOUND: 'battleship-mega-laser', // Sound effect during beam fire
+    BEAM_VOLUME: 0.5,                   // Volume for beam sound
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.5,                    // Volume for hit sound
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.7,              // Volume for destruction sound
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.8               // Volume for collision sound
+  },
+
+  // Alien Carrier - Spawns fighters when on-screen
+  ALIEN_CARRIER: {
+    IMAGE_URL: 'alien-carrier.png',
+    WIDTH: 128,
+    HEIGHT: 128,
+    HEALTH: 600,
+    SCORE_VALUE: 800,
+    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    FORWARD_ACCELERATION: 0.0002,       // Very slow acceleration
+    MAX_SPEED: 0.02,                    // 0.2x player speed (slowest ship)
+    ROTATIONAL_SPEED: Math.PI / 2400,   // Very slow rotation
+    SPAWN_COOLDOWN: 8000,               // Milliseconds between fighter spawns
+    SPAWN_COUNT: 2,                     // Number of fighters spawned per cycle
+    MAX_SPAWNED_FIGHTERS: 6,            // Maximum active spawned fighters
+    VISIBILITY_MARGIN: -50,             // Negative margin = must be on-screen (not off-screen)
+    SPAWN_SOUND: 'spawn',               // Sound effect when spawning (TODO: add asset)
+    SPAWN_VOLUME: 0.4,                  // Volume for spawn sound
+    HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
+    HIT_VOLUME: 0.6,                    // Volume for hit sound
+    DESTROYED_SOUND: 'explosion',       // Sound when destroyed
+    DESTROYED_VOLUME: 0.8,              // Volume for destruction sound
+    PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
+    COLLISION_SOUND: 'hit',             // Sound when colliding with player
+    COLLISION_VOLUME: 0.9               // Volume for collision sound
   },
 
   // Asteroid - Large destructible obstacle

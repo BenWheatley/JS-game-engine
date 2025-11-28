@@ -8,6 +8,8 @@ import { GameConfig } from './GameConfig.js';
 import { Plasma } from './Plasma.js';
 import { Missile } from './Missile.js';
 import { Laser } from './Laser.js';
+import { AlienCarrier } from './AlienCarrier.js';
+import { AlienBattleship } from './AlienBattleship.js';
 
 class Game extends EventTarget {
 	/**
@@ -158,6 +160,13 @@ class Game extends EventTarget {
 		}
 		for (const projectile of this.npcProjectiles) {
 			projectile.draw();
+		}
+
+		// Battleship beams (rendered before NPCs for proper Z-ordering)
+		for (const npc of this.npcs) {
+			if (npc instanceof AlienBattleship) {
+				npc.drawBeam(context);
+			}
 		}
 
 		// NPCs
@@ -413,8 +422,8 @@ class Game extends EventTarget {
 
 		// Update all NPCs with unified loop
 		for (const npc of this.npcs) {
-			// All NPCs accept playerPosition (asteroids ignore it)
-			npc.update(deltaTime, this.player.sprite.position);
+			// All NPCs accept playerPosition; battleships also need gameTime
+			npc.update(deltaTime, this.player.sprite.position, this.gameTime);
 
 			// Handle NPC shooting (unified)
 			if (npc.tryShoot) {
@@ -424,6 +433,42 @@ class Game extends EventTarget {
 					if (shootResult.sound) {
 						soundManager.play(shootResult.sound, shootResult.volume);
 					}
+				}
+			}
+
+			// Handle carrier spawning
+			if (npc instanceof AlienCarrier) {
+				const camera = new Vector2D(
+					this.player.sprite.position.x - this.canvas.width / 2,
+					this.player.sprite.position.y - this.canvas.height / 2
+				);
+				const spawnResult = npc.trySpawnFighters(
+					this.gameTime,
+					camera,
+					this.canvas.width,
+					this.canvas.height,
+					this.player.sprite.position
+				);
+				if (spawnResult && spawnResult.fighters) {
+					this.npcs.push(...spawnResult.fighters);
+					// TODO: Play spawn sound when asset is available
+					// if (spawnResult.sound) {
+					//   soundManager.play(spawnResult.sound, spawnResult.volume);
+					// }
+				}
+			}
+
+			// Handle battleship beam damage (only if player is alive)
+			if (this.player.health > 0 && npc instanceof AlienBattleship) {
+				const beamHit = npc.checkBeamHit(this.player.sprite.position, deltaTime);
+				if (beamHit) {
+					this.player.health -= beamHit.damage;
+					this.player.onDamage(beamHit.damage); // Reset shield regen timer and trigger haptic
+					DebugLogger.log(`Player hit by battleship beam! Damage: ${beamHit.damage.toFixed(2)}, Health: ${this.player.health.toFixed(2)}`);
+					// Note: No sound per-frame - beam sound plays once when firing starts
+
+					// Track damage taken for untouchable achievement
+					this.achievementStats.damageTakenThisWave += beamHit.damage;
 				}
 			}
 		}
@@ -505,7 +550,7 @@ class Game extends EventTarget {
 
 					// Apply damage to player
 					this.player.health -= collisionResult.damage;
-					this.player.onDamage(); // Reset shield regen timer
+					this.player.onDamage(collisionResult.damage); // Reset shield regen timer and trigger haptic
 					DebugLogger.log(`Player health after: ${this.player.health}`);
 
 					if (collisionResult.sound) {
@@ -529,7 +574,7 @@ class Game extends EventTarget {
 
 					const hitResult = projectile.onHitPlayer();
 					this.player.health -= hitResult.damage;
-					this.player.onDamage(); // Reset shield regen timer
+					this.player.onDamage(hitResult.damage); // Reset shield regen timer and trigger haptic
 					DebugLogger.log(`Player hit by projectile! Health: ${this.player.health}`);
 
 					if (hitResult.sound) {

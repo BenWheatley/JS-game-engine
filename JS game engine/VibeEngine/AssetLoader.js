@@ -20,6 +20,8 @@ class AssetLoader {
     'alien-scout.png',
     'alien-fighter.png',
     'alien-saucer.png',
+    'alien-battleship.png',
+    'alien-carrier.png',
     'missile_ship.png',
     'asteroid-big.png',
     'asteroid-medium.png',
