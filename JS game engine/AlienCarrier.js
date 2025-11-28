@@ -24,20 +24,6 @@ class AlienCarrier extends NPC {
 		this.canvasHeight = canvasHeight;
 	}
 
-	accelerate(deltaTime) {
-		const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.ALIEN_CARRIER.FORWARD_ACCELERATION);
-		const velocityChange = accelerationVector.mul(deltaTime);
-		this.velocity = this.velocity.add(velocityChange);
-		this.clampSpeed();
-	}
-
-	clampSpeed() {
-		const speed = this.velocity.mag();
-		if (speed > GameConfig.ALIEN_CARRIER.MAX_SPEED) {
-			this.velocity = this.velocity.norm().mul(GameConfig.ALIEN_CARRIER.MAX_SPEED);
-		}
-	}
-
 	/**
 	 * Check if carrier is visible on screen (within camera viewport)
 	 * @param {Vector2D} camera - Camera position (top-left of viewport)
@@ -127,10 +113,10 @@ class AlienCarrier extends NPC {
 			const targetAngle = Math.atan2(toTarget.y, toTarget.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
 			this.turnTowards(targetAngle, deltaTime);
-			this.accelerate(deltaTime);
+			this.accelerate(deltaTime);  // Uses NPC base class method
 		}
 
-		// Update position
+		// Update position using parent update
 		super.update(deltaTime);
 	}
 }

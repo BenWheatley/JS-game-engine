@@ -30,25 +30,11 @@ class AlienBattleship extends NPC {
 		);
 	}
 
-	accelerate(deltaTime) {
-		const accelerationVector = Vector2D.fromRadial(this.sprite.rotation, 1).mul(GameConfig.ALIEN_BATTLESHIP.FORWARD_ACCELERATION);
-		const velocityChange = accelerationVector.mul(deltaTime);
-		this.velocity = this.velocity.add(velocityChange);
-		this.clampSpeed();
-	}
-
-	clampSpeed() {
-		const speed = this.velocity.mag();
-		if (speed > GameConfig.ALIEN_BATTLESHIP.MAX_SPEED) {
-			this.velocity = this.velocity.norm().mul(GameConfig.ALIEN_BATTLESHIP.MAX_SPEED);
-		}
-	}
-
 	/**
 	 * Update attack state and beam weapon
+	 * Called from update() method
 	 * @param {number} gameTime - Current game time
 	 * @param {Vector2D} playerPosition - Player position for targeting
-	 * @returns {Object|null} Sound event {sound, volume} if state changed
 	 */
 	updateAttackState(gameTime, playerPosition) {
 		const stateElapsed = gameTime - this.stateStartTime;
@@ -100,7 +86,8 @@ class AlienBattleship extends NPC {
 			case 'firing':
 				// Keep beam aligned with ship rotation
 				this.beam.origin = this.sprite.position;
-				this.beam.rotation = this.sprite.rotation;
+				// Remove sprite offset since beam uses standard canvas rotation (0 = right)
+				this.beam.rotation = this.sprite.rotation - GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
 				// Wait for beam duration to complete
 				if (stateElapsed >= GameConfig.ALIEN_BATTLESHIP.BEAM_DURATION) {
@@ -135,7 +122,12 @@ class AlienBattleship extends NPC {
 		return null;
 	}
 
-	update(deltaTime, playerPosition) {
+	update(deltaTime, playerPosition, gameTime) {
+		// Update attack state machine (must be called before movement AI)
+		if (gameTime !== undefined) {
+			this.updateAttackState(gameTime, playerPosition);
+		}
+
 		// Check if we need a new target (only when not charging/firing)
 		if (this.attackState === 'cooldown' && this.hasReachedTarget()) {
 			this.pickNewTarget(playerPosition);
@@ -147,13 +139,13 @@ class AlienBattleship extends NPC {
 			const targetAngle = Math.atan2(toTarget.y, toTarget.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
 			this.turnTowards(targetAngle, deltaTime);
-			this.accelerate(deltaTime);
+			this.accelerate(deltaTime);  // Uses NPC base class method
 		} else if (this.attackState === 'charging' || this.attackState === 'firing') {
 			// Stop moving while charging/firing (apply friction)
 			this.velocity = this.velocity.mul(0.95);
 		}
 
-		// Update position
+		// Update position using parent update
 		super.update(deltaTime);
 	}
 
@@ -167,7 +159,8 @@ class AlienBattleship extends NPC {
 		if (this.attackState === 'charging') {
 			const chargeProgress = (Date.now() - this.stateStartTime) / GameConfig.ALIEN_BATTLESHIP.CHARGE_DURATION;
 			this.beam.origin = this.sprite.position;
-			this.beam.rotation = this.sprite.rotation;
+			// Remove sprite offset since beam uses standard canvas rotation (0 = right)
+			this.beam.rotation = this.sprite.rotation - GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 			this.beam.drawChargeTelegraph(context, camera, chargeProgress);
 		}
 

@@ -94,6 +94,45 @@ class SpawnSystem {
   }
 
   /**
+   * Spawns a single entity of the specified type
+   * Useful for manual spawning during development (call from console)
+   * @param {string} entityType - Entity type key (e.g., 'alienScouts', 'alienBattleships')
+   * @param {Vector2D} playerPos - Player position for spawn calculations
+   * @param {number} canvasWidth - Canvas width
+   * @param {number} canvasHeight - Canvas height
+   * @param {Array} npcsArray - Array to push spawned entity into
+   * @returns {Object|null} Spawned entity or null if type invalid
+   */
+  static spawnEntity(entityType, playerPos, canvasWidth, canvasHeight, npcsArray) {
+    const entityDef = GameConfig.SPAWNING.ENTITY_TYPES[entityType];
+
+    // Validate entity type
+    if (!entityDef) {
+      DebugLogger.warn(`Unknown entity type: ${entityType}`);
+      return null;
+    }
+
+    // Get config for this entity type
+    const entityConfig = GameConfig[entityDef.config];
+
+    // Calculate spawn position
+    const position = SpawnSystem.getOffscreenSpawnPosition(
+      playerPos,
+      canvasWidth,
+      canvasHeight,
+      entityConfig.WIDTH,
+      entityConfig.HEIGHT
+    );
+
+    // Instantiate using the class reference from config
+    const entity = new entityDef.class(position, playerPos, canvasWidth, canvasHeight);
+    npcsArray.push(entity);
+
+    DebugLogger.log(`Spawned ${entityType} at`, position);
+    return entity;
+  }
+
+  /**
    * Spawns a complete wave of NPCs for the given level
    * Uses dynamic class instantiation based on GameConfig.SPAWNING.ENTITY_TYPES
    * @param {number} level - Wave level (1-based)
@@ -109,30 +148,9 @@ class SpawnSystem {
 
     // Dynamically spawn all entity types defined in the wave
     for (const [entityType, count] of Object.entries(wave)) {
-      const entityDef = GameConfig.SPAWNING.ENTITY_TYPES[entityType];
-
-      // Skip if entity type not defined in ENTITY_TYPES map
-      if (!entityDef) {
-        DebugLogger.warn(`Unknown entity type: ${entityType}`);
-        continue;
-      }
-
-      // Get config for this entity type
-      const entityConfig = GameConfig[entityDef.config];
-
-      // Spawn the specified count
+      // Spawn the specified count using spawnEntity
       for (let i = 0; i < count; i++) {
-        const position = SpawnSystem.getOffscreenSpawnPosition(
-          playerPos,
-          canvasWidth,
-          canvasHeight,
-          entityConfig.WIDTH,
-          entityConfig.HEIGHT
-        );
-
-        // Instantiate using the class reference from config
-        const entity = new entityDef.class(position, playerPos, canvasWidth, canvasHeight);
-        npcsArray.push(entity);
+        SpawnSystem.spawnEntity(entityType, playerPos, canvasWidth, canvasHeight, npcsArray);
       }
     }
   }

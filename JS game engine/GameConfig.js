@@ -118,7 +118,7 @@ const GameConfig = {
     // Each level specifies counts for: scouts, fighters, cruisers, saucers, battleships, carriers, asteroids
     WAVES: [
       // Level 1: Tutorial - Easy start
-      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 2 },
+      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 1, alienCarriers: 1, asteroids: 2 },
 
       // Level 2: Introduce fighters
       { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 3 },

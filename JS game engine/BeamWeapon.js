@@ -140,28 +140,20 @@ class BeamWeapon {
 		context.translate(screenX, screenY);
 		context.rotate(this.rotation);
 
-		// Draw red warning line showing beam direction
-		const alpha = 0.3 + (chargeProgress * 0.4); // Fade in as charge builds
-		context.strokeStyle = `rgba(255, 0, 0, ${alpha})`;
+		// Draw thin flashing red laser pointer line
+		// Flash by pulsing between two alpha values
+		const flashSpeed = 8; // How fast it flashes
+		const flash = Math.sin(Date.now() / 100 * flashSpeed) * 0.5 + 0.5; // 0 to 1
+		const alpha = 0.4 + (flash * 0.6); // Pulsing alpha
+
+		context.strokeStyle = `rgba(255, 50, 50, ${alpha})`;
 		context.lineWidth = 2;
-		context.setLineDash([10, 5]); // Dashed line
+		context.setLineDash([8, 4]); // Dashed line
 		context.beginPath();
 		context.moveTo(0, 0);
 		context.lineTo(this.length, 0);
 		context.stroke();
 		context.setLineDash([]); // Reset dash
-
-		// Draw pulsing charge-up glow at origin
-		const glowSize = this.width * (0.5 + chargeProgress * 0.5);
-		const glowGradient = context.createRadialGradient(0, 0, 0, 0, 0, glowSize);
-		glowGradient.addColorStop(0, `rgba(255, 100, 100, ${0.6 * chargeProgress})`);
-		glowGradient.addColorStop(0.5, `rgba(255, 0, 0, ${0.3 * chargeProgress})`);
-		glowGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
-
-		context.fillStyle = glowGradient;
-		context.beginPath();
-		context.arc(0, 0, glowSize, 0, Math.PI * 2);
-		context.fill();
 
 		context.restore();
 	}
