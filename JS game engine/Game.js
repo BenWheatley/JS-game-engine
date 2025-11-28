@@ -162,6 +162,13 @@ class Game extends EventTarget {
 			projectile.draw();
 		}
 
+		// Battleship beams (rendered before NPCs for proper Z-ordering)
+		for (const npc of this.npcs) {
+			if (npc instanceof AlienBattleship) {
+				npc.drawBeam(context);
+			}
+		}
+
 		// NPCs
 		for (const npc of this.npcs) {
 			npc.draw();

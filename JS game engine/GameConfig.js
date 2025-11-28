@@ -264,7 +264,7 @@ const GameConfig = {
     BEAM_COOLDOWN: 4000,                // Milliseconds between beam attacks
     BEAM_DAMAGE: 75,                    // Damage dealt by beam
     BEAM_WIDTH: 50,                     // Beam width in pixels
-    BEAM_LENGTH: 800,                   // Beam length in pixels
+    BEAM_LENGTH: 2400,                  // Beam length in pixels
     CHARGE_SOUND: 'charge',             // Sound effect during charge-up (TODO: add asset)
     CHARGE_VOLUME: 0.4,                 // Volume for charge sound
     BEAM_SOUND: 'beam',                 // Sound effect during beam fire (TODO: add asset)

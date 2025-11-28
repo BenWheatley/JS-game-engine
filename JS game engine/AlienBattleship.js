@@ -48,9 +48,9 @@ class AlienBattleship extends NPC {
 					this.attackState = 'charging';
 					this.stateStartTime = gameTime;
 
-					// Lock aim at player
+					// Calculate target aim at player (but don't instantly snap to it)
 					const toPlayer = playerPosition.sub(this.sprite.position);
-					this.lockedRotation = Math.atan2(toPlayer.y, toPlayer.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
+					this.targetAimRotation = Math.atan2(toPlayer.y, toPlayer.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
 					// TODO: Play charge sound when asset is available
 					// soundEvent = {
@@ -61,10 +61,8 @@ class AlienBattleship extends NPC {
 				break;
 
 			case 'charging':
-				// Rotate sprite to locked aim
-				if (this.lockedRotation !== undefined) {
-					this.sprite.rotation = this.lockedRotation;
-				}
+				// Gradually turn towards target aim (uses normal turn speed)
+				// Note: We need deltaTime but it's not in this method - will be handled in update()
 
 				// Wait for charge to complete
 				if (stateElapsed >= GameConfig.ALIEN_BATTLESHIP.CHARGE_DURATION) {
@@ -97,7 +95,7 @@ class AlienBattleship extends NPC {
 
 					// Deactivate beam
 					this.beam.deactivate();
-					this.lockedRotation = undefined;
+					this.targetAimRotation = undefined;
 				}
 				break;
 		}
@@ -133,27 +131,30 @@ class AlienBattleship extends NPC {
 			this.pickNewTarget(playerPosition);
 		}
 
-		// AI: Turn towards target and accelerate (only when not charging/firing)
+		// AI: Turn towards target and accelerate (only when in cooldown)
 		if (this.attackState === 'cooldown' && this.targetPosition) {
 			const toTarget = this.targetPosition.sub(this.sprite.position);
 			const targetAngle = Math.atan2(toTarget.y, toTarget.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
 			this.turnTowards(targetAngle, deltaTime);
 			this.accelerate(deltaTime);  // Uses NPC base class method
-		} else if (this.attackState === 'charging' || this.attackState === 'firing') {
-			// Stop moving while charging/firing (apply friction)
-			this.velocity = this.velocity.mul(0.95);
+		} else if (this.attackState === 'charging') {
+			// While charging, turn towards aim position (no deceleration - this is space!)
+			if (this.targetAimRotation !== undefined) {
+				this.turnTowards(this.targetAimRotation, deltaTime);
+			}
 		}
+		// Note: No else needed for 'firing' - ship maintains velocity in space
 
 		// Update position using parent update
 		super.update(deltaTime);
 	}
 
 	/**
-	 * Draw the battleship and its beam/telegraph
+	 * Draw beam/telegraph (called before NPCs for proper Z-ordering)
 	 * @param {CanvasRenderingContext2D} context - Canvas context
 	 */
-	draw(context) {
+	drawBeam(context) {
 		// Draw charge telegraph if charging
 		if (this.attackState === 'charging') {
 			const chargeProgress = (Date.now() - this.stateStartTime) / GameConfig.ALIEN_BATTLESHIP.CHARGE_DURATION;
@@ -163,11 +164,10 @@ class AlienBattleship extends NPC {
 			this.beam.drawChargeTelegraph(context, chargeProgress);
 		}
 
-		// Draw sprite
-		super.draw();
-
 		// Draw beam if firing
 		if (this.attackState === 'firing') {
+			this.beam.origin = this.sprite.position;
+			this.beam.rotation = this.sprite.rotation - GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 			this.beam.draw(context);
 		}
 	}
