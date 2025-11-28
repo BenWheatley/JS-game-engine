@@ -371,26 +371,6 @@ class Game extends EventTarget {
 		}
 	}
 
-	// Helper function to trigger gamepad haptic feedback
-	triggerGamepadHaptic(damage) {
-		const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-		for (const gamepad of gamepads) {
-			if (gamepad && gamepad.vibrationActuator) {
-				// Scale intensity based on damage (0.1 to 0.8)
-				// Typical max player health is ~300, damage ranges from 10-100
-				const intensity = Math.min(0.8, Math.max(0.1, damage / 100));
-				const duration = Math.min(300, 50 + damage * 2); // 50-300ms based on damage
-
-				gamepad.vibrationActuator.playEffect('dual-rumble', {
-					startDelay: 0,
-					duration: duration,
-					weakMagnitude: intensity * 0.5,
-					strongMagnitude: intensity
-				});
-			}
-		}
-	}
-
 	// Update loop; deltaTime is milliseconds
 	update(deltaTime) {
 		// Handle gamepad input for menu navigation
@@ -483,8 +463,7 @@ class Game extends EventTarget {
 				const beamHit = npc.checkBeamHit(this.player.sprite.position, deltaTime);
 				if (beamHit) {
 					this.player.health -= beamHit.damage;
-					this.player.onDamage(); // Reset shield regen timer
-					this.triggerGamepadHaptic(beamHit.damage); // Controller vibration
+					this.player.onDamage(beamHit.damage); // Reset shield regen timer and trigger haptic
 					DebugLogger.log(`Player hit by battleship beam! Damage: ${beamHit.damage.toFixed(2)}, Health: ${this.player.health.toFixed(2)}`);
 					// Note: No sound per-frame - beam sound plays once when firing starts
 
@@ -571,8 +550,7 @@ class Game extends EventTarget {
 
 					// Apply damage to player
 					this.player.health -= collisionResult.damage;
-					this.player.onDamage(); // Reset shield regen timer
-					this.triggerGamepadHaptic(collisionResult.damage); // Controller vibration
+					this.player.onDamage(collisionResult.damage); // Reset shield regen timer and trigger haptic
 					DebugLogger.log(`Player health after: ${this.player.health}`);
 
 					if (collisionResult.sound) {
@@ -596,8 +574,7 @@ class Game extends EventTarget {
 
 					const hitResult = projectile.onHitPlayer();
 					this.player.health -= hitResult.damage;
-					this.player.onDamage(); // Reset shield regen timer
-					this.triggerGamepadHaptic(hitResult.damage); // Controller vibration
+					this.player.onDamage(hitResult.damage); // Reset shield regen timer and trigger haptic
 					DebugLogger.log(`Player hit by projectile! Health: ${this.player.health}`);
 
 					if (hitResult.sound) {
