@@ -800,6 +800,23 @@ class Game extends EventTarget {
 	_cheat_clearLevel() {
 		this.npcs = [];
 	}
+
+	_cheat_testLevel() {
+		// Clear existing NPCs
+		this.npcs = [];
+
+		// Spawn one of each NPC type using SpawnSystem
+		const entityTypes = Object.keys(GameConfig.SPAWNING.ENTITY_TYPES);
+		for (const entityType of entityTypes) {
+			SpawnSystem.spawnEntity(
+				entityType,
+				this.player.sprite.position,
+				this.canvas.width,
+				this.canvas.height,
+				this.npcs
+			);
+		}
+	}
 }
 
 export { Game };
