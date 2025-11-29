@@ -31,13 +31,13 @@ class ParticleSystem {
 	}
 
 	// Create a large burst for NPC explosions
-	spawnExplosion(position, color = "255, 150, 50") {
-		const particleCount = 24;
-		const minSpeed = 0.03;
-		const maxSpeed = 0.12;
-		const lifetime = 600; // milliseconds
-		const minSize = 2;
-		const maxSize = 4;
+	spawnExplosion(position, color = "255, 150, 50", params = {}) {
+		const particleCount = params.particleCount || 24;
+		const minSpeed = params.minSpeed || 0.03;
+		const maxSpeed = params.maxSpeed || 0.12;
+		const lifetime = params.lifetime || 600; // milliseconds
+		const minSize = params.minSize || 2;
+		const maxSize = params.maxSize || 4;
 
 		for (let i = 0; i < particleCount; i++) {
 			const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.3;

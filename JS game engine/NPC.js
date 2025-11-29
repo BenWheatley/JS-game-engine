@@ -34,6 +34,9 @@ class NPC extends GameEntity {
     // Health bar configuration (can be boolean for backward compat, or number for width)
     this.healthBarWidth = config.SHOW_HEALTH_BAR || 0;
 
+    // Explosion configuration (optional - defaults to standard explosion)
+    this.explosionParams = config.EXPLOSION_PARAMS || null;
+
     // AI state machine
     this.targetPosition = null;
     this.canvasWidth = canvasWidth;

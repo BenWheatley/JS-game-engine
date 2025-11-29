@@ -358,8 +358,8 @@ class Game extends EventTarget {
 		// Add score
 		this.score += npc.scoreValue;
 
-		// Spawn explosion particles
-		this.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor);
+		// Spawn explosion particles (with custom params for large ships)
+		this.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor, npc.explosionParams);
 
 		// Handle spawns (e.g., asteroid fragments)
 		// Note: hitResult.spawns is handled in the shot collision code path

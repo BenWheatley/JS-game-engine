@@ -264,7 +264,15 @@ const GameConfig = {
     DESTROYED_VOLUME: 1.0,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.8               // Volume for collision sound
+    COLLISION_VOLUME: 0.8,              // Volume for collision sound
+    EXPLOSION_PARAMS: {                 // Large impressive explosion
+      particleCount: 120,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 3400,
+      minSize: 3,
+      maxSize: 8
+    }
   },
 
   // Alien Carrier - Spawns fighters when on-screen
@@ -290,7 +298,15 @@ const GameConfig = {
     DESTROYED_VOLUME: 1.0,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.9               // Volume for collision sound
+    COLLISION_VOLUME: 0.9,              // Volume for collision sound
+    EXPLOSION_PARAMS: {                 // Large impressive explosion
+      particleCount: 120,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 3400,
+      minSize: 3,
+      maxSize: 8
+    }
   },
 
   // Asteroid - Large destructible obstacle
