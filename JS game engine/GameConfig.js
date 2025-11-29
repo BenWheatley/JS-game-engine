@@ -200,7 +200,7 @@ const GameConfig = {
     HEIGHT: 92,
     HEALTH: 200,
     SCORE_VALUE: 200,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    SHOW_HEALTH_BAR: 60,                // Health bar width in pixels
     FORWARD_ACCELERATION: 0.0004,       // Slower than AlienScout
     MAX_SPEED: 0.04,                    // Slower than AlienScout
     ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
@@ -223,7 +223,7 @@ const GameConfig = {
     HEIGHT: 64,
     HEALTH: 100,
     SCORE_VALUE: 500,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    SHOW_HEALTH_BAR: 60,                // Health bar width in pixels
     MOVEMENT_DURATION: 4500,            // Milliseconds to reach target
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
@@ -244,7 +244,7 @@ const GameConfig = {
     HEIGHT: 96,
     HEALTH: 5000,
     SCORE_VALUE: 10000,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    SHOW_HEALTH_BAR: 120,               // Health bar width in pixels (2x normal for large ship)
     FORWARD_ACCELERATION: 0.0005,       // Slow acceleration
     MAX_SPEED: 0.05,                    // 0.5x player speed
     ROTATIONAL_SPEED: Math.PI / 1800,   // Slow rotation
@@ -274,7 +274,7 @@ const GameConfig = {
     HEIGHT: 128,
     HEALTH: 3000,
     SCORE_VALUE: 4000,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    SHOW_HEALTH_BAR: 120,               // Health bar width in pixels (2x normal for large ship)
     FORWARD_ACCELERATION: 0.0002,       // Very slow acceleration
     MAX_SPEED: 0.02,                    // 0.2x player speed (slowest ship)
     ROTATIONAL_SPEED: Math.PI / 2400,   // Very slow rotation

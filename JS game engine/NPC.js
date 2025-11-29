@@ -31,8 +31,8 @@ class NPC extends GameEntity {
     this.collisionVolume = config.COLLISION_VOLUME;
     this.rotationalSpeed = config.ROTATIONAL_SPEED;
 
-    // Health bar configuration
-    this.showHealthBar = config.SHOW_HEALTH_BAR || false;
+    // Health bar configuration (can be boolean for backward compat, or number for width)
+    this.healthBarWidth = config.SHOW_HEALTH_BAR || 0;
 
     // AI state machine
     this.targetPosition = null;
@@ -155,14 +155,14 @@ class NPC extends GameEntity {
     // Draw sprite first
     super.draw();
 
-    // Draw health bar if enabled
-    if (this.showHealthBar) {
+    // Draw health bar if width is specified (0 = no health bar)
+    if (this.healthBarWidth > 0) {
       const context = Sprite._context;
       if (!context) return;
 
       const healthPercentage = Math.max(0, Math.min(1, this.health / this.maxHealth));
 
-      const barWidth = 60;
+      const barWidth = this.healthBarWidth;
       const barHeight = 6;
       const barX = this.sprite.position.x - barWidth / 2;
       const barY = this.sprite.position.y - this.sprite.size.y / 2 - 12; // 12 pixels above sprite
