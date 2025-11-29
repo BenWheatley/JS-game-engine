@@ -55,7 +55,10 @@ class Game extends EventTarget {
 		this.achievementStats = {
 		  damageTakenThisWave: 0 // Damage taken in current wave (for untouchable)
 		};
-		
+
+		// Debug flags
+		this._showBoundingBoxes = false;
+
 		this.advanceLevel();
 	}
 
@@ -182,7 +185,80 @@ class Game extends EventTarget {
 			this.player.draw();
 		}
 
+		// Debug: Draw bounding boxes if enabled
+		if (this._showBoundingBoxes) {
+			this.drawBoundingBoxes(context);
+		}
+
 		context.restore();
+	}
+
+	drawBoundingBoxes(context) {
+		context.strokeStyle = 'rgba(0, 255, 0, 0.7)';
+		context.lineWidth = 2;
+
+		// Draw player bounding box
+		if (this.player.health > 0) {
+			const halfWidth = this.player.sprite.size.x / 2;
+			const halfHeight = this.player.sprite.size.y / 2;
+			context.strokeRect(
+				this.player.sprite.position.x - halfWidth,
+				this.player.sprite.position.y - halfHeight,
+				this.player.sprite.size.x,
+				this.player.sprite.size.y
+			);
+		}
+
+		// Draw NPC bounding boxes
+		for (const npc of this.npcs) {
+			const halfWidth = npc.sprite.size.x / 2;
+			const halfHeight = npc.sprite.size.y / 2;
+			context.strokeRect(
+				npc.sprite.position.x - halfWidth,
+				npc.sprite.position.y - halfHeight,
+				npc.sprite.size.x,
+				npc.sprite.size.y
+			);
+		}
+
+		// Draw player projectile bounding boxes
+		context.strokeStyle = 'rgba(0, 255, 255, 0.5)'; // Cyan for player projectiles
+		for (const proj of this.playerProjectiles) {
+			const halfWidth = proj.sprite.size.x / 2;
+			const halfHeight = proj.sprite.size.y / 2;
+			context.strokeRect(
+				proj.sprite.position.x - halfWidth,
+				proj.sprite.position.y - halfHeight,
+				proj.sprite.size.x,
+				proj.sprite.size.y
+			);
+		}
+
+		// Draw NPC projectile bounding boxes
+		context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Red for NPC projectiles
+		for (const proj of this.npcProjectiles) {
+			const halfWidth = proj.sprite.size.x / 2;
+			const halfHeight = proj.sprite.size.y / 2;
+			context.strokeRect(
+				proj.sprite.position.x - halfWidth,
+				proj.sprite.position.y - halfHeight,
+				proj.sprite.size.x,
+				proj.sprite.size.y
+			);
+		}
+
+		// Draw wormhole bounding box
+		if (this.wormhole) {
+			context.strokeStyle = 'rgba(255, 255, 0, 0.7)'; // Yellow for wormhole
+			const halfWidth = this.wormhole.sprite.size.x / 2;
+			const halfHeight = this.wormhole.sprite.size.y / 2;
+			context.strokeRect(
+				this.wormhole.position.x - halfWidth,
+				this.wormhole.position.y - halfHeight,
+				this.wormhole.sprite.size.x,
+				this.wormhole.sprite.size.y
+			);
+		}
 	}
 	
 	renderWormholeMessageAndArrow() {
@@ -799,6 +875,7 @@ class Game extends EventTarget {
 	
 	_cheat_clearLevel() {
 		this.npcs = [];
+		this._showBoundingBoxes = true;
 	}
 
 	_cheat_testLevel() {
@@ -816,10 +893,11 @@ class Game extends EventTarget {
 				this.npcs
 			);
 		}
-		
+
 		this.player.weaponLevel = 7;
 		this.player.shieldLevel = 7;
 		this.player.health = 500;
+		this._showBoundingBoxes = true;
 	}
 }
 
