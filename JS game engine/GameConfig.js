@@ -213,7 +213,15 @@ const GameConfig = {
     DESTROYED_VOLUME: 0.6,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.7               // Volume for collision sound
+    COLLISION_VOLUME: 0.7,               // Volume for collision sound
+    EXPLOSION_PARAMS: {
+      particleCount: 50,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 1200,
+      minSize: 3,
+      maxSize: 8
+    }
   },
 
   // Alien Saucer - Flying saucer with ease-in-out movement
@@ -234,7 +242,15 @@ const GameConfig = {
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.6               // Volume for collision sound
+    COLLISION_VOLUME: 0.6,               // Volume for collision sound
+    EXPLOSION_PARAMS: {
+      particleCount: 50,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 1200,
+      minSize: 3,
+      maxSize: 8
+    }
   },
 
   // Alien Battleship (Siege Destroyer) - Heavy ship with charge-up beam weapon
@@ -282,7 +298,7 @@ const GameConfig = {
     HEIGHT: 128,
     HEALTH: 3000,
     SCORE_VALUE: 4000,
-    SHOW_HEALTH_BAR: 120,               // Health bar width in pixels (2x normal for large ship)
+    SHOW_HEALTH_BAR: 100,               // Health bar width in pixels (2x normal for large ship)
     FORWARD_ACCELERATION: 0.0002,       // Very slow acceleration
     MAX_SPEED: 0.02,                    // 0.2x player speed (slowest ship)
     ROTATIONAL_SPEED: Math.PI / 2400,   // Very slow rotation
@@ -300,10 +316,10 @@ const GameConfig = {
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.9,              // Volume for collision sound
     EXPLOSION_PARAMS: {                 // Large impressive explosion
-      particleCount: 120,
+      particleCount: 90,
       minSpeed: 0.05,
       maxSpeed: 0.25,
-      lifetime: 3400,
+      lifetime: 2400,
       minSize: 3,
       maxSize: 8
     }

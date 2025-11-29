@@ -816,6 +816,10 @@ class Game extends EventTarget {
 				this.npcs
 			);
 		}
+		
+		this.player.weaponLevel = 7;
+		this.player.shieldLevel = 7;
+		this.player.health = 500;
 	}
 }
 
