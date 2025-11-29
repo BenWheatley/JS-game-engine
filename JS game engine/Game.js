@@ -194,11 +194,11 @@ class Game extends EventTarget {
 	}
 
 	drawBoundingBoxes(context) {
-		context.strokeStyle = 'rgba(0, 255, 0, 0.7)';
 		context.lineWidth = 2;
 
-		// Draw player bounding box
+		// Draw player AABB (axis-aligned bounding box)
 		if (this.player.health > 0) {
+			context.strokeStyle = 'rgba(0, 255, 0, 0.7)';
 			const halfWidth = this.player.sprite.size.x / 2;
 			const halfHeight = this.player.sprite.size.y / 2;
 			context.strokeRect(
@@ -209,7 +209,8 @@ class Game extends EventTarget {
 			);
 		}
 
-		// Draw NPC bounding boxes
+		// Draw NPC AABBs (axis-aligned bounding boxes)
+		context.strokeStyle = 'rgba(255, 100, 0, 0.7)'; // Orange for NPCs
 		for (const npc of this.npcs) {
 			const halfWidth = npc.sprite.size.x / 2;
 			const halfHeight = npc.sprite.size.y / 2;
@@ -221,7 +222,7 @@ class Game extends EventTarget {
 			);
 		}
 
-		// Draw player projectile bounding boxes
+		// Draw player projectile AABBs
 		context.strokeStyle = 'rgba(0, 255, 255, 0.5)'; // Cyan for player projectiles
 		for (const proj of this.playerProjectiles) {
 			const halfWidth = proj.sprite.size.x / 2;
@@ -234,7 +235,7 @@ class Game extends EventTarget {
 			);
 		}
 
-		// Draw NPC projectile bounding boxes
+		// Draw NPC projectile AABBs
 		context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Red for NPC projectiles
 		for (const proj of this.npcProjectiles) {
 			const halfWidth = proj.sprite.size.x / 2;
@@ -247,17 +248,21 @@ class Game extends EventTarget {
 			);
 		}
 
-		// Draw wormhole bounding box
+		// Draw wormhole collision circle (uses checkCircle with radiusScale=3)
 		if (this.wormhole) {
 			context.strokeStyle = 'rgba(255, 255, 0, 0.7)'; // Yellow for wormhole
-			const halfWidth = this.wormhole.sprite.size.x / 2;
-			const halfHeight = this.wormhole.sprite.size.y / 2;
-			context.strokeRect(
-				this.wormhole.position.x - halfWidth,
-				this.wormhole.position.y - halfHeight,
-				this.wormhole.sprite.size.x,
-				this.wormhole.sprite.size.y
+			// Matches CollisionDetection.checkCircle() calculation
+			const radiusScale = 3;
+			const collisionRadius = this.wormhole.size.x / radiusScale;
+			context.beginPath();
+			context.arc(
+				this.wormhole.position.x,
+				this.wormhole.position.y,
+				collisionRadius,
+				0,
+				Math.PI * 2
 			);
+			context.stroke();
 		}
 	}
 	
