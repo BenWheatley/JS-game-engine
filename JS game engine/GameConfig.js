@@ -21,6 +21,18 @@ const GameConfig = {
     SPRITE_UP_ANGLE_OFFSET: Math.PI / 2 // Sprite faces up at rotation 0, add 90° to get direction
   },
 
+  // Particle system explosion configurations
+  EXPLOSIONS: {
+    SMALL: {
+      particleCount: 24,
+      minSpeed: 0.03,
+      maxSpeed: 0.12,
+      lifetime: 600,
+      minSize: 2,
+      maxSize: 4
+    }
+  },
+
   // NPC AI behavior constants (AlienScout, AlienFighter, MissileCruiser)
   NPC: {
     ARRIVAL_THRESHOLD: 50,              // Distance in pixels to consider target reached

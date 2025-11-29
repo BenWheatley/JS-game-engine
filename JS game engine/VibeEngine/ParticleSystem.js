@@ -1,5 +1,6 @@
 import { Particle } from './Particle.js';
 import { Vector2D } from './Vector2D.js';
+import { GameConfig } from '../GameConfig.js';
 
 class ParticleSystem {
 	constructor() {
@@ -31,13 +32,13 @@ class ParticleSystem {
 	}
 
 	// Create a large burst for NPC explosions
-	spawnExplosion(position, color = "255, 150, 50", params = {}) {
-		const particleCount = params.particleCount || 24;
-		const minSpeed = params.minSpeed || 0.03;
-		const maxSpeed = params.maxSpeed || 0.12;
-		const lifetime = params.lifetime || 600; // milliseconds
-		const minSize = params.minSize || 2;
-		const maxSize = params.maxSize || 4;
+	spawnExplosion(position, color = "255, 150, 50", params = GameConfig.EXPLOSIONS.SMALL) {
+		const particleCount = params.particleCount;
+		const minSpeed = params.minSpeed;
+		const maxSpeed = params.maxSpeed;
+		const lifetime = params.lifetime;
+		const minSize = params.minSize;
+		const maxSize = params.maxSize;
 
 		for (let i = 0; i < particleCount; i++) {
 			const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.3;
