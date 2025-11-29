@@ -115,37 +115,26 @@ const GameConfig = {
   // Wave-based spawning system - defines enemy composition per level
   SPAWNING: {
     // Level progression - defines what spawns at each level
-    // Each level specifies counts for: scouts, fighters, cruisers, saucers, battleships, carriers, asteroids
     WAVES: [
-      // Level 1: Tutorial - Easy start
-      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 1, alienCarriers: 1, asteroids: 2 },
-
-      // Level 2: Introduce fighters
+      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 2 },
       { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 3 },
-
-      // Level 3: More enemies
       { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
-
-      // Level 4: Introduce alien saucers
       { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
-
-      // Level 5: Ramping up
       { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 5 },
-
-      // Level 6: Heavy combat
       { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
-
-      // Level 7: Elite wave
       { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
-
-      // Level 8: Introduce missile cruisers
       { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 7 },
-
-      // Level 9: Near impossible
       { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 8 },
-
-      // Level 10+: Repeating pattern with scaling
-      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 10 }
+      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 10 },
+      { alienScouts: 12, alienFighters: 15, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 1, asteroids: 10 },
+      { alienScouts: 10, alienFighters: 20, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 1, asteroids: 10 },
+      { alienScouts: 5, alienFighters: 20, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 3, alienBattleships: 0, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 3, alienBattleships: 1, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 4, alienBattleships: 1, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 5, alienBattleships: 1, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 5, alienBattleships: 2, alienCarriers: 2, asteroids: 10 }
+      // Procedural after this point
     ],
 
     // Scaling factor for levels beyond the wave definitions
