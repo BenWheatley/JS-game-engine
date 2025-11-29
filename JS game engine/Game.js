@@ -423,7 +423,10 @@ class Game extends EventTarget {
 		// Update all NPCs with unified loop
 		for (const npc of this.npcs) {
 			// All NPCs accept playerPosition; battleships also need gameTime
-			npc.update(deltaTime, this.player.sprite.position, this.gameTime);
+			const updateResult = npc.update(deltaTime, this.player.sprite.position, this.gameTime);
+			if (updateResult !== undefined && updateResult !== null) {
+				soundManager.play(updateResult.sound, updateResult.volume);
+			}
 
 			// Handle NPC shooting (unified)
 			if (npc.tryShoot) {
@@ -451,10 +454,9 @@ class Game extends EventTarget {
 				);
 				if (spawnResult && spawnResult.fighters) {
 					this.npcs.push(...spawnResult.fighters);
-					// TODO: Play spawn sound when asset is available
-					// if (spawnResult.sound) {
-					//   soundManager.play(spawnResult.sound, spawnResult.volume);
-					// }
+					if (spawnResult.sound) {
+					  soundManager.play(spawnResult.sound, spawnResult.volume);
+					}
 				}
 			}
 

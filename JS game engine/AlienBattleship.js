@@ -52,11 +52,10 @@ class AlienBattleship extends NPC {
 					const toPlayer = playerPosition.sub(this.sprite.position);
 					this.targetAimRotation = Math.atan2(toPlayer.y, toPlayer.x) + GameConfig.SHARED.SPRITE_UP_ANGLE_OFFSET;
 
-					// TODO: Play charge sound when asset is available
-					// soundEvent = {
-					//   sound: GameConfig.ALIEN_BATTLESHIP.CHARGE_SOUND,
-					//   volume: GameConfig.ALIEN_BATTLESHIP.CHARGE_VOLUME
-					// };
+					soundEvent = {
+					   sound: GameConfig.ALIEN_BATTLESHIP.CHARGE_SOUND,
+					   volume: GameConfig.ALIEN_BATTLESHIP.CHARGE_VOLUME
+					};
 				}
 				break;
 
@@ -73,11 +72,10 @@ class AlienBattleship extends NPC {
 					// Activate beam
 					this.beam.activate();
 
-					// TODO: Play beam sound when asset is available
-					// soundEvent = {
-					//   sound: GameConfig.ALIEN_BATTLESHIP.BEAM_SOUND,
-					//   volume: GameConfig.ALIEN_BATTLESHIP.BEAM_VOLUME
-					// };
+					soundEvent = {
+					   sound: GameConfig.ALIEN_BATTLESHIP.BEAM_SOUND,
+					   volume: GameConfig.ALIEN_BATTLESHIP.BEAM_VOLUME
+					};
 				}
 				break;
 
@@ -124,8 +122,9 @@ class AlienBattleship extends NPC {
 
 	update(deltaTime, playerPosition, gameTime) {
 		// Update attack state machine (must be called before movement AI)
+		let soundEvent = null;
 		if (gameTime !== undefined) {
-			this.updateAttackState(gameTime, playerPosition);
+			soundEvent = this.updateAttackState(gameTime, playerPosition);
 		}
 
 		// Check if we need a new target (only when not charging/firing)
@@ -150,6 +149,8 @@ class AlienBattleship extends NPC {
 
 		// Update position using parent update
 		super.update(deltaTime);
+		
+		return soundEvent;
 	}
 
 	/**

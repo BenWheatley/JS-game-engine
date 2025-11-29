@@ -40,7 +40,10 @@ class AssetLoader {
     'shoot': 'laser_1.2.m4a',
     'explosion': 'explosion_medium.m4a',
     'hit': 'explosion_small.m4a',
-    'missile_launcher': 'missile_launcher.m4a'
+    'missile_launcher': 'missile_launcher.m4a',
+    'sine_sweep_80_to_120': 'sine_sweep_80_to_120.m4a',
+    'battleship-mega-laser': 'battleship-mega-laser.m4a',
+    'launch-fighter': 'launch-fighter.m4a',
   };
 
   /**

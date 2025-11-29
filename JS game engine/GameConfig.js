@@ -253,8 +253,8 @@ const GameConfig = {
     IMAGE_URL: 'alien-battleship.png',
     WIDTH: 96,
     HEIGHT: 96,
-    HEALTH: 450,
-    SCORE_VALUE: 550,
+    HEALTH: 5000,
+    SCORE_VALUE: 10000,
     SHOW_HEALTH_BAR: true,              // Display health bar above sprite
     FORWARD_ACCELERATION: 0.0005,       // Slow acceleration
     MAX_SPEED: 0.05,                    // 0.5x player speed
@@ -272,7 +272,7 @@ const GameConfig = {
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
     HIT_VOLUME: 0.5,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
-    DESTROYED_VOLUME: 0.7,              // Volume for destruction sound
+    DESTROYED_VOLUME: 1.0,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.8               // Volume for collision sound
@@ -283,8 +283,8 @@ const GameConfig = {
     IMAGE_URL: 'alien-carrier.png',
     WIDTH: 128,
     HEIGHT: 128,
-    HEALTH: 600,
-    SCORE_VALUE: 800,
+    HEALTH: 3000,
+    SCORE_VALUE: 4000,
     SHOW_HEALTH_BAR: true,              // Display health bar above sprite
     FORWARD_ACCELERATION: 0.0002,       // Very slow acceleration
     MAX_SPEED: 0.02,                    // 0.2x player speed (slowest ship)
@@ -293,12 +293,12 @@ const GameConfig = {
     SPAWN_COUNT: 2,                     // Number of fighters spawned per cycle
     MAX_SPAWNED_FIGHTERS: 6,            // Maximum active spawned fighters
     VISIBILITY_MARGIN: -50,             // Negative margin = must be on-screen (not off-screen)
-    SPAWN_SOUND: 'spawn',               // Sound effect when spawning (TODO: add asset)
+    SPAWN_SOUND: 'launch-fighter',      // Sound effect when spawning
     SPAWN_VOLUME: 0.4,                  // Volume for spawn sound
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
     HIT_VOLUME: 0.6,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
-    DESTROYED_VOLUME: 0.8,              // Volume for destruction sound
+    DESTROYED_VOLUME: 1.0,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
     COLLISION_VOLUME: 0.9               // Volume for collision sound
