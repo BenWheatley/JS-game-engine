@@ -233,7 +233,18 @@ const GameConfig = {
       lifetime: 1200,
       minSize: 3,
       maxSize: 8
-    }
+    },
+    // Collision polygon (points relative to center, assuming missile cruiser has narrow front/back)
+    COLLISION_POLYGON: [
+      {x: 0, y: -46},      // Nose (top when sprite pointing up)
+      {x: 20, y: -30},     // Right front
+      {x: 30, y: 0},       // Right mid
+      {x: 25, y: 35},      // Right rear
+      {x: 0, y: 46},       // Tail (bottom when sprite pointing up)
+      {x: -25, y: 35},     // Left rear
+      {x: -30, y: 0},      // Left mid
+      {x: -20, y: -30}     // Left front
+    ]
   },
 
   // Alien Saucer - Flying saucer with ease-in-out movement
@@ -300,7 +311,18 @@ const GameConfig = {
       lifetime: 3400,
       minSize: 3,
       maxSize: 8
-    }
+    },
+    // Collision polygon (heavy battleship - bulky octagon hull)
+    COLLISION_POLYGON: [
+      {x: 0, y: -48},      // Front nose
+      {x: 35, y: -30},     // Right front
+      {x: 42, y: 0},       // Right mid
+      {x: 35, y: 30},      // Right rear
+      {x: 0, y: 48},       // Rear tail
+      {x: -35, y: 30},     // Left rear
+      {x: -42, y: 0},      // Left mid
+      {x: -35, y: -30}     // Left front
+    ]
   },
 
   // Alien Carrier - Spawns fighters when on-screen
@@ -334,7 +356,18 @@ const GameConfig = {
       lifetime: 2400,
       minSize: 3,
       maxSize: 8
-    }
+    },
+    // Collision polygon (large carrier - wide hexagonal hull with hangar bay)
+    COLLISION_POLYGON: [
+      {x: 0, y: -64},      // Front nose
+      {x: 50, y: -40},     // Right front
+      {x: 55, y: 0},       // Right mid (hangar bay width)
+      {x: 50, y: 40},      // Right rear
+      {x: 0, y: 64},       // Rear tail
+      {x: -50, y: 40},     // Left rear
+      {x: -55, y: 0},      // Left mid
+      {x: -50, y: -40}     // Left front
+    ]
   },
 
   // Asteroid - Large destructible obstacle

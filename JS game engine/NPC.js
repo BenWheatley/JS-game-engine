@@ -37,6 +37,9 @@ class NPC extends GameEntity {
     // Explosion configuration (defaults to small explosion if not specified)
     this.explosionParams = config.EXPLOSION_PARAMS || GameConfig.EXPLOSIONS.SMALL;
 
+    // Collision polygon (if defined in config)
+    this.collisionPolygon = config.COLLISION_POLYGON || null;
+
     // AI state machine
     this.targetPosition = null;
     this.canvasWidth = canvasWidth;

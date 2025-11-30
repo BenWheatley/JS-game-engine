@@ -209,17 +209,23 @@ class Game extends EventTarget {
 			);
 		}
 
-		// Draw NPC AABBs (axis-aligned bounding boxes)
+		// Draw NPC collision shapes (polygon or AABB)
 		context.strokeStyle = 'rgba(255, 100, 0, 0.7)'; // Orange for NPCs
 		for (const npc of this.npcs) {
-			const halfWidth = npc.sprite.size.x / 2;
-			const halfHeight = npc.sprite.size.y / 2;
-			context.strokeRect(
-				npc.sprite.position.x - halfWidth,
-				npc.sprite.position.y - halfHeight,
-				npc.sprite.size.x,
-				npc.sprite.size.y
-			);
+			if (npc.collisionPolygon) {
+				// Draw polygon
+				this.drawCollisionPolygon(context, npc.collisionPolygon, npc.sprite.position, npc.sprite.rotation);
+			} else {
+				// Draw AABB
+				const halfWidth = npc.sprite.size.x / 2;
+				const halfHeight = npc.sprite.size.y / 2;
+				context.strokeRect(
+					npc.sprite.position.x - halfWidth,
+					npc.sprite.position.y - halfHeight,
+					npc.sprite.size.x,
+					npc.sprite.size.y
+				);
+			}
 		}
 
 		// Draw player projectile AABBs
@@ -264,6 +270,31 @@ class Game extends EventTarget {
 			);
 			context.stroke();
 		}
+	}
+
+	drawCollisionPolygon(context, localPoints, position, rotation) {
+		// Transform polygon to world space (same as CollisionDetection.transformPolygon)
+		const cos = Math.cos(rotation);
+		const sin = Math.sin(rotation);
+
+		context.beginPath();
+		for (let i = 0; i < localPoints.length; i++) {
+			const point = localPoints[i];
+			// Rotate point
+			const rotatedX = point.x * cos - point.y * sin;
+			const rotatedY = point.x * sin + point.y * cos;
+			// Translate to world position
+			const worldX = rotatedX + position.x;
+			const worldY = rotatedY + position.y;
+
+			if (i === 0) {
+				context.moveTo(worldX, worldY);
+			} else {
+				context.lineTo(worldX, worldY);
+			}
+		}
+		context.closePath();
+		context.stroke();
 	}
 	
 	renderWormholeMessageAndArrow() {
@@ -579,7 +610,7 @@ class Game extends EventTarget {
 		// Check player shot collisions with all NPCs (unified loop)
 		for (const shot of this.playerProjectiles) {
 			for (const npc of this.npcs) {
-				if (CollisionDetection.checkAABB(shot, npc)) {
+				if (CollisionDetection.check(shot, npc)) {
 					playerProjectilesToRemove.add(shot);
 
 					// Spawn impact particles and sound from shot properties
@@ -622,7 +653,7 @@ class Game extends EventTarget {
 		// Check player-NPC collisions (unified loop) - only if player is alive
 		if (this.player.health > 0) {
 			for (const npc of this.npcs) {
-				if (CollisionDetection.checkAABB(this.player, npc)) {
+				if (CollisionDetection.check(this.player, npc)) {
 					npcsToRemove.add(npc);
 
 					const collisionResult = npc.onCollideWithPlayer();
@@ -652,7 +683,7 @@ class Game extends EventTarget {
 		// Check NPC projectile-player collisions (unified loop) - only if player is alive
 		if (this.player.health > 0) {
 			for (const projectile of this.npcProjectiles) {
-				if (CollisionDetection.checkAABB(this.player, projectile)) {
+				if (CollisionDetection.check(this.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
 
 					const hitResult = projectile.onHitPlayer();
