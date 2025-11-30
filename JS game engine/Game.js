@@ -55,7 +55,10 @@ class Game extends EventTarget {
 		this.achievementStats = {
 		  damageTakenThisWave: 0 // Damage taken in current wave (for untouchable)
 		};
-		
+
+		// Debug flags
+		this._showBoundingBoxes = false;
+
 		this.advanceLevel();
 	}
 
@@ -182,7 +185,116 @@ class Game extends EventTarget {
 			this.player.draw();
 		}
 
+		// Debug: Draw bounding boxes if enabled
+		if (this._showBoundingBoxes) {
+			this.drawBoundingBoxes(context);
+		}
+
 		context.restore();
+	}
+
+	drawBoundingBoxes(context) {
+		context.lineWidth = 2;
+
+		// Draw player AABB (axis-aligned bounding box)
+		if (this.player.health > 0) {
+			context.strokeStyle = 'rgba(0, 255, 0, 0.7)';
+			const halfWidth = this.player.sprite.size.x / 2;
+			const halfHeight = this.player.sprite.size.y / 2;
+			context.strokeRect(
+				this.player.sprite.position.x - halfWidth,
+				this.player.sprite.position.y - halfHeight,
+				this.player.sprite.size.x,
+				this.player.sprite.size.y
+			);
+		}
+
+		// Draw NPC collision shapes (polygon or AABB)
+		context.strokeStyle = 'rgba(255, 100, 0, 0.7)'; // Orange for NPCs
+		for (const npc of this.npcs) {
+			if (npc.collisionPolygon) {
+				// Draw polygon
+				this.drawCollisionPolygon(context, npc.collisionPolygon, npc.sprite.position, npc.sprite.rotation);
+			} else {
+				// Draw AABB
+				const halfWidth = npc.sprite.size.x / 2;
+				const halfHeight = npc.sprite.size.y / 2;
+				context.strokeRect(
+					npc.sprite.position.x - halfWidth,
+					npc.sprite.position.y - halfHeight,
+					npc.sprite.size.x,
+					npc.sprite.size.y
+				);
+			}
+		}
+
+		// Draw player projectile AABBs
+		context.strokeStyle = 'rgba(0, 255, 255, 0.5)'; // Cyan for player projectiles
+		for (const proj of this.playerProjectiles) {
+			const halfWidth = proj.sprite.size.x / 2;
+			const halfHeight = proj.sprite.size.y / 2;
+			context.strokeRect(
+				proj.sprite.position.x - halfWidth,
+				proj.sprite.position.y - halfHeight,
+				proj.sprite.size.x,
+				proj.sprite.size.y
+			);
+		}
+
+		// Draw NPC projectile AABBs
+		context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Red for NPC projectiles
+		for (const proj of this.npcProjectiles) {
+			const halfWidth = proj.sprite.size.x / 2;
+			const halfHeight = proj.sprite.size.y / 2;
+			context.strokeRect(
+				proj.sprite.position.x - halfWidth,
+				proj.sprite.position.y - halfHeight,
+				proj.sprite.size.x,
+				proj.sprite.size.y
+			);
+		}
+
+		// Draw wormhole collision circle (uses checkCircle with radiusScale=3)
+		if (this.wormhole) {
+			context.strokeStyle = 'rgba(255, 255, 0, 0.7)'; // Yellow for wormhole
+			// Matches CollisionDetection.checkCircle() calculation
+			const radiusScale = 3;
+			const collisionRadius = this.wormhole.size.x / radiusScale;
+			context.beginPath();
+			context.arc(
+				this.wormhole.position.x,
+				this.wormhole.position.y,
+				collisionRadius,
+				0,
+				Math.PI * 2
+			);
+			context.stroke();
+		}
+	}
+
+	drawCollisionPolygon(context, localPoints, position, rotation) {
+		// Transform polygon to world space (same as CollisionDetection.transformPolygon)
+		const cos = Math.cos(rotation);
+		const sin = Math.sin(rotation);
+
+		context.beginPath();
+		for (let i = 0; i < localPoints.length; i++) {
+			const point = localPoints[i];
+			// Rotate point
+			const rotatedX = point.x * cos - point.y * sin;
+			const rotatedY = point.x * sin + point.y * cos;
+			// Translate to world position
+			const worldX = rotatedX + position.x;
+			const worldY = rotatedY + position.y;
+
+			if (i === 0) {
+				context.moveTo(worldX, worldY);
+			} else {
+				context.lineTo(worldX, worldY);
+			}
+		}
+		context.closePath();
+		context.stroke();
 	}
 	
 	renderWormholeMessageAndArrow() {
@@ -358,8 +470,8 @@ class Game extends EventTarget {
 		// Add score
 		this.score += npc.scoreValue;
 
-		// Spawn explosion particles
-		this.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor);
+		// Spawn explosion particles (with custom params for large ships)
+		this.particleSystem.spawnExplosion(npc.sprite.position, npc.particleColor, npc.explosionParams);
 
 		// Handle spawns (e.g., asteroid fragments)
 		// Note: hitResult.spawns is handled in the shot collision code path
@@ -423,7 +535,10 @@ class Game extends EventTarget {
 		// Update all NPCs with unified loop
 		for (const npc of this.npcs) {
 			// All NPCs accept playerPosition; battleships also need gameTime
-			npc.update(deltaTime, this.player.sprite.position, this.gameTime);
+			const updateResult = npc.update(deltaTime, this.player.sprite.position, this.gameTime);
+			if (updateResult !== undefined && updateResult !== null) {
+				soundManager.play(updateResult.sound, updateResult.volume);
+			}
 
 			// Handle NPC shooting (unified)
 			if (npc.tryShoot) {
@@ -451,10 +566,9 @@ class Game extends EventTarget {
 				);
 				if (spawnResult && spawnResult.fighters) {
 					this.npcs.push(...spawnResult.fighters);
-					// TODO: Play spawn sound when asset is available
-					// if (spawnResult.sound) {
-					//   soundManager.play(spawnResult.sound, spawnResult.volume);
-					// }
+					if (spawnResult.sound) {
+					  soundManager.play(spawnResult.sound, spawnResult.volume);
+					}
 				}
 			}
 
@@ -496,7 +610,7 @@ class Game extends EventTarget {
 		// Check player shot collisions with all NPCs (unified loop)
 		for (const shot of this.playerProjectiles) {
 			for (const npc of this.npcs) {
-				if (CollisionDetection.checkAABB(shot, npc)) {
+				if (CollisionDetection.check(shot, npc)) {
 					playerProjectilesToRemove.add(shot);
 
 					// Spawn impact particles and sound from shot properties
@@ -539,7 +653,7 @@ class Game extends EventTarget {
 		// Check player-NPC collisions (unified loop) - only if player is alive
 		if (this.player.health > 0) {
 			for (const npc of this.npcs) {
-				if (CollisionDetection.checkAABB(this.player, npc)) {
+				if (CollisionDetection.check(this.player, npc)) {
 					npcsToRemove.add(npc);
 
 					const collisionResult = npc.onCollideWithPlayer();
@@ -569,7 +683,7 @@ class Game extends EventTarget {
 		// Check NPC projectile-player collisions (unified loop) - only if player is alive
 		if (this.player.health > 0) {
 			for (const projectile of this.npcProjectiles) {
-				if (CollisionDetection.checkAABB(this.player, projectile)) {
+				if (CollisionDetection.check(this.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
 
 					const hitResult = projectile.onHitPlayer();
@@ -797,6 +911,29 @@ class Game extends EventTarget {
 	
 	_cheat_clearLevel() {
 		this.npcs = [];
+		this._showBoundingBoxes = true;
+	}
+
+	_cheat_testLevel() {
+		// Clear existing NPCs
+		this.npcs = [];
+
+		// Spawn one of each NPC type using SpawnSystem
+		const entityTypes = Object.keys(GameConfig.SPAWNING.ENTITY_TYPES);
+		for (const entityType of entityTypes) {
+			SpawnSystem.spawnEntity(
+				entityType,
+				this.player.sprite.position,
+				this.canvas.width,
+				this.canvas.height,
+				this.npcs
+			);
+		}
+
+		this.player.weaponLevel = 7;
+		this.player.shieldLevel = 7;
+		this.player.health = 500;
+		this._showBoundingBoxes = true;
 	}
 }
 

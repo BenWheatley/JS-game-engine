@@ -21,6 +21,18 @@ const GameConfig = {
     SPRITE_UP_ANGLE_OFFSET: Math.PI / 2 // Sprite faces up at rotation 0, add 90° to get direction
   },
 
+  // Particle system explosion configurations
+  EXPLOSIONS: {
+    SMALL: {
+      particleCount: 24,
+      minSpeed: 0.03,
+      maxSpeed: 0.12,
+      lifetime: 600,
+      minSize: 2,
+      maxSize: 4
+    }
+  },
+
   // NPC AI behavior constants (AlienScout, AlienFighter, MissileCruiser)
   NPC: {
     ARRIVAL_THRESHOLD: 50,              // Distance in pixels to consider target reached
@@ -115,37 +127,26 @@ const GameConfig = {
   // Wave-based spawning system - defines enemy composition per level
   SPAWNING: {
     // Level progression - defines what spawns at each level
-    // Each level specifies counts for: scouts, fighters, cruisers, saucers, battleships, carriers, asteroids
     WAVES: [
-      // Level 1: Tutorial - Easy start
-      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 1, alienCarriers: 1, asteroids: 2 },
-
-      // Level 2: Introduce fighters
+      { alienScouts: 3, alienFighters: 0, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 2 },
       { alienScouts: 4, alienFighters: 2, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 3 },
-
-      // Level 3: More enemies
       { alienScouts: 5, alienFighters: 3, missileCruisers: 0, alienSaucers: 0, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
-
-      // Level 4: Introduce alien saucers
       { alienScouts: 6, alienFighters: 4, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 4 },
-
-      // Level 5: Ramping up
       { alienScouts: 7, alienFighters: 5, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 5 },
-
-      // Level 6: Heavy combat
       { alienScouts: 8, alienFighters: 6, missileCruisers: 0, alienSaucers: 1, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
-
-      // Level 7: Elite wave
       { alienScouts: 9, alienFighters: 7, missileCruisers: 0, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 6 },
-
-      // Level 8: Introduce missile cruisers
       { alienScouts: 10, alienFighters: 8, missileCruisers: 1, alienSaucers: 2, alienBattleships: 0, alienCarriers: 0, asteroids: 7 },
-
-      // Level 9: Near impossible
       { alienScouts: 12, alienFighters: 10, missileCruisers: 2, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 8 },
-
-      // Level 10+: Repeating pattern with scaling
-      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 10 }
+      { alienScouts: 15, alienFighters: 12, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 0, asteroids: 10 },
+      { alienScouts: 12, alienFighters: 15, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 1, asteroids: 10 },
+      { alienScouts: 10, alienFighters: 20, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 1, asteroids: 10 },
+      { alienScouts: 5, alienFighters: 20, missileCruisers: 3, alienSaucers: 3, alienBattleships: 0, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 3, alienBattleships: 0, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 3, alienBattleships: 1, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 4, alienBattleships: 1, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 5, alienBattleships: 1, alienCarriers: 2, asteroids: 10 },
+      { alienScouts: 0, alienFighters: 20, missileCruisers: 4, alienSaucers: 5, alienBattleships: 2, alienCarriers: 2, asteroids: 10 }
+      // Procedural after this point
     ],
 
     // Scaling factor for levels beyond the wave definitions
@@ -211,7 +212,7 @@ const GameConfig = {
     HEIGHT: 92,
     HEALTH: 200,
     SCORE_VALUE: 200,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    SHOW_HEALTH_BAR: 60,                // Health bar width in pixels
     FORWARD_ACCELERATION: 0.0004,       // Slower than AlienScout
     MAX_SPEED: 0.04,                    // Slower than AlienScout
     ROTATIONAL_SPEED: Math.PI / 1500,   // Slower rotation than AlienScout
@@ -224,7 +225,26 @@ const GameConfig = {
     DESTROYED_VOLUME: 0.6,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.7               // Volume for collision sound
+    COLLISION_VOLUME: 0.7,               // Volume for collision sound
+    EXPLOSION_PARAMS: {
+      particleCount: 50,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 1200,
+      minSize: 3,
+      maxSize: 8
+    },
+    // Collision polygon (points relative to center, assuming missile cruiser has narrow front/back)
+    COLLISION_POLYGON: [
+      {x: 0, y: -46},      // Nose (top when sprite pointing up)
+      {x: 20, y: -30},     // Right front
+      {x: 30, y: 0},       // Right mid
+      {x: 25, y: 35},      // Right rear
+      {x: 0, y: 46},       // Tail (bottom when sprite pointing up)
+      {x: -25, y: 35},     // Left rear
+      {x: -30, y: 0},      // Left mid
+      {x: -20, y: -30}     // Left front
+    ]
   },
 
   // Alien Saucer - Flying saucer with ease-in-out movement
@@ -234,7 +254,7 @@ const GameConfig = {
     HEIGHT: 64,
     HEALTH: 100,
     SCORE_VALUE: 500,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    SHOW_HEALTH_BAR: 60,                // Health bar width in pixels
     MOVEMENT_DURATION: 4500,            // Milliseconds to reach target
     STOP_DURATION: 2000,                // Milliseconds to stay stopped (2 seconds)
     SHOOT_SOUND: 'shoot',               // Sound effect to play when shooting
@@ -245,7 +265,15 @@ const GameConfig = {
     DESTROYED_VOLUME: 0.5,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.6               // Volume for collision sound
+    COLLISION_VOLUME: 0.6,               // Volume for collision sound
+    EXPLOSION_PARAMS: {
+      particleCount: 50,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 1200,
+      minSize: 3,
+      maxSize: 8
+    }
   },
 
   // Alien Battleship (Siege Destroyer) - Heavy ship with charge-up beam weapon
@@ -253,9 +281,9 @@ const GameConfig = {
     IMAGE_URL: 'alien-battleship.png',
     WIDTH: 96,
     HEIGHT: 96,
-    HEALTH: 450,
-    SCORE_VALUE: 550,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    HEALTH: 5000,
+    SCORE_VALUE: 10000,
+    SHOW_HEALTH_BAR: 120,               // Health bar width in pixels (2x normal for large ship)
     FORWARD_ACCELERATION: 0.0005,       // Slow acceleration
     MAX_SPEED: 0.05,                    // 0.5x player speed
     ROTATIONAL_SPEED: Math.PI / 1800,   // Slow rotation
@@ -272,10 +300,29 @@ const GameConfig = {
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
     HIT_VOLUME: 0.5,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
-    DESTROYED_VOLUME: 0.7,              // Volume for destruction sound
+    DESTROYED_VOLUME: 1.0,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.8               // Volume for collision sound
+    COLLISION_VOLUME: 0.8,              // Volume for collision sound
+    EXPLOSION_PARAMS: {                 // Large impressive explosion
+      particleCount: 120,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 3400,
+      minSize: 3,
+      maxSize: 8
+    },
+    // Collision polygon (heavy battleship - bulky octagon hull)
+    COLLISION_POLYGON: [
+      {x: 0, y: -48},      // Front nose
+      {x: 35, y: -30},     // Right front
+      {x: 42, y: 0},       // Right mid
+      {x: 35, y: 30},      // Right rear
+      {x: 0, y: 48},       // Rear tail
+      {x: -35, y: 30},     // Left rear
+      {x: -42, y: 0},      // Left mid
+      {x: -35, y: -30}     // Left front
+    ]
   },
 
   // Alien Carrier - Spawns fighters when on-screen
@@ -283,9 +330,9 @@ const GameConfig = {
     IMAGE_URL: 'alien-carrier.png',
     WIDTH: 128,
     HEIGHT: 128,
-    HEALTH: 600,
-    SCORE_VALUE: 800,
-    SHOW_HEALTH_BAR: true,              // Display health bar above sprite
+    HEALTH: 3000,
+    SCORE_VALUE: 4000,
+    SHOW_HEALTH_BAR: 100,               // Health bar width in pixels (2x normal for large ship)
     FORWARD_ACCELERATION: 0.0002,       // Very slow acceleration
     MAX_SPEED: 0.02,                    // 0.2x player speed (slowest ship)
     ROTATIONAL_SPEED: Math.PI / 2400,   // Very slow rotation
@@ -293,15 +340,34 @@ const GameConfig = {
     SPAWN_COUNT: 2,                     // Number of fighters spawned per cycle
     MAX_SPAWNED_FIGHTERS: 6,            // Maximum active spawned fighters
     VISIBILITY_MARGIN: -50,             // Negative margin = must be on-screen (not off-screen)
-    SPAWN_SOUND: 'spawn',               // Sound effect when spawning (TODO: add asset)
+    SPAWN_SOUND: 'launch-fighter',      // Sound effect when spawning
     SPAWN_VOLUME: 0.4,                  // Volume for spawn sound
     HIT_SOUND: 'hit',                   // Sound when hit but not destroyed
     HIT_VOLUME: 0.6,                    // Volume for hit sound
     DESTROYED_SOUND: 'explosion',       // Sound when destroyed
-    DESTROYED_VOLUME: 0.8,              // Volume for destruction sound
+    DESTROYED_VOLUME: 1.0,              // Volume for destruction sound
     PARTICLE_COLOR: '255, 150, 50',     // Orange particle color
     COLLISION_SOUND: 'hit',             // Sound when colliding with player
-    COLLISION_VOLUME: 0.9               // Volume for collision sound
+    COLLISION_VOLUME: 0.9,              // Volume for collision sound
+    EXPLOSION_PARAMS: {                 // Large impressive explosion
+      particleCount: 90,
+      minSpeed: 0.05,
+      maxSpeed: 0.25,
+      lifetime: 2400,
+      minSize: 3,
+      maxSize: 8
+    },
+    // Collision polygon (large carrier - wide hexagonal hull with hangar bay)
+    COLLISION_POLYGON: [
+      {x: 0, y: -64},      // Front nose
+      {x: 50, y: -40},     // Right front
+      {x: 55, y: 0},       // Right mid (hangar bay width)
+      {x: 50, y: 40},      // Right rear
+      {x: 0, y: 64},       // Rear tail
+      {x: -50, y: 40},     // Left rear
+      {x: -55, y: 0},      // Left mid
+      {x: -50, y: -40}     // Left front
+    ]
   },
 
   // Asteroid - Large destructible obstacle
