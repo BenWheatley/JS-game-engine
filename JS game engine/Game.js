@@ -40,6 +40,7 @@ class Game extends EventTarget {
 
 		// Gameplay state (null when in menus, PLAYING during gameplay, PAUSED when paused)
 		this.currentState = null;
+		this.gameOverTriggered = false;
 		this.score = 0;
 		this.currentLevel = 0;
 
@@ -717,9 +718,9 @@ class Game extends EventTarget {
 		this.npcProjectiles = this.npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
 
 		// Check for game over - only trigger once
-		if (this.player.health <= 0 && this.player.health > -1000) {
+		if (this.player.health <= 0 && !this.gameOverTriggered) {
+			this.gameOverTriggered = true;
 			this.gameOver();
-			this.player.health = -1000; // Sentinel value to prevent retriggering
 			// Don't return - let the game continue running
 		}
 
