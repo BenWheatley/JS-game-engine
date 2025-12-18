@@ -68,11 +68,23 @@
 	</style>
 </head>
 <body>
-	<h1>Vector2D.js Test Suite</h1>
+	<h1>Unit Test Suite</h1>
 	<div id="results" class="test-results"></div>
 
-	<script src="Vector2D.js"></script>
-	<script>
+	<script type="module">
+		import { CollisionDetection } from './VibeEngine/CollisionDetection.js';
+		import { Vector2D } from './VibeEngine/Vector2D.js';
+
+		// Signal that modules are loaded
+		window.CollisionDetection = CollisionDetection;
+		window.Vector2D = Vector2D;
+		window.modulesLoaded = true;
+
+		// Trigger test execution
+		window.dispatchEvent(new Event('modulesReady'));
+	</script>
+
+	<script defer>
 		// Simple test framework
 		class TestRunner {
 			constructor() {
@@ -191,11 +203,18 @@
 			}
 		}
 
-		// Run tests
-		const runner = new TestRunner();
+		// Wait for modules to load before running tests
+		function runAllTests() {
+			// Check if modules are loaded
+			if (!window.CollisionDetection || !window.Vector2D) {
+				console.error('Modules not loaded yet');
+				return;
+			}
 
-		// Constructor tests
-		runner.describe('Vector2D Constructor', () => {
+			const runner = new TestRunner();
+
+			// Constructor tests
+			runner.describe('Vector2D Constructor', () => {
 			runner.it('should create vector with default values (0, 0)', () => {
 				const v = new Vector2D();
 				runner.assertEqual(v.x, 0);
@@ -655,8 +674,361 @@
 			});
 		});
 
-		// Render results
-		runner.render();
+		// ====================
+		// CollisionDetection Tests
+		// ====================
+
+		// Helper functions to create mock entities
+		function createAABBEntity(x, y, width, height) {
+			return {
+				sprite: {
+					position: new Vector2D(x, y),
+					size: new Vector2D(width, height),
+					rotation: 0
+				}
+			};
+		}
+
+		function createCircleEntity(x, y, radius) {
+			return {
+				position: new Vector2D(x, y),
+				size: new Vector2D(radius * 2, radius * 2)
+			};
+		}
+
+		function createPolygonEntity(x, y, width, height, polygon, rotation = 0) {
+			return {
+				sprite: {
+					position: new Vector2D(x, y),
+					size: new Vector2D(width, height),
+					rotation: rotation
+				},
+				collisionPolygon: polygon
+			};
+		}
+
+		// AABB vs AABB Collision Tests
+		runner.describe('CollisionDetection - AABB vs AABB', () => {
+			runner.it('should detect collision when AABBs overlap', () => {
+				const entity1 = createAABBEntity(0, 0, 20, 20);
+				const entity2 = createAABBEntity(10, 10, 20, 20);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should not detect collision when AABBs do not overlap', () => {
+				const entity1 = createAABBEntity(0, 0, 20, 20);
+				const entity2 = createAABBEntity(50, 50, 20, 20);
+				runner.assertFalse(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should detect collision when one AABB contains another', () => {
+				const entity1 = createAABBEntity(0, 0, 100, 100);
+				const entity2 = createAABBEntity(0, 0, 20, 20);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should handle negative positions correctly', () => {
+				const entity1 = createAABBEntity(-10, -10, 20, 20);
+				const entity2 = createAABBEntity(-5, -5, 20, 20);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should handle different sizes correctly', () => {
+				const entity1 = createAABBEntity(0, 0, 10, 50);
+				const entity2 = createAABBEntity(5, 0, 50, 10);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+		});
+
+		// Circle Collision Tests
+		runner.describe('CollisionDetection - Circle Collisions', () => {
+			runner.it('should detect collision when circles overlap', () => {
+				const entity1 = createCircleEntity(0, 0, 10);
+				const entity2 = createAABBEntity(5, 5, 20, 20);
+				runner.assertTrue(CollisionDetection.checkCircle(entity1, entity2, 3));
+			});
+
+			runner.it('should not detect collision when circles are far apart', () => {
+				const entity1 = createCircleEntity(0, 0, 10);
+				const entity2 = createAABBEntity(100, 100, 20, 20);
+				runner.assertFalse(CollisionDetection.checkCircle(entity1, entity2, 3));
+			});
+
+			runner.it('should respect radiusScale parameter', () => {
+				const entity1 = createCircleEntity(0, 0, 30);
+				const entity2 = createAABBEntity(20, 0, 30, 30);
+				// With scale 3: collision radius = (30+30)/3 = 20, distance = 20 -> collision
+				runner.assertTrue(CollisionDetection.checkCircle(entity1, entity2, 3));
+				// With scale 2: collision radius = (30+30)/2 = 30, distance = 20 -> collision
+				runner.assertTrue(CollisionDetection.checkCircle(entity1, entity2, 2));
+			});
+
+			runner.it('should handle circles at origin', () => {
+				const entity1 = createCircleEntity(0, 0, 10);
+				const entity2 = createAABBEntity(0, 0, 20, 20);
+				runner.assertTrue(CollisionDetection.checkCircle(entity1, entity2, 3));
+			});
+		});
+
+		// Polygon vs Polygon Collision Tests
+		runner.describe('CollisionDetection - Polygon Collisions', () => {
+			runner.it('should detect collision when polygons overlap', () => {
+				const poly1 = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const poly2 = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const entity1 = createPolygonEntity(0, 0, 20, 20, poly1);
+				const entity2 = createPolygonEntity(5, 5, 20, 20, poly2);
+				runner.assertTrue(CollisionDetection.checkPolygonCollision(entity1, entity2));
+			});
+
+			runner.it('should not detect collision when polygons are separate', () => {
+				const poly1 = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const poly2 = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const entity1 = createPolygonEntity(0, 0, 20, 20, poly1);
+				const entity2 = createPolygonEntity(50, 50, 20, 20, poly2);
+				runner.assertFalse(CollisionDetection.checkPolygonCollision(entity1, entity2));
+			});
+
+			runner.it('should handle octagon (battleship-like) collision', () => {
+				const octagon = [
+					{x: 0, y: -48}, {x: 35, y: -30}, {x: 42, y: 0}, {x: 35, y: 30},
+					{x: 0, y: 48}, {x: -35, y: 30}, {x: -42, y: 0}, {x: -35, y: -30}
+				];
+				const square = [
+					{x: -21, y: -21}, {x: 21, y: -21},
+					{x: 21, y: 21}, {x: -21, y: 21}
+				];
+				const entity1 = createPolygonEntity(0, 0, 96, 96, octagon);
+				const entity2 = createPolygonEntity(0, 0, 42, 42, square);
+				// Direct overlap at same position - should collide
+				runner.assertTrue(CollisionDetection.checkPolygonCollision(entity1, entity2));
+			});
+
+			runner.it('should not detect collision when octagon and square are separated', () => {
+				const octagon = [
+					{x: 0, y: -48}, {x: 35, y: -30}, {x: 42, y: 0}, {x: 35, y: 30},
+					{x: 0, y: 48}, {x: -35, y: 30}, {x: -42, y: 0}, {x: -35, y: -30}
+				];
+				const square = [
+					{x: -21, y: -21}, {x: 21, y: -21},
+					{x: 21, y: 21}, {x: -21, y: 21}
+				];
+				const entity1 = createPolygonEntity(0, 0, 96, 96, octagon);
+				const entity2 = createPolygonEntity(100, 100, 42, 42, square);
+				runner.assertFalse(CollisionDetection.checkPolygonCollision(entity1, entity2));
+			});
+
+			runner.it('should handle rotated polygons', () => {
+				const triangle = [
+					{x: 0, y: -10}, {x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const square = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const entity1 = createPolygonEntity(0, 0, 20, 20, triangle, Math.PI / 4);
+				const entity2 = createPolygonEntity(5, 0, 20, 20, square);
+				runner.assertTrue(CollisionDetection.checkPolygonCollision(entity1, entity2));
+			});
+		});
+
+		// AABB vs Polygon (Mixed Type) Tests
+		runner.describe('CollisionDetection - AABB vs Polygon (via check)', () => {
+			runner.it('should detect collision between AABB and polygon', () => {
+				const octagon = [
+					{x: 0, y: -48}, {x: 35, y: -30}, {x: 42, y: 0}, {x: 35, y: 30},
+					{x: 0, y: 48}, {x: -35, y: 30}, {x: -42, y: 0}, {x: -35, y: -30}
+				];
+				const aabbEntity = createAABBEntity(0, 0, 42, 42);
+				const polyEntity = createPolygonEntity(0, 0, 96, 96, octagon);
+				// check() should automatically use polygon collision
+				runner.assertTrue(CollisionDetection.check(aabbEntity, polyEntity));
+				runner.assertTrue(CollisionDetection.check(polyEntity, aabbEntity));
+			});
+
+			runner.it('should not detect collision when AABB and polygon are separate', () => {
+				const octagon = [
+					{x: 0, y: -48}, {x: 35, y: -30}, {x: 42, y: 0}, {x: 35, y: 30},
+					{x: 0, y: 48}, {x: -35, y: 30}, {x: -42, y: 0}, {x: -35, y: -30}
+				];
+				const aabbEntity = createAABBEntity(0, 0, 42, 42);
+				const polyEntity = createPolygonEntity(100, 0, 96, 96, octagon);
+				runner.assertFalse(CollisionDetection.check(aabbEntity, polyEntity));
+				runner.assertFalse(CollisionDetection.check(polyEntity, aabbEntity));
+			});
+
+			runner.it('should handle player-battleship collision scenario', () => {
+				// Simulate actual game scenario
+				const battleshipPoly = [
+					{x: 0, y: -48}, {x: 35, y: -30}, {x: 42, y: 0}, {x: 35, y: 30},
+					{x: 0, y: 48}, {x: -35, y: 30}, {x: -42, y: 0}, {x: -35, y: -30}
+				];
+				const player = createAABBEntity(0, 0, 42, 43);
+				const battleship = createPolygonEntity(0, 0, 96, 96, battleshipPoly);
+				// Player ramming into battleship at same position
+				runner.assertTrue(CollisionDetection.check(player, battleship));
+			});
+
+			runner.it('should detect edge collision between AABB and polygon', () => {
+				const triangle = [
+					{x: 0, y: -20}, {x: 20, y: 20}, {x: -20, y: 20}
+				];
+				const aabbEntity = createAABBEntity(0, -10, 10, 10);
+				const polyEntity = createPolygonEntity(0, 0, 40, 40, triangle);
+				runner.assertTrue(CollisionDetection.check(aabbEntity, polyEntity));
+			});
+		});
+
+		// Smart Routing Tests
+		runner.describe('CollisionDetection - Smart check() routing', () => {
+			runner.it('should use AABB when both entities have no polygon', () => {
+				const entity1 = createAABBEntity(0, 0, 20, 20);
+				const entity2 = createAABBEntity(10, 10, 20, 20);
+				// Should route to checkAABB
+				runner.assertTrue(CollisionDetection.check(entity1, entity2));
+			});
+
+			runner.it('should use polygon collision when entity1 has polygon', () => {
+				const poly = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const entity1 = createPolygonEntity(0, 0, 20, 20, poly);
+				const entity2 = createAABBEntity(5, 5, 20, 20);
+				// Should route to checkPolygonCollision
+				runner.assertTrue(CollisionDetection.check(entity1, entity2));
+			});
+
+			runner.it('should use polygon collision when entity2 has polygon', () => {
+				const poly = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const entity1 = createAABBEntity(0, 0, 20, 20);
+				const entity2 = createPolygonEntity(5, 5, 20, 20, poly);
+				// Should route to checkPolygonCollision
+				runner.assertTrue(CollisionDetection.check(entity1, entity2));
+			});
+
+			runner.it('should use polygon collision when both entities have polygons', () => {
+				const poly1 = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				const poly2 = [
+					{x: -15, y: -15}, {x: 15, y: -15},
+					{x: 15, y: 15}, {x: -15, y: 15}
+				];
+				const entity1 = createPolygonEntity(0, 0, 20, 20, poly1);
+				const entity2 = createPolygonEntity(8, 8, 30, 30, poly2);
+				// Should route to checkPolygonCollision
+				runner.assertTrue(CollisionDetection.check(entity1, entity2));
+			});
+		});
+
+		// Regression Tests (Game Over Bug)
+		runner.describe('CollisionDetection - Regression Tests (Game Over Bug)', () => {
+			runner.it('should detect player-battleship collision that caused game over bug', () => {
+				// This is the exact scenario that was failing
+				const battleshipPoly = [
+					{x: 0, y: -48}, {x: 35, y: -30}, {x: 42, y: 0}, {x: 35, y: 30},
+					{x: 0, y: 48}, {x: -35, y: 30}, {x: -42, y: 0}, {x: -35, y: -30}
+				];
+				// Player dimensions from Player.js
+				const player = createAABBEntity(100, 100, 42, 43);
+				// Battleship at same position (direct collision)
+				const battleship = createPolygonEntity(100, 100, 96, 96, battleshipPoly);
+				const collisionDetected = CollisionDetection.check(player, battleship);
+				runner.assertTrue(collisionDetected, 'Player-battleship collision must be detected');
+			});
+
+			runner.it('should detect collision with missile cruiser (also has polygon)', () => {
+				const cruiserPoly = [
+					{x: 0, y: -46}, {x: 20, y: -30}, {x: 30, y: 0}, {x: 25, y: 35},
+					{x: 0, y: 46}, {x: -25, y: 35}, {x: -30, y: 0}, {x: -20, y: -30}
+				];
+				const player = createAABBEntity(50, 50, 42, 43);
+				const cruiser = createPolygonEntity(50, 50, 92, 92, cruiserPoly);
+				runner.assertTrue(CollisionDetection.check(player, cruiser));
+			});
+
+			runner.it('should detect collision with carrier (also has polygon)', () => {
+				const carrierPoly = [
+					{x: 0, y: -64}, {x: 50, y: -40}, {x: 55, y: 0}, {x: 50, y: 40},
+					{x: 0, y: 64}, {x: -50, y: 40}, {x: -55, y: 0}, {x: -50, y: -40}
+				];
+				const player = createAABBEntity(200, 200, 42, 43);
+				const carrier = createPolygonEntity(200, 200, 128, 128, carrierPoly);
+				runner.assertTrue(CollisionDetection.check(player, carrier));
+			});
+
+			runner.it('should still detect collisions with non-polygon NPCs', () => {
+				// Regular NPC without polygon (uses AABB)
+				const player = createAABBEntity(0, 0, 42, 43);
+				const scout = createAABBEntity(10, 10, 52, 54);
+				runner.assertTrue(CollisionDetection.check(player, scout));
+			});
+		});
+
+		// Edge Cases
+		runner.describe('CollisionDetection - Edge Cases', () => {
+			runner.it('should handle zero-sized entities', () => {
+				const entity1 = createAABBEntity(0, 0, 0, 0);
+				const entity2 = createAABBEntity(0, 0, 20, 20);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should handle very large entities', () => {
+				const entity1 = createAABBEntity(0, 0, 10000, 10000);
+				const entity2 = createAABBEntity(5000, 5000, 100, 100);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should handle entities at extreme coordinates', () => {
+				const entity1 = createAABBEntity(999999, 999999, 20, 20);
+				const entity2 = createAABBEntity(1000000, 1000000, 20, 20);
+				runner.assertTrue(CollisionDetection.checkAABB(entity1, entity2));
+			});
+
+			runner.it('should handle rotation edge cases', () => {
+				const square = [
+					{x: -10, y: -10}, {x: 10, y: -10},
+					{x: 10, y: 10}, {x: -10, y: 10}
+				];
+				// Test at 90 degree rotation
+				const entity1 = createPolygonEntity(0, 0, 20, 20, square, Math.PI / 2);
+				const entity2 = createAABBEntity(0, 0, 20, 20);
+				runner.assertTrue(CollisionDetection.check(entity1, entity2),
+					'Should collide at rotation ' + (Math.PI / 2));
+			});
+		});
+
+			// Render results
+			runner.render();
+		}
+
+		// Run tests when modules are ready
+		window.addEventListener('modulesReady', runAllTests);
+
+		// Fallback: also try running after a short delay if event already fired
+		window.addEventListener('DOMContentLoaded', () => {
+			setTimeout(() => {
+				if (window.modulesLoaded && document.getElementById('results').children.length === 0) {
+					runAllTests();
+				}
+			}, 100);
+		});
 	</script>
 </body>
 </html>
