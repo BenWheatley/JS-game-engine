@@ -21,19 +21,6 @@ Game loop, collision detection, rendering, and configuration still mixed in one 
 
 ---
 
-### 2. Oversized Sprite Assets
-**Files:** energy-blast.png, alien-ship.png
-**Status:** NEEDS FIXING
-
-| Asset | Current Size | Rendered Size | Waste |
-|-------|-------------|---------------|-------|
-| energy-blast.png | 512 x 512 | 10 x 10 | 51x downscale |
-| alien-ship.png | 512 x 512 | 50 x 50 | 10x downscale |
-
-**Recommendation:** Create properly-sized versions to reduce bandwidth.
-
----
-
 ### 3. localStorage Validation
 **File:** HighScoreManager.js
 **Status:** NEEDS REVIEW
