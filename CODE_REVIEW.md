@@ -1,69 +1,47 @@
 # Code Review: Outstanding Issues
 
-**Review Date:** 2025-11-16
+**Review Date:** 2025-12-19
 
 ---
 
 ## High Priority Issues
 
 ### 1. Monolithic Main File
-**File:** skeleton.html (~1000 lines)
-**Status:** IN PROGRESS
+**File:** main.js, Game.js
+**Status:** MOSTLY RESOLVED ✓
 
-Game loop, collision detection, rendering, and configuration still mixed in one HTML file.
+Code has been successfully extracted into modular components:
+- ✓ Game.js - Game state and loop
+- ✓ Player.js - Player entity
+- ✓ NPC.js - Enemy base class
+- ✓ CollisionDetection.js - Collision system
+- ✓ GameConfig.js - Configuration
+- ✓ HighScoreManager.js - Score persistence
+- ✓ SpawnSystem.js - Entity spawning
+- ✓ MenuSystem.js - Menu management
+- ✓ VibeEngine/ - Core engine components
 
-**Recommendation:** Continue extraction (HighScoreManager, SpawnSystem, and GameState completed):
-
-**Next Priority Extractions:**
-1. **CollisionSystem.js** - All collision detection and damage handling
-2. **Renderer.js** - Draw loops, camera transforms, HUD rendering
-3. **InputHandler.js** - Keyboard and gamepad input processing
-
----
-
-### 3. localStorage Validation
-**File:** HighScoreManager.js
-**Status:** NEEDS REVIEW
-
-High scores can be manipulated via browser DevTools.
-
-**Recommendation:**
-- Add score range validation (0-999999)
-- Validate data types on load
-- Consider integrity hash (optional)
-- Document this as known limitation for offline games
+Architecture is now modular and maintainable.
 
 ---
 
 ## Medium Priority Issues
 
-### 4. Magic Numbers in Collision Damage
-**File:** skeleton.html (collision detection)
-**Status:** NEEDS FIXING
+### 2. Magic Numbers in Collision Damage
+**File:** Game.js, NPC entities
+**Status:** MOSTLY RESOLVED ✓
 
-Hardcoded damage values:
-```javascript
-player.health -= 50; // Asteroids deal fixed damage
-player.health -= 25; // Small asteroids deal less damage
-```
+Damage values are now configured per-entity in GameConfig.js via health values. Collision damage uses `npc.health` as the damage amount (Game.js:666), providing consistent and configurable damage values.
 
-**Recommendation:** Move to GameConfig:
-```javascript
-GameConfig.DAMAGE = {
-  ASTEROID_LARGE: 50,
-  ASTEROID_SMALL: 25,
-  PLASMA_SHOT: 25,
-  MISSILE: 50
-};
-```
+**Note:** Projectile damage is defined per-projectile class (Laser, Plasma, Missile). This is acceptable for a local game.
 
 ---
 
-### 5. Error Handling for localStorage
+### 3. Error Handling for localStorage
 **File:** HighScoreManager.js
 **Status:** NEEDS ADDING
 
-No try-catch around localStorage operations.
+No try-catch around localStorage operations. While cheating is acceptable for a local game, the code should handle quota errors gracefully (e.g., when localStorage is full or disabled).
 
 **Recommendation:**
 ```javascript
@@ -73,106 +51,73 @@ saveHighScore(name, score) {
     localStorage.setItem(this.storageKey, JSON.stringify(topScores));
   } catch (e) {
     console.error('Failed to save high score:', e);
-    // Show user-facing error message
+    // Gracefully degrade - game continues without saving
   }
 }
 ```
 
 ---
 
-### 6. Sprite Loading Error Handling
-**File:** Sprite.js:50-60
+### 4. Sprite Loading Error Handling
+**File:** Sprite.js
 **Status:** NEEDS REVIEW
 
-Failed sprite loads throw errors and crash the game. Consider fallback/error sprites.
+Failed sprite loads throw errors and crash the game. Consider fallback/error sprites or graceful degradation.
 
----
-
-### 7. No Build Process
-**Status:** NEEDS CONSIDERATION
-
-Current development workflow:
-- No transpilation
-- No minification
-- No bundling
-- No source maps
-
-**Recommendation:** Consider Vite for:
-- Fast HMR during development
-- Automatic minification for production
-- ES module optimization
-- Source map generation
+**Recommendation:** Add error handling with colored rectangles as fallback sprites for missing assets.
 
 ---
 
 ## Low Priority Issues
 
-### 8. No Automated Testing
-**Status:** NEEDS ADDING
+### 5. Automated Testing
+**File:** UnitTests.html
+**Status:** COMPLETED ✓
 
-Missing unit tests for:
-- Collision detection (AABB)
-- Spawn distribution uniformity
-- Input sanitization edge cases
-- Vector math operations
+Comprehensive test suite added for:
+- ✓ Vector2D math operations (30+ tests)
+- ✓ CollisionDetection - AABB, Circle, Polygon collisions (30+ tests)
+- ✓ Mixed-type collision detection
+- ✓ Regression tests for game over bug
+- ✓ Edge cases and rotation handling
 
-**Recommendation:** Add Vitest or Jest:
-```javascript
-describe('CollisionSystem', () => {
-  test('detects AABB collision', () => {
-    const entity1 = { sprite: { position: {x: 0, y: 0}, size: {x: 10, y: 10} }};
-    const entity2 = { sprite: { position: {x: 5, y: 5}, size: {x: 10, y: 10} }};
-    expect(checkCollision(entity1, entity2)).toBe(true);
-  });
-});
-```
+**Note:** Tests use browser-based test runner (no build tools required). Open UnitTests.html to run.
 
 ---
 
-### 9. Console.log Statements
-**Files:** Throughout codebase
-**Status:** NEEDS CLEANUP
+### 6. Debug Logging
+**Files:** Game.js and various components
+**Status:** ACCEPTABLE (using DebugLogger)
 
-Production code contains console.log statements.
+Code uses `DebugLogger.log()` from VibeEngine for debug output. This is appropriate for a local development game. No changes needed.
 
-**Recommendation:** Add debug flag or remove for production:
-```javascript
-const DEBUG = false;
-function debugLog(...args) {
-  if (DEBUG) console.log(...args);
-}
-```
+**Note:** DebugLogger can be toggled on/off if needed via VibeEngine configuration.
 
 ---
 
-### 10. No ESLint Configuration
-**Status:** NEEDS ADDING
+### 7. Canvas Size Hardcoded
+**File:** main.js
+**Status:** ACCEPTABLE (documented limitation)
 
-Code style not enforced programmatically.
-
-**Recommendation:** Add `.eslintrc.json`:
-```json
-{
-  "extends": "eslint:recommended",
-  "env": { "browser": true, "es6": true },
-  "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" }
-}
-```
+Canvas dimensions hardcoded to 800x600. Consider making responsive for different screen sizes if needed in the future.
 
 ---
 
-### 11. Canvas Size Hardcoded
-**File:** skeleton.html
-**Status:** ACCEPTABLE (document limitation)
-
-Canvas dimensions hardcoded to 800x600. Consider making responsive for different screen sizes.
-
----
-
-### 12. Collision Detection Optimization
-**File:** skeleton.html
-**Status:** ACCEPTABLE (document limitation)
+### 8. Collision Detection Optimization
+**File:** Game.js (update loop)
+**Status:** ACCEPTABLE (documented limitation)
 
 O(n²) brute-force collision detection. Acceptable for current entity counts (<50), but document the limitation for future scaling.
 
 **Future Consideration:** Spatial partitioning (QuadTree) if entity count grows significantly.
+
+---
+
+## Summary
+
+**Total Issues:** 8 items tracked
+- ✓ **Resolved:** 3 (Modular architecture, Damage configuration, Automated testing)
+- **Low Priority:** 3 (Sprite error handling, localStorage errors, Debug logging)
+- **Documented Limitations:** 2 (Canvas size, Collision optimization)
+
+The codebase is in good shape for a local-only game. No build process or anti-cheat measures needed.
