@@ -15,7 +15,8 @@
       "Bash(for file in Player.js Wormhole.js Minimap.js UpgradeBackground.js SpawnSystem.js NPCAIUtils.js)",
       "Bash(echo -e \"\\nexport { $file%.js };\")",
       "Bash(for file in AlienFighter.js AlienSaucer.js AlienScout.js MissileCruiser.js Asteroid.js AsteroidSpawn.js)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(node -c:*)"
     ],
     "deny": [],
     "ask": []

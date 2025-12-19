@@ -1,21 +1,17 @@
-import { Sprite } from './VibeEngine/VibeEngine.js';
+import { Entity } from './VibeEngine/VibeEngine.js';
 
-class GameEntity {
-  constructor(position, rotation, velocity, size, imageUrl) {
-    this.sprite = new Sprite(imageUrl, position, size);
-    this.sprite.rotation = rotation;
-    this.velocity = velocity;
-  }
-
-  draw() {
-    this.sprite.draw();
-  }
-
-  update(deltaTime) {
-    // Update the entity's position based on the velocity and time
-    const displacement = this.velocity.mul(deltaTime);
-    this.sprite.position = this.sprite.position.add(displacement);
-  }
+/**
+ * GameEntity - Game-specific extension of engine Entity
+ *
+ * Adds game-specific functionality:
+ * - Combat system (onHit)
+ * - Collision responses (onCollideWithPlayer)
+ * - Minimap integration (getMinimapInfo)
+ *
+ * Base entity mechanics (sprite, velocity, update, draw) are handled by the engine.
+ */
+class GameEntity extends Entity {
+  // Inherits constructor, update(), draw() from Entity
 
   /**
    * Handle being hit by damage
