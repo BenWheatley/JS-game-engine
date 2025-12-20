@@ -1,4 +1,4 @@
-import { ParticleSystem, CollisionDetection, DebugLogger, Vector2D, Particle } from './VibeEngine/VibeEngine.js';
+import { ParticleSystem, CollisionDetection, DebugLogger, Vector2D, Particle, Camera } from './VibeEngine/VibeEngine.js';
 import { UpgradeBackground } from './UpgradeBackground.js';
 import { Player } from './Player.js';
 import { Minimap } from './Minimap.js';
@@ -26,7 +26,7 @@ class Game extends EventTarget {
 		super();
 		this.canvas = canvas;
 		this.upgradeBackground = new UpgradeBackground();
-		
+
 		// Player and entities
 		this.player = new Player();
 		this.npcs = [];
@@ -35,6 +35,7 @@ class Game extends EventTarget {
 		this.wormhole = null;
 
 		// Systems
+		this.camera = new Camera(canvas.width, canvas.height);
 		this.particleSystem = new ParticleSystem();
 		this.minimap = new Minimap(canvas.width, canvas.height);
 
@@ -125,11 +126,9 @@ class Game extends EventTarget {
 		context.fillStyle = 'black';
 		context.fillRect(0, 0, canvas.width, canvas.height);
 
-		context.save();
-		context.translate(
-			canvas.width/2-this.player.sprite.position.x,
-			canvas.height/2-this.player.sprite.position.y
-		);
+		// Apply camera transform to center on player
+		this.camera.follow(this.player.sprite.position);
+		this.camera.apply(context);
 
 		// Draw tiled background
 		const tileWidth = backgroundTileSize.x * 0.9;
@@ -191,7 +190,8 @@ class Game extends EventTarget {
 			this.drawBoundingBoxes(context);
 		}
 
-		context.restore();
+		// Restore camera transform
+		this.camera.restore(context);
 	}
 
 	drawBoundingBoxes(context) {
