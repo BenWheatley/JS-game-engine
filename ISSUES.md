@@ -38,16 +38,6 @@ Failed sprite loads throw errors and crash the game. Consider fallback/error spr
 
 ## Missing Unit Tests
 
-### High Priority
-- [ ] **Camera** - coordinate conversions, viewport bounds, follow behavior
-- [ ] **Sprite** - position, rotation, bounding box calculations
-- [ ] **Entity** - velocity application, position updates over time
-
-### Medium Priority
-- [ ] **SpawnSystem** - wave scaling, spawn position distribution
-- [ ] **ParticleSystem** - particle lifecycle, physics, performance limits
-- [ ] **Projectile** - movement, lifetime tracking
-
 ### Low Priority
 - [ ] **PreferencesManager** - save/load preferences, default values
 - [ ] **AssetLoader** - image loading and caching
@@ -75,5 +65,5 @@ Components that could be generalized and moved to VibeEngine:
 ## Summary
 
 **Code Issues:** 2
-**Missing Tests:** 11 components (3 high priority)
+**Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified

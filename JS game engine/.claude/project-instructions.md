@@ -11,6 +11,7 @@
 - The game is already open in a browser tab during development
 - `file:///` URLs have CORS restrictions that prevent asset loading
 - Testing happens manually by the developer
+- **IMPORTANT:** Whenever any task is completed, update ISSUES.md to remove the completed item entirely
 
 ## Code Style
 

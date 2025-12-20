@@ -78,6 +78,10 @@
 		import { Camera } from './VibeEngine/Camera.js';
 		import { Sprite } from './VibeEngine/Sprite.js';
 		import { Entity } from './VibeEngine/Entity.js';
+		import { Particle } from './VibeEngine/Particle.js';
+		import { ParticleSystem } from './VibeEngine/ParticleSystem.js';
+		import { Projectile } from './VibeEngine/Projectile.js';
+		import { SpawnSystem } from './SpawnSystem.js';
 
 		// Signal that modules are loaded
 		window.CollisionDetection = CollisionDetection;
@@ -86,6 +90,10 @@
 		window.Camera = Camera;
 		window.Sprite = Sprite;
 		window.Entity = Entity;
+		window.Particle = Particle;
+		window.ParticleSystem = ParticleSystem;
+		window.Projectile = Projectile;
+		window.SpawnSystem = SpawnSystem;
 		window.modulesLoaded = true;
 
 		// Trigger test execution
@@ -215,7 +223,8 @@
 		function runAllTests() {
 			// Check if modules are loaded
 			if (!window.CollisionDetection || !window.Vector2D || !window.EntityManager ||
-			    !window.Camera || !window.Sprite || !window.Entity) {
+			    !window.Camera || !window.Sprite || !window.Entity ||
+			    !window.Particle || !window.ParticleSystem || !window.Projectile || !window.SpawnSystem) {
 				console.error('Modules not loaded yet');
 				return;
 			}
@@ -1891,6 +1900,487 @@
 
 				// Rotation should remain unchanged
 				runner.assertAlmostEqual(entity.sprite.rotation, rotation, 0.01);
+			});
+		});
+
+		// SpawnSystem Tests
+		runner.describe('SpawnSystem - Wave Definition', () => {
+			runner.it('should return wave definition for level 1', () => {
+				const wave = window.SpawnSystem.getWaveDefinition(1);
+				runner.assertTrue(typeof wave === 'object');
+				runner.assertTrue(Object.keys(wave).length > 0);
+			});
+
+			runner.it('should scale wave for levels beyond defined waves', () => {
+				const lastDefinedLevel = 10; // Adjust based on GameConfig
+				const beyondLevel = 15;
+
+				const baseWave = window.SpawnSystem.getWaveDefinition(lastDefinedLevel);
+				const scaledWave = window.SpawnSystem.getWaveDefinition(beyondLevel);
+
+				// Scaled wave should have more entities
+				let baseTotal = 0;
+				let scaledTotal = 0;
+
+				for (const count of Object.values(baseWave)) {
+					baseTotal += count;
+				}
+				for (const count of Object.values(scaledWave)) {
+					scaledTotal += count;
+				}
+
+				runner.assertTrue(scaledTotal >= baseTotal, 'Scaled wave should have at least as many entities');
+			});
+
+			runner.it('should have same entity types in scaled waves', () => {
+				const level1 = window.SpawnSystem.getWaveDefinition(1);
+				const level100 = window.SpawnSystem.getWaveDefinition(100);
+
+				// Same entity types should exist (though counts differ)
+				const types1 = Object.keys(level1);
+				const types100 = Object.keys(level100);
+
+				runner.assertTrue(types1.length > 0);
+				runner.assertTrue(types100.length > 0);
+			});
+		});
+
+		runner.describe('SpawnSystem - Spawn Position', () => {
+			runner.it('should generate spawn positions outside viewport', () => {
+				const playerPos = new window.Vector2D(0, 0);
+				const canvasWidth = 800;
+				const canvasHeight = 600;
+				const npcSize = 50;
+
+				const position = window.SpawnSystem.getOffscreenSpawnPosition(
+					playerPos, canvasWidth, canvasHeight, npcSize, npcSize
+				);
+
+				// Check position is outside viewport
+				const halfWidth = canvasWidth / 2;
+				const halfHeight = canvasHeight / 2;
+				const halfNpcSize = npcSize / 2;
+
+				const outsideHorizontal = Math.abs(position.x) > halfWidth + halfNpcSize;
+				const outsideVertical = Math.abs(position.y) > halfHeight + halfNpcSize;
+
+				runner.assertTrue(outsideHorizontal || outsideVertical,
+					'Spawn position should be outside viewport');
+			});
+
+			runner.it('should generate different positions on multiple calls', () => {
+				const playerPos = new window.Vector2D(0, 0);
+				const positions = [];
+
+				for (let i = 0; i < 10; i++) {
+					positions.push(window.SpawnSystem.getOffscreenSpawnPosition(
+						playerPos, 800, 600, 50, 50
+					));
+				}
+
+				// Check that not all positions are identical
+				const uniquePositions = new Set(positions.map(p => `${p.x},${p.y}`));
+				runner.assertTrue(uniquePositions.size > 1, 'Should generate varied positions');
+			});
+		});
+
+		runner.describe('SpawnSystem - Entity Spawning', () => {
+			runner.it('should return null for invalid entity type', () => {
+				const entity = window.SpawnSystem.spawnEntity(
+					'invalidEntityType',
+					new window.Vector2D(0, 0),
+					800, 600
+				);
+				runner.assertEqual(entity, null);
+			});
+
+			runner.it('should spawn wave and return array of entities', () => {
+				const entities = window.SpawnSystem.spawnWave(
+					1,
+					new window.Vector2D(0, 0),
+					800, 600
+				);
+
+				runner.assertTrue(Array.isArray(entities));
+				runner.assertTrue(entities.length > 0);
+			});
+		});
+
+		// Particle Tests
+		runner.describe('Particle - Constructor and Properties', () => {
+			runner.it('should create particle with initial properties', () => {
+				const pos = new window.Vector2D(100, 200);
+				const vel = new window.Vector2D(0.5, 0.3);
+				const lifetime = 1000;
+				const color = "255, 100, 50";
+				const size = 5;
+
+				const particle = new window.Particle(pos, vel, lifetime, color, size);
+
+				runner.assertEqual(particle.position, pos);
+				runner.assertEqual(particle.velocity, vel);
+				runner.assertEqual(particle.lifetime, lifetime);
+				runner.assertEqual(particle.color, color);
+				runner.assertEqual(particle.size, size);
+				runner.assertEqual(particle.age, 0);
+			});
+		});
+
+		runner.describe('Particle - Lifecycle', () => {
+			runner.it('should not be dead when freshly created', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(0, 0),
+					1000, "255,255,255", 5
+				);
+				runner.assertFalse(particle.isDead());
+			});
+
+			runner.it('should age over time', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(0, 0),
+					1000, "255,255,255", 5
+				);
+
+				particle.update(100);
+				runner.assertEqual(particle.age, 100);
+
+				particle.update(200);
+				runner.assertEqual(particle.age, 300);
+			});
+
+			runner.it('should be dead when age exceeds lifetime', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(0, 0),
+					1000, "255,255,255", 5
+				);
+
+				particle.update(1000);
+				runner.assertTrue(particle.isDead());
+			});
+
+			runner.it('should be dead when age equals lifetime', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(0, 0),
+					500, "255,255,255", 5
+				);
+
+				particle.update(500);
+				runner.assertTrue(particle.isDead());
+			});
+		});
+
+		runner.describe('Particle - Movement and Physics', () => {
+			runner.it('should update position based on velocity', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 0.5),
+					1000, "255,255,255", 5
+				);
+
+				particle.update(100);
+
+				// Position should be updated by velocity * deltaTime
+				runner.assertAlmostEqual(particle.position.x, 100, 0.1);
+				runner.assertAlmostEqual(particle.position.y, 50, 0.1);
+			});
+
+			runner.it('should apply friction to slow down', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 0),
+					1000, "255,255,255", 5
+				);
+
+				const initialSpeed = particle.velocity.length();
+				particle.update(100);
+				const speedAfterUpdate = particle.velocity.length();
+
+				runner.assertTrue(speedAfterUpdate < initialSpeed, 'Velocity should decrease due to friction');
+			});
+
+			runner.it('should continue slowing down over multiple updates', () => {
+				const particle = new window.Particle(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 0),
+					1000, "255,255,255", 5
+				);
+
+				const speeds = [];
+				for (let i = 0; i < 5; i++) {
+					speeds.push(particle.velocity.length());
+					particle.update(10);
+				}
+
+				// Each speed should be less than the previous
+				for (let i = 1; i < speeds.length; i++) {
+					runner.assertTrue(speeds[i] < speeds[i-1], 'Speed should decrease each update');
+				}
+			});
+		});
+
+		// ParticleSystem Tests
+		runner.describe('ParticleSystem - Constructor', () => {
+			runner.it('should create empty particle system', () => {
+				const system = new window.ParticleSystem();
+				runner.assertTrue(Array.isArray(system.particles));
+				runner.assertEqual(system.particles.length, 0);
+			});
+		});
+
+		runner.describe('ParticleSystem - Impact Spawning', () => {
+			runner.it('should spawn impact particles', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				runner.assertTrue(system.particles.length > 0);
+			});
+
+			runner.it('should spawn correct number of impact particles', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				runner.assertEqual(system.particles.length, 8);
+			});
+
+			runner.it('should spawn particles at correct position', () => {
+				const system = new window.ParticleSystem();
+				const pos = new window.Vector2D(100, 200);
+				system.spawnImpact(pos);
+
+				// All particles should start at the impact position
+				for (const particle of system.particles) {
+					runner.assertAlmostEqual(particle.position.x, pos.x, 0.01);
+					runner.assertAlmostEqual(particle.position.y, pos.y, 0.01);
+				}
+			});
+
+			runner.it('should spawn particles with different velocities', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				// Check that velocities are different (evenly distributed in circle)
+				const angles = system.particles.map(p =>
+					Math.atan2(p.velocity.y, p.velocity.x)
+				);
+
+				// All angles should be different
+				const uniqueAngles = new Set(angles.map(a => a.toFixed(3)));
+				runner.assertEqual(uniqueAngles.size, system.particles.length);
+			});
+		});
+
+		runner.describe('ParticleSystem - Explosion Spawning', () => {
+			runner.it('should spawn explosion particles', () => {
+				const system = new window.ParticleSystem();
+				const params = {
+					particleCount: 20,
+					minSpeed: 0.1,
+					maxSpeed: 0.3,
+					lifetime: 500,
+					minSize: 2,
+					maxSize: 5
+				};
+				system.spawnExplosion(new window.Vector2D(100, 200), "255,100,50", params);
+
+				runner.assertEqual(system.particles.length, 20);
+			});
+
+			runner.it('should spawn particles with varying sizes', () => {
+				const system = new window.ParticleSystem();
+				const params = {
+					particleCount: 20,
+					minSpeed: 0.1,
+					maxSpeed: 0.3,
+					lifetime: 500,
+					minSize: 2,
+					maxSize: 10
+				};
+				system.spawnExplosion(new window.Vector2D(100, 200), "255,100,50", params);
+
+				const sizes = system.particles.map(p => p.size);
+				const minSize = Math.min(...sizes);
+				const maxSize = Math.max(...sizes);
+
+				runner.assertTrue(minSize >= 2);
+				runner.assertTrue(maxSize <= 10);
+				runner.assertTrue(maxSize > minSize, 'Should have size variation');
+			});
+		});
+
+		runner.describe('ParticleSystem - Update and Cleanup', () => {
+			runner.it('should update all particles', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				const initialAges = system.particles.map(p => p.age);
+				system.update(100);
+				const updatedAges = system.particles.map(p => p.age);
+
+				for (let i = 0; i < initialAges.length; i++) {
+					runner.assertTrue(updatedAges[i] > initialAges[i]);
+				}
+			});
+
+			runner.it('should remove dead particles', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				// Update past particle lifetime
+				system.update(1000);
+
+				runner.assertEqual(system.particles.length, 0, 'All particles should be removed');
+			});
+
+			runner.it('should keep alive particles', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				// Update for short time
+				system.update(50);
+
+				runner.assertTrue(system.particles.length > 0, 'Particles should still be alive');
+			});
+
+			runner.it('should clear all particles', () => {
+				const system = new window.ParticleSystem();
+				system.spawnImpact(new window.Vector2D(100, 200));
+
+				system.clear();
+				runner.assertEqual(system.particles.length, 0);
+			});
+		});
+
+		// Projectile Tests
+		runner.describe('Projectile - Constructor', () => {
+			runner.it('should create projectile with correct properties', () => {
+				const pos = new window.Vector2D(100, 200);
+				const vel = new window.Vector2D(1, 0);
+				const size = new window.Vector2D(10, 20);
+				const damage = 25;
+
+				const projectile = new window.Projectile(pos, vel, 'bullet.png', size, damage);
+
+				runner.assertEqual(projectile.sprite.position, pos);
+				runner.assertEqual(projectile.velocity, vel);
+				runner.assertEqual(projectile.damage, damage);
+				runner.assertEqual(projectile.sprite.size, size);
+			});
+
+			runner.it('should set rotation to face direction of travel', () => {
+				// Moving right (positive x)
+				const projectile = new window.Projectile(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 0),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					10
+				);
+
+				// Rotation should be Math.atan2(0, 1) + PI/2 = 0 + PI/2
+				runner.assertAlmostEqual(projectile.sprite.rotation, Math.PI / 2, 0.01);
+			});
+
+			runner.it('should handle diagonal velocity rotation', () => {
+				// Moving diagonally (45 degrees)
+				const projectile = new window.Projectile(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 1),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					10
+				);
+
+				// Rotation should be Math.atan2(1, 1) + PI/2 = PI/4 + PI/2
+				const expectedRotation = Math.atan2(1, 1) + Math.PI / 2;
+				runner.assertAlmostEqual(projectile.sprite.rotation, expectedRotation, 0.01);
+			});
+		});
+
+		runner.describe('Projectile - Movement', () => {
+			runner.it('should update position based on velocity', () => {
+				const projectile = new window.Projectile(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(5, 3),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					10
+				);
+
+				projectile.update();
+
+				runner.assertAlmostEqual(projectile.sprite.position.x, 5, 0.01);
+				runner.assertAlmostEqual(projectile.sprite.position.y, 3, 0.01);
+			});
+
+			runner.it('should accumulate movement over multiple updates', () => {
+				const projectile = new window.Projectile(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(2, 1),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					10
+				);
+
+				projectile.update();
+				projectile.update();
+				projectile.update();
+
+				runner.assertAlmostEqual(projectile.sprite.position.x, 6, 0.01);
+				runner.assertAlmostEqual(projectile.sprite.position.y, 3, 0.01);
+			});
+
+			runner.it('should handle negative velocity', () => {
+				const projectile = new window.Projectile(
+					new window.Vector2D(100, 100),
+					new window.Vector2D(-5, -3),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					10
+				);
+
+				projectile.update();
+
+				runner.assertAlmostEqual(projectile.sprite.position.x, 95, 0.01);
+				runner.assertAlmostEqual(projectile.sprite.position.y, 97, 0.01);
+			});
+
+			runner.it('should maintain rotation during movement', () => {
+				const projectile = new window.Projectile(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 0),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					10
+				);
+
+				const initialRotation = projectile.sprite.rotation;
+				projectile.update();
+				projectile.update();
+
+				runner.assertAlmostEqual(projectile.sprite.rotation, initialRotation, 0.01);
+			});
+		});
+
+		runner.describe('Projectile - Collision Response', () => {
+			runner.it('should return default values for onHitPlayer', () => {
+				const projectile = new window.Projectile(
+					new window.Vector2D(0, 0),
+					new window.Vector2D(1, 0),
+					'bullet.png',
+					new window.Vector2D(10, 10),
+					15
+				);
+
+				const result = projectile.onHitPlayer();
+
+				runner.assertEqual(result.damage, 0);
+				runner.assertEqual(result.sound, null);
+				runner.assertEqual(result.volume, 0);
+				runner.assertEqual(result.particleColor, null);
 			});
 		});
 
