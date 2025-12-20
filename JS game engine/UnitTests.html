@@ -2095,9 +2095,9 @@
 					1000, "255,255,255", 5
 				);
 
-				const initialSpeed = particle.velocity.length();
+				const initialSpeed = particle.velocity.mag();
 				particle.update(100);
-				const speedAfterUpdate = particle.velocity.length();
+				const speedAfterUpdate = particle.velocity.mag();
 
 				runner.assertTrue(speedAfterUpdate < initialSpeed, 'Velocity should decrease due to friction');
 			});
@@ -2111,7 +2111,7 @@
 
 				const speeds = [];
 				for (let i = 0; i < 5; i++) {
-					speeds.push(particle.velocity.length());
+					speeds.push(particle.velocity.mag());
 					particle.update(10);
 				}
 
