@@ -67,3 +67,9 @@ Components that could be generalized and moved to VibeEngine:
 **Code Issues:** 2
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified
+
+## Recent Improvements
+
+- ✅ Implemented exact circle collision detection (Circle vs Circle, Circle vs AABB, Circle vs Polygon)
+- ✅ Updated CollisionDetection.check() smart routing to support all shape combinations
+- ✅ Added unit tests for Camera, Sprite, Entity, SpawnSystem, Particle, ParticleSystem, Projectile

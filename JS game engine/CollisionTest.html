@@ -95,6 +95,7 @@
 				rotation: 0,
 				size: new Vector2D(80, 80),
 				color: '#569cd6',
+				type: 'polygon',
 				collisionPolygon: [
 					new Vector2D(0, -40),    // Top
 					new Vector2D(40, 40),    // Bottom right
@@ -106,13 +107,16 @@
 				rotation: 0,
 				size: new Vector2D(100, 80),
 				color: '#4ec9b0',
+				type: 'aabb',
 				collisionPolygon: null
 			},
 			circle: {
 				position: new Vector2D(900, 400),
 				rotation: 0,
 				size: new Vector2D(60, 60),
+				radius: 30, // Circle uses radius property
 				color: '#c586c0',
+				type: 'circle',
 				collisionPolygon: null
 			}
 		};
@@ -133,6 +137,9 @@
 					new Vector2D(35, 35),
 					new Vector2D(-35, 35)
 				];
+			} else if (mouseShapeType === 'circle') {
+				shape.radius = 35; // Circle uses radius property
+				shape.collisionPolygon = null;
 			} else {
 				shape.collisionPolygon = null;
 			}
@@ -295,14 +302,22 @@
 
 			// Draw and check fixed shapes
 			for (const [name, shape] of Object.entries(fixedShapes)) {
-				const entity = createEntity(
-					shape.position,
-					shape.rotation,
-					shape.size,
-					shape.collisionPolygon
-				);
+				// Create entity with radius if it's a circle
+				const entity = {
+					sprite: {
+						position: shape.position,
+						rotation: shape.rotation,
+						size: shape.size
+					},
+					collisionPolygon: shape.collisionPolygon
+				};
+				if (shape.radius !== undefined) {
+					entity.radius = shape.radius;
+				}
 
+				// Use smart routing - it now handles all collision types!
 				const isColliding = CollisionDetection.check(mouseShape, entity);
+
 				if (isColliding) {
 					collisions.push(name);
 				}
