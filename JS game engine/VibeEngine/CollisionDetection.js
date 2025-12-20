@@ -3,9 +3,15 @@
  *
  * Responsibilities:
  * - AABB (Axis-Aligned Bounding Box) collision detection
- * - Circle collision detection
+ * - Exact Circle collision detection (Circle vs Circle, Circle vs AABB, Circle vs Polygon)
  * - Polygon collision detection (SAT - Separating Axis Theorem)
+ * - Smart routing - Automatic collision method selection based on entity shape properties
  * - Centralized collision logic for all entity types
+ *
+ * Shape Detection:
+ * - Circle: Entity has 'radius' property
+ * - Polygon: Entity has 'collisionPolygon' property (array of vertices)
+ * - AABB: Entity has neither (uses sprite.position and sprite.size)
  */
 class CollisionDetection {
   /**

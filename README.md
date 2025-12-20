@@ -34,11 +34,41 @@ Efficient sprite rendering with:
 - Rotation and transformation support
 - Loading state management
 
-#### **GameEntity.js** - Base Game Object
-Abstract base class providing:
-- Position, rotation, and velocity properties
+#### **Entity.js** - Base Entity Class
+Generic base class for all game objects:
+- Position, rotation, and velocity properties via sprite
 - Physics-based movement updates
-- Sprite management and rendering
+- Abstract draw() and update() methods
+- Compatible with EntityManager validation
+
+#### **EntityManager.js** - Entity Collection Management
+Centralized entity management system:
+- Group-based entity organization (npcs, playerProjectiles, etc.)
+- Lifecycle hooks (onAdd, onRemove) for event-driven logic
+- Batch operations for efficient bulk entity additions
+- Runtime validation of entity methods (draw/update)
+- Error logging via DebugLogger
+
+#### **Camera.js** - Camera System
+Scrolling camera for large game worlds:
+- Player-following camera with smooth tracking
+- Screen-to-world and world-to-screen coordinate conversion
+- Visible bounds calculation for culling
+- Configurable follow speed and offset
+
+#### **CollisionDetection.js** - Collision Detection
+Comprehensive collision detection with smart routing:
+- **AABB vs AABB**: Rectangle overlap detection
+- **Circle vs Circle**: Exact distance-based collision
+- **Circle vs AABB**: Closest point algorithm for exact detection
+- **Circle vs Polygon**: Point-in-polygon + edge intersection tests
+- **Polygon vs Polygon**: SAT (Separating Axis Theorem)
+- **Smart Routing**: Automatic method selection based on shape type (radius property for circles, collisionPolygon for polygons)
+- Entities without either default to AABB collision
+
+#### **GameEntity.js** - Base Game Object
+Abstract base class for game-specific entities:
+- Extends Entity with game-specific functionality
 - Collision detection hooks (onHit, onCollideWithPlayer)
 - Minimap rendering interface (getMinimapInfo)
 
@@ -246,7 +276,10 @@ The included demo showcases a fully-featured space shooter with:
 - RequestAnimationFrame for smooth 60 FPS
 
 **Collision System:**
-- AABB (Axis-Aligned Bounding Box) collision detection
+- Comprehensive collision detection with smart routing
+- Supports AABB, Circle (via radius property), and Polygon (SAT) shapes
+- Exact mathematical collision for all shape combinations
+- Automatic method selection based on entity properties
 
 ## Assets
 
@@ -278,13 +311,17 @@ The included demo showcases a fully-featured space shooter with:
 ## Known Limitations & TODOs
 
 **Technical Issues:**
-- **No Automated Tests**: Missing unit tests for collision, spawn distribution, etc.
 - **No Build Process**: No minification, bundling, or source maps
-- **Collision Detection**: Basic AABB O(n²) (acceptable for current scale, could optimize with QuadTree)
+- **Collision Detection Performance**: O(n²) collision checking (acceptable for current scale, could optimize with QuadTree/spatial partitioning)
 - **No Screen Shake**: Missing camera shake for impacts
 - **Limited Audio**: No engine sounds or ambient space audio
 - **No Mobile Support**: No touch controls for mobile devices
 - **Global References**: Some globals (engine, menuSystem, soundManager) still used in Game.js - should use dependency injection
+
+**Test Coverage:**
+- ✅ **Unit Tests**: 220+ automated tests covering collision detection, entity management, camera, sprites, particles, projectiles, spawning
+- ✅ **Interactive Tests**: CollisionTest.html for visual collision verification
+- ⚠️ **Incomplete Coverage**: Low-priority components still need tests (PreferencesManager, AssetLoader, SoundManager, MenuSystem, AchievementManager, HighScoreManager)
 
 ## Getting Started
 
@@ -304,10 +341,13 @@ JS game engine/
 │   ├── VibeEngine.js              # Barrel export for all engine classes
 │   ├── Vector2D.js                # 2D vector mathematics
 │   ├── Sprite.js                  # Sprite rendering system
+│   ├── Entity.js                  # Base entity class
+│   ├── EntityManager.js           # Entity collection management
+│   ├── Camera.js                  # Camera system with world/screen conversion
+│   ├── CollisionDetection.js      # Multi-shape collision detection (AABB/Circle/Polygon)
 │   ├── Projectile.js              # Base projectile class
 │   ├── Particle.js                # Individual particle class
 │   ├── ParticleSystem.js          # Visual effects system
-│   ├── CollisionDetection.js      # AABB collision detection
 │   ├── Note.js                    # Web Audio API wrapper for music
 │   ├── MusicPlayer.js             # MIDI player using Note.js
 │   ├── SoundManager.js            # Sound effects manager
@@ -319,7 +359,7 @@ JS game engine/
 │   └── DebugLogger.js             # Conditional debug logging
 ├── main.js                        # Game entry point (ES6 module)
 ├── Game.js                        # Game class (extends EventTarget)
-├── GameEntity.js                  # Base game object class
+├── GameEntity.js                  # Game-specific entity base class
 ├── GameConfig.js                  # Centralized configuration
 ├── NPC.js                         # Base NPC/enemy class
 ├── NPCAIUtils.js                  # Shared AI utilities
@@ -337,6 +377,8 @@ JS game engine/
 ├── Wormhole.js                    # Level transition portals
 ├── Minimap.js                     # Radar display system
 ├── UpgradeBackground.js           # Animated upgrade menu background
+├── UnitTests.html                 # Automated unit test suite (220+ tests)
+├── CollisionTest.html             # Interactive collision detection test
 ├── css.css                        # Menu and UI styling
 ├── skeleton.html                  # Demo game HTML
 ├── *.png                          # Visual assets (sprites)
@@ -362,10 +404,9 @@ JS game engine/
 11. Boss encounters at milestone waves (5, 10, 15, etc.)
 
 **Technical Improvements:**
-13. Add automated testing (Vitest/Jest for collision, spawn, input sanitization)
+13. Expand test coverage to low-priority components (PreferencesManager, AssetLoader, SoundManager, MenuSystem, AchievementManager)
 14. Implement build process (Vite for HMR, minification, bundling)
-15. Add ESLint configuration for code quality
-16. Consider spatial partitioning (QuadTree) if entity counts grow significantly
+15. Consider spatial partitioning (QuadTree) if entity counts grow significantly
 
 ## Development History
 
@@ -409,6 +450,19 @@ This project was developed through AI collaboration:
 - **Alien Saucer**: New enemy with curved movement and 8-way ring attack
 - **Code Extraction**: SpawnSystem.js, main.js, UpgradeBackground.js separated from skeleton.html
 - **Import Resolution**: Fixed all circular dependencies and missing imports
+
+**Phase 5 - Engine Architecture & Testing (Claude Code - December 2024):**
+- **EntityManager System**: Centralized entity collection management with group-based organization, lifecycle hooks (onAdd/onRemove), batch operations, and runtime validation
+- **Camera System**: Player-following camera with world/screen coordinate conversion and visible bounds calculation
+- **Entity Base Class**: Generic base entity class for all game objects with physics and sprite management
+- **Exact Collision Detection**: Complete overhaul of collision system supporting all shape combinations (AABB, Circle, Polygon) with exact mathematical algorithms
+  - Circle vs Circle: Distance-based exact collision
+  - Circle vs AABB: Closest point algorithm
+  - Circle vs Polygon: Point-in-polygon + edge intersection tests
+  - Smart routing: Automatic method selection based on entity properties (radius for circles, collisionPolygon for polygons)
+- **Comprehensive Test Suite**: 220+ automated unit tests covering collision detection (all shape combinations), entity management, camera, sprites, particles, projectiles, and spawn system
+- **Interactive Testing**: CollisionTest.html for visual verification of collision detection with real-time shape switching and rotation
+- **Architecture Improvements**: SpawnSystem refactored to return entities instead of mutating arrays, improved encapsulation throughout engine
 
 ## License
 
