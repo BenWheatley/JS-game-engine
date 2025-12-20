@@ -1,4 +1,4 @@
-import { ParticleSystem, CollisionDetection, DebugLogger, Vector2D, Particle, Camera } from './VibeEngine/VibeEngine.js';
+import { ParticleSystem, CollisionDetection, DebugLogger, Vector2D, Particle, Camera, EntityManager } from './VibeEngine/VibeEngine.js';
 import { UpgradeBackground } from './UpgradeBackground.js';
 import { Player } from './Player.js';
 import { Minimap } from './Minimap.js';
@@ -29,12 +29,14 @@ class Game extends EventTarget {
 
 		// Player and entities
 		this.player = new Player();
-		this.npcs = [];
-		this.playerProjectiles = [];
-		this.npcProjectiles = [];
 		this.wormhole = null;
 
 		// Systems
+		this.entities = new EntityManager();
+		this.entities.createGroup('npcs');
+		this.entities.createGroup('playerProjectiles');
+		this.entities.createGroup('npcProjectiles');
+
 		this.camera = new Camera(canvas.width, canvas.height);
 		this.particleSystem = new ParticleSystem();
 		this.minimap = new Minimap(canvas.width, canvas.height);
@@ -116,7 +118,7 @@ class Game extends EventTarget {
 
 		// Mini-map
 		this.minimap.draw(context, {
-			npcs: this.npcs,
+			npcs: this.entities.getGroup('npcs'),
 			wormhole: this.wormhole
 		}, this.player.sprite.position);
 	}
@@ -158,24 +160,18 @@ class Game extends EventTarget {
 		}
 
 		// Shots
-		for (const projectile of this.playerProjectiles) {
-			projectile.draw();
-		}
-		for (const projectile of this.npcProjectiles) {
-			projectile.draw();
-		}
+		this.entities.renderGroup('playerProjectiles');
+		this.entities.renderGroup('npcProjectiles');
 
 		// Battleship beams (rendered before NPCs for proper Z-ordering)
-		for (const npc of this.npcs) {
+		for (const npc of this.entities.getGroup('npcs')) {
 			if (npc instanceof AlienBattleship) {
 				npc.drawBeam(context);
 			}
 		}
 
 		// NPCs
-		for (const npc of this.npcs) {
-			npc.draw();
-		}
+		this.entities.renderGroup('npcs');
 
 		// Particles
 		this.particleSystem.draw(context);
@@ -212,7 +208,7 @@ class Game extends EventTarget {
 
 		// Draw NPC collision shapes (polygon or AABB)
 		context.strokeStyle = 'rgba(255, 100, 0, 0.7)'; // Orange for NPCs
-		for (const npc of this.npcs) {
+		for (const npc of this.entities.getGroup('npcs')) {
 			if (npc.collisionPolygon) {
 				// Draw polygon
 				this.drawCollisionPolygon(context, npc.collisionPolygon, npc.sprite.position, npc.sprite.rotation);
@@ -231,7 +227,7 @@ class Game extends EventTarget {
 
 		// Draw player projectile AABBs
 		context.strokeStyle = 'rgba(0, 255, 255, 0.5)'; // Cyan for player projectiles
-		for (const proj of this.playerProjectiles) {
+		for (const proj of this.entities.getGroup('playerProjectiles')) {
 			const halfWidth = proj.sprite.size.x / 2;
 			const halfHeight = proj.sprite.size.y / 2;
 			context.strokeRect(
@@ -244,7 +240,7 @@ class Game extends EventTarget {
 
 		// Draw NPC projectile AABBs
 		context.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Red for NPC projectiles
-		for (const proj of this.npcProjectiles) {
+		for (const proj of this.entities.getGroup('npcProjectiles')) {
 			const halfWidth = proj.sprite.size.x / 2;
 			const halfHeight = proj.sprite.size.y / 2;
 			context.strokeRect(
@@ -357,16 +353,6 @@ class Game extends EventTarget {
 		}
 	}
 	
-	// Helper: Update all projectiles
-	updateAllProjectiles() {
-		for (const projectile of this.playerProjectiles) {
-			projectile.update();
-		}
-		for (const projectile of this.npcProjectiles) {
-			projectile.update();
-		}
-	}
-
 	// Helper: Check if entity is beyond wrap distance from player (per-axis check)
 	isBeyondWrapDistance(entityPos, playerPos, wrapDistance) {
 		const offsetX = entityPos.x - playerPos.x;
@@ -376,11 +362,11 @@ class Game extends EventTarget {
 
 	// Helper: Despawn projectiles that are too far from player (uses same logic as NPC wrapping)
 	despawnDistantProjectiles(wrapDistance) {
-		this.playerProjectiles = this.playerProjectiles.filter(projectile =>
-			!this.isBeyondWrapDistance(projectile.sprite.position, this.player.sprite.position, wrapDistance)
+		this.entities.removeWhere('playerProjectiles', projectile =>
+			this.isBeyondWrapDistance(projectile.sprite.position, this.player.sprite.position, wrapDistance)
 		);
-		this.npcProjectiles = this.npcProjectiles.filter(projectile =>
-			!this.isBeyondWrapDistance(projectile.sprite.position, this.player.sprite.position, wrapDistance)
+		this.entities.removeWhere('npcProjectiles', projectile =>
+			this.isBeyondWrapDistance(projectile.sprite.position, this.player.sprite.position, wrapDistance)
 		);
 	}
 		
@@ -452,7 +438,7 @@ class Game extends EventTarget {
 						DebugLogger.log(`Unexpected projectileType: ${projectileType}`);
 					}
 
-					this.playerProjectiles.push(newShot);
+					this.entities.add('playerProjectiles', newShot);
 				}
 			}
 
@@ -534,7 +520,7 @@ class Game extends EventTarget {
 		}
 
 		// Update all NPCs with unified loop
-		for (const npc of this.npcs) {
+		for (const npc of this.entities.getGroup('npcs')) {
 			// All NPCs accept playerPosition; battleships also need gameTime
 			const updateResult = npc.update(deltaTime, this.player.sprite.position, this.gameTime);
 			if (updateResult !== undefined && updateResult !== null) {
@@ -545,7 +531,7 @@ class Game extends EventTarget {
 			if (npc.tryShoot) {
 				const shootResult = npc.tryShoot(this.gameTime);
 				if (shootResult && shootResult.shots) {
-					this.npcProjectiles.push(...shootResult.shots);
+					this.entities.addMultiple('npcProjectiles', shootResult.shots);
 					if (shootResult.sound) {
 						soundManager.play(shootResult.sound, shootResult.volume);
 					}
@@ -566,7 +552,7 @@ class Game extends EventTarget {
 					this.player.sprite.position
 				);
 				if (spawnResult && spawnResult.fighters) {
-					this.npcs.push(...spawnResult.fighters);
+					this.entities.addMultiple('npcs', spawnResult.fighters);
 					if (spawnResult.sound) {
 					  soundManager.play(spawnResult.sound, spawnResult.volume);
 					}
@@ -589,7 +575,8 @@ class Game extends EventTarget {
 		}
 
 		// Update all projectiles
-		this.updateAllProjectiles();
+		this.entities.updateGroup('playerProjectiles', deltaTime);
+		this.entities.updateGroup('npcProjectiles', deltaTime);
 
 		// Update particles
 		this.particleSystem.update(deltaTime);
@@ -609,8 +596,8 @@ class Game extends EventTarget {
 		const npcProjectilesToRemove = new Set();
 
 		// Check player shot collisions with all NPCs (unified loop)
-		for (const shot of this.playerProjectiles) {
-			for (const npc of this.npcs) {
+		for (const shot of this.entities.getGroup('playerProjectiles')) {
+			for (const npc of this.entities.getGroup('npcs')) {
 				if (CollisionDetection.check(shot, npc)) {
 					playerProjectilesToRemove.add(shot);
 
@@ -641,7 +628,7 @@ class Game extends EventTarget {
 
 						// Handle spawns (specific to asteroid splitting)
 						if (hitResult.spawns) {
-							this.npcs.push(...hitResult.spawns);
+							this.entities.addMultiple('npcs', hitResult.spawns);
 						}
 					}
 					if (hitResult.sound) {
@@ -653,7 +640,7 @@ class Game extends EventTarget {
 
 		// Check player-NPC collisions (unified loop) - only if player is alive
 		if (this.player.health > 0) {
-			for (const npc of this.npcs) {
+			for (const npc of this.entities.getGroup('npcs')) {
 				if (CollisionDetection.check(this.player, npc)) {
 					npcsToRemove.add(npc);
 
@@ -683,7 +670,7 @@ class Game extends EventTarget {
 
 		// Check NPC projectile-player collisions (unified loop) - only if player is alive
 		if (this.player.health > 0) {
-			for (const projectile of this.npcProjectiles) {
+			for (const projectile of this.entities.getGroup('npcProjectiles')) {
 				if (CollisionDetection.check(this.player, projectile)) {
 					npcProjectilesToRemove.add(projectile);
 
@@ -713,9 +700,9 @@ class Game extends EventTarget {
 		}
 
 		// Remove collided entities (unified filtering)
-		this.npcs = this.npcs.filter(npc => !npcsToRemove.has(npc));
-		this.playerProjectiles = this.playerProjectiles.filter(projectile => !playerProjectilesToRemove.has(projectile));
-		this.npcProjectiles = this.npcProjectiles.filter(projectile => !npcProjectilesToRemove.has(projectile));
+		this.entities.removeWhere('npcs', npc => npcsToRemove.has(npc));
+		this.entities.removeWhere('playerProjectiles', projectile => playerProjectilesToRemove.has(projectile));
+		this.entities.removeWhere('npcProjectiles', projectile => npcProjectilesToRemove.has(projectile));
 
 		// Check for game over - only trigger once
 		if (this.player.health <= 0 && !this.gameOverTriggered) {
@@ -728,7 +715,7 @@ class Game extends EventTarget {
 		const wrapDistance = GameConfig.WORLD.NPC_WRAP_DISTANCE; // Minimap range - wrap NPCs at this distance
 
 		// Wrap all NPCs around minimap edges
-		for (const npc of this.npcs) {
+		for (const npc of this.entities.getGroup('npcs')) {
 			npc.sprite.position.x = this.wrapCoordinate(npc.sprite.position.x, this.player.sprite.position.x, wrapDistance);
 			npc.sprite.position.y = this.wrapCoordinate(npc.sprite.position.y, this.player.sprite.position.y, wrapDistance);
 		}
@@ -863,7 +850,7 @@ class Game extends EventTarget {
 	* @returns {number} Number of NPCs
 	*/
 	countNPCs() {
-		return this.npcs.length;
+		return this.entities.count('npcs');
 	}
 
 	/**
@@ -895,8 +882,8 @@ class Game extends EventTarget {
 		this.wormhole = null;
 
 		// Clear all projectiles when transitioning levels
-		this.playerProjectiles = [];
-		this.npcProjectiles = [];
+		this.entities.clearGroup('playerProjectiles');
+		this.entities.clearGroup('npcProjectiles');
 
 		// Reset wave-specific achievement tracking
 		this.achievementStats.damageTakenThisWave = 0;
@@ -906,18 +893,18 @@ class Game extends EventTarget {
 			this.player.sprite.position,
 			this.canvas.width,
 			this.canvas.height,
-			this.npcs
+			this.entities.getGroup('npcs')
 		);
 	}
 	
 	_cheat_clearLevel() {
-		this.npcs = [];
+		this.entities.clearGroup('npcs');
 		this._showBoundingBoxes = true;
 	}
 
 	_cheat_testLevel() {
 		// Clear existing NPCs
-		this.npcs = [];
+		this.entities.clearGroup('npcs');
 
 		// Spawn one of each NPC type using SpawnSystem
 		const entityTypes = Object.keys(GameConfig.SPAWNING.ENTITY_TYPES);
@@ -927,7 +914,7 @@ class Game extends EventTarget {
 				this.player.sprite.position,
 				this.canvas.width,
 				this.canvas.height,
-				this.npcs
+				this.entities.getGroup('npcs')
 			);
 		}
 

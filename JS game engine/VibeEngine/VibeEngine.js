@@ -4,6 +4,7 @@ import './CanvasRenderingContext2D-extensions.js';
 import { Vector2D } from './Vector2D.js';
 import { Sprite } from './Sprite.js';
 import { Entity } from './Entity.js';
+import { EntityManager } from './EntityManager.js';
 import { Camera } from './Camera.js';
 import { Projectile } from './Projectile.js';
 import { Particle } from './Particle.js';
@@ -195,6 +196,7 @@ export {
 	Vector2D,
 	Sprite,
 	Entity,
+	EntityManager,
 	Camera,
 	Projectile,
 	Particle,
