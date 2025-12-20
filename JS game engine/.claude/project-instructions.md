@@ -12,6 +12,7 @@
 - `file:///` URLs have CORS restrictions that prevent asset loading
 - Testing happens manually by the developer
 - **IMPORTANT:** Whenever any task is completed, update ISSUES.md to remove the completed item entirely
+- **IMPORTANT:** ISSUES.md contains ONLY outstanding issues - never add completed work, changelogs, or "Recent Improvements" sections
 
 ## Code Style
 
