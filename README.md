@@ -451,7 +451,7 @@ This project was developed through AI collaboration:
 - **Code Extraction**: SpawnSystem.js, main.js, UpgradeBackground.js separated from skeleton.html
 - **Import Resolution**: Fixed all circular dependencies and missing imports
 
-**Phase 5 - Engine Architecture & Testing (Claude Code - December 2024):**
+**Phase 5 - Engine Architecture & Testing (Claude Code - December 2025):**
 - **EntityManager System**: Centralized entity collection management with group-based organization, lifecycle hooks (onAdd/onRemove), batch operations, and runtime validation
 - **Camera System**: Player-following camera with world/screen coordinate conversion and visible bounds calculation
 - **Entity Base Class**: Generic base entity class for all game objects with physics and sprite management
