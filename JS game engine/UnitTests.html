@@ -75,11 +75,17 @@
 		import { CollisionDetection } from './VibeEngine/CollisionDetection.js';
 		import { Vector2D } from './VibeEngine/Vector2D.js';
 		import { EntityManager } from './VibeEngine/EntityManager.js?v=2';
+		import { Camera } from './VibeEngine/Camera.js';
+		import { Sprite } from './VibeEngine/Sprite.js';
+		import { Entity } from './VibeEngine/Entity.js';
 
 		// Signal that modules are loaded
 		window.CollisionDetection = CollisionDetection;
 		window.Vector2D = Vector2D;
 		window.EntityManager = EntityManager;
+		window.Camera = Camera;
+		window.Sprite = Sprite;
+		window.Entity = Entity;
 		window.modulesLoaded = true;
 
 		// Trigger test execution
@@ -208,7 +214,8 @@
 		// Wait for modules to load before running tests
 		function runAllTests() {
 			// Check if modules are loaded
-			if (!window.CollisionDetection || !window.Vector2D || !window.EntityManager) {
+			if (!window.CollisionDetection || !window.Vector2D || !window.EntityManager ||
+			    !window.Camera || !window.Sprite || !window.Entity) {
 				console.error('Modules not loaded yet');
 				return;
 			}
@@ -1494,6 +1501,396 @@
 				});
 
 				runner.assertEqual(count, 2);
+			});
+		});
+
+		// Camera Tests
+		runner.describe('Camera - Constructor and Setup', () => {
+			runner.it('should create camera with viewport dimensions', () => {
+				const camera = new window.Camera(800, 600);
+				runner.assertEqual(camera.viewportWidth, 800);
+				runner.assertEqual(camera.viewportHeight, 600);
+			});
+
+			runner.it('should initialize target at origin', () => {
+				const camera = new window.Camera(800, 600);
+				runner.assertEqual(camera.target.x, 0);
+				runner.assertEqual(camera.target.y, 0);
+			});
+		});
+
+		runner.describe('Camera - Follow Target', () => {
+			runner.it('should update target when following position', () => {
+				const camera = new window.Camera(800, 600);
+				const target = new window.Vector2D(100, 200);
+				camera.follow(target);
+				runner.assertEqual(camera.target, target);
+			});
+
+			runner.it('should track moving target', () => {
+				const camera = new window.Camera(800, 600);
+				const target = new window.Vector2D(100, 200);
+				camera.follow(target);
+
+				// Move target
+				target.x = 300;
+				target.y = 400;
+
+				// Camera should still reference same object
+				runner.assertEqual(camera.target.x, 300);
+				runner.assertEqual(camera.target.y, 400);
+			});
+		});
+
+		runner.describe('Camera - Coordinate Conversions', () => {
+			runner.it('should convert screen to world coordinates at origin', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(0, 0));
+
+				// Center of screen should map to world origin
+				const screenCenter = new window.Vector2D(400, 300);
+				const worldPos = camera.screenToWorld(screenCenter);
+
+				runner.assertAlmostEqual(worldPos.x, 0, 0.01);
+				runner.assertAlmostEqual(worldPos.y, 0, 0.01);
+			});
+
+			runner.it('should convert screen to world coordinates when camera is offset', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(100, 50));
+
+				// Center of screen should map to camera target
+				const screenCenter = new window.Vector2D(400, 300);
+				const worldPos = camera.screenToWorld(screenCenter);
+
+				runner.assertAlmostEqual(worldPos.x, 100, 0.01);
+				runner.assertAlmostEqual(worldPos.y, 50, 0.01);
+			});
+
+			runner.it('should convert world to screen coordinates at origin', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(0, 0));
+
+				// World origin should map to screen center
+				const worldOrigin = new window.Vector2D(0, 0);
+				const screenPos = camera.worldToScreen(worldOrigin);
+
+				runner.assertAlmostEqual(screenPos.x, 400, 0.01);
+				runner.assertAlmostEqual(screenPos.y, 300, 0.01);
+			});
+
+			runner.it('should convert world to screen coordinates when camera is offset', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(100, 50));
+
+				// Camera target should map to screen center
+				const worldPos = new window.Vector2D(100, 50);
+				const screenPos = camera.worldToScreen(worldPos);
+
+				runner.assertAlmostEqual(screenPos.x, 400, 0.01);
+				runner.assertAlmostEqual(screenPos.y, 300, 0.01);
+			});
+
+			runner.it('should be inverse operations (screen->world->screen)', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(123, 456));
+
+				const originalScreen = new window.Vector2D(250, 180);
+				const world = camera.screenToWorld(originalScreen);
+				const backToScreen = camera.worldToScreen(world);
+
+				runner.assertAlmostEqual(backToScreen.x, originalScreen.x, 0.01);
+				runner.assertAlmostEqual(backToScreen.y, originalScreen.y, 0.01);
+			});
+
+			runner.it('should be inverse operations (world->screen->world)', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(123, 456));
+
+				const originalWorld = new window.Vector2D(500, 250);
+				const screen = camera.worldToScreen(originalWorld);
+				const backToWorld = camera.screenToWorld(screen);
+
+				runner.assertAlmostEqual(backToWorld.x, originalWorld.x, 0.01);
+				runner.assertAlmostEqual(backToWorld.y, originalWorld.y, 0.01);
+			});
+		});
+
+		runner.describe('Camera - Visible Bounds', () => {
+			runner.it('should calculate visible bounds at origin', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(0, 0));
+
+				const bounds = camera.getVisibleBounds();
+
+				runner.assertAlmostEqual(bounds.left, -400, 0.01);
+				runner.assertAlmostEqual(bounds.right, 400, 0.01);
+				runner.assertAlmostEqual(bounds.top, -300, 0.01);
+				runner.assertAlmostEqual(bounds.bottom, 300, 0.01);
+			});
+
+			runner.it('should calculate visible bounds with camera offset', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(1000, 2000));
+
+				const bounds = camera.getVisibleBounds();
+
+				runner.assertAlmostEqual(bounds.left, 600, 0.01);   // 1000 - 400
+				runner.assertAlmostEqual(bounds.right, 1400, 0.01); // 1000 + 400
+				runner.assertAlmostEqual(bounds.top, 1700, 0.01);   // 2000 - 300
+				runner.assertAlmostEqual(bounds.bottom, 2300, 0.01); // 2000 + 300
+			});
+
+			runner.it('should handle negative camera positions', () => {
+				const camera = new window.Camera(800, 600);
+				camera.follow(new window.Vector2D(-500, -300));
+
+				const bounds = camera.getVisibleBounds();
+
+				runner.assertAlmostEqual(bounds.left, -900, 0.01);  // -500 - 400
+				runner.assertAlmostEqual(bounds.right, -100, 0.01); // -500 + 400
+				runner.assertAlmostEqual(bounds.top, -600, 0.01);   // -300 - 300
+				runner.assertAlmostEqual(bounds.bottom, 0, 0.01);   // -300 + 300
+			});
+		});
+
+		// Sprite Tests
+		runner.describe('Sprite - Constructor', () => {
+			runner.it('should create sprite with position and size', () => {
+				const pos = new window.Vector2D(100, 200);
+				const size = new window.Vector2D(50, 75);
+				const sprite = new window.Sprite('test.png', pos, size);
+
+				runner.assertEqual(sprite.position, pos);
+				runner.assertEqual(sprite.size, size);
+				runner.assertEqual(sprite.imageUrl, 'test.png');
+			});
+
+			runner.it('should initialize rotation to zero', () => {
+				const sprite = new window.Sprite('test.png', new window.Vector2D(0, 0), new window.Vector2D(10, 10));
+				runner.assertEqual(sprite.rotation, 0);
+			});
+
+			runner.it('should allow setting rotation', () => {
+				const sprite = new window.Sprite('test.png', new window.Vector2D(0, 0), new window.Vector2D(10, 10));
+				sprite.rotation = Math.PI / 2;
+				runner.assertAlmostEqual(sprite.rotation, Math.PI / 2, 0.01);
+			});
+		});
+
+		runner.describe('Sprite - Cache Management', () => {
+			runner.it('should check if sprite is cached', () => {
+				const url = 'cached-sprite.png';
+				window.Sprite.cache[url] = {}; // Mock cached sprite
+				runner.assertTrue(window.Sprite.isCached(url));
+				delete window.Sprite.cache[url]; // Cleanup
+			});
+
+			runner.it('should return false for non-cached sprite', () => {
+				runner.assertFalse(window.Sprite.isCached('non-existent.png'));
+			});
+
+			runner.it('should get sprite from cache', () => {
+				const url = 'cached-sprite.png';
+				const mockImage = { width: 100, height: 100 };
+				window.Sprite.cache[url] = mockImage;
+
+				const cached = window.Sprite.getFromCache(url);
+				runner.assertEqual(cached, mockImage);
+
+				delete window.Sprite.cache[url]; // Cleanup
+			});
+
+			runner.it('should return undefined for non-cached sprite', () => {
+				const cached = window.Sprite.getFromCache('non-existent.png');
+				runner.assertEqual(cached, undefined);
+			});
+		});
+
+		runner.describe('Sprite - Loading State', () => {
+			runner.it('should report not loading when no sprites are loading', () => {
+				runner.assertFalse(window.Sprite.stillLoading());
+			});
+
+			runner.it('should report loading when sprites are in loading state', () => {
+				window.Sprite.loadingSprites['loading-sprite.png'] = true;
+				runner.assertTrue(window.Sprite.stillLoading());
+				delete window.Sprite.loadingSprites['loading-sprite.png']; // Cleanup
+			});
+		});
+
+		// Entity Tests
+		runner.describe('Entity - Constructor', () => {
+			runner.it('should create entity with sprite', () => {
+				const pos = new window.Vector2D(100, 200);
+				const rotation = Math.PI / 4;
+				const velocity = new window.Vector2D(0.5, 0.3);
+				const size = new window.Vector2D(50, 50);
+
+				const entity = new window.Entity(pos, rotation, velocity, size, 'entity.png');
+
+				runner.assertEqual(entity.sprite.position, pos);
+				runner.assertAlmostEqual(entity.sprite.rotation, rotation, 0.01);
+				runner.assertEqual(entity.velocity, velocity);
+				runner.assertEqual(entity.sprite.size, size);
+			});
+
+			runner.it('should create sprite with correct image URL', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					0,
+					new window.Vector2D(0, 0),
+					new window.Vector2D(10, 10),
+					'test-entity.png'
+				);
+
+				runner.assertEqual(entity.sprite.imageUrl, 'test-entity.png');
+			});
+		});
+
+		runner.describe('Entity - Update Movement', () => {
+			runner.it('should update position based on velocity and deltaTime', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					0,
+					new window.Vector2D(1, 0), // 1 unit per millisecond in x
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(100); // 100ms elapsed
+
+				runner.assertAlmostEqual(entity.sprite.position.x, 100, 0.01);
+				runner.assertAlmostEqual(entity.sprite.position.y, 0, 0.01);
+			});
+
+			runner.it('should handle diagonal movement', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					0,
+					new window.Vector2D(0.5, 0.5), // Diagonal velocity
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(100);
+
+				runner.assertAlmostEqual(entity.sprite.position.x, 50, 0.01);
+				runner.assertAlmostEqual(entity.sprite.position.y, 50, 0.01);
+			});
+
+			runner.it('should handle negative velocity', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(100, 100),
+					0,
+					new window.Vector2D(-1, -0.5),
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(50);
+
+				runner.assertAlmostEqual(entity.sprite.position.x, 50, 0.01);
+				runner.assertAlmostEqual(entity.sprite.position.y, 75, 0.01);
+			});
+
+			runner.it('should handle zero velocity (stationary)', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(100, 200),
+					0,
+					new window.Vector2D(0, 0),
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				const originalPos = entity.sprite.position;
+				entity.update(100);
+
+				// Position should not change
+				runner.assertAlmostEqual(entity.sprite.position.x, 100, 0.01);
+				runner.assertAlmostEqual(entity.sprite.position.y, 200, 0.01);
+			});
+
+			runner.it('should accumulate position changes over multiple updates', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					0,
+					new window.Vector2D(1, 0),
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(50);  // Move to x=50
+				entity.update(50);  // Move to x=100
+				entity.update(100); // Move to x=200
+
+				runner.assertAlmostEqual(entity.sprite.position.x, 200, 0.01);
+			});
+
+			runner.it('should handle different deltaTime values correctly', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					0,
+					new window.Vector2D(2, 0), // 2 units per ms
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(1);    // Move 2 units
+				runner.assertAlmostEqual(entity.sprite.position.x, 2, 0.01);
+
+				entity.update(10);   // Move 20 more units
+				runner.assertAlmostEqual(entity.sprite.position.x, 22, 0.01);
+
+				entity.update(100);  // Move 200 more units
+				runner.assertAlmostEqual(entity.sprite.position.x, 222, 0.01);
+			});
+		});
+
+		runner.describe('Entity - Edge Cases', () => {
+			runner.it('should handle zero deltaTime', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(100, 100),
+					0,
+					new window.Vector2D(1, 1),
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(0);
+
+				// Position should not change
+				runner.assertAlmostEqual(entity.sprite.position.x, 100, 0.01);
+				runner.assertAlmostEqual(entity.sprite.position.y, 100, 0.01);
+			});
+
+			runner.it('should handle very small deltaTime', () => {
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					0,
+					new window.Vector2D(1, 0),
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(0.001);
+				runner.assertAlmostEqual(entity.sprite.position.x, 0.001, 0.0001);
+			});
+
+			runner.it('should preserve rotation during updates', () => {
+				const rotation = Math.PI / 3;
+				const entity = new window.Entity(
+					new window.Vector2D(0, 0),
+					rotation,
+					new window.Vector2D(1, 0),
+					new window.Vector2D(10, 10),
+					'test.png'
+				);
+
+				entity.update(100);
+
+				// Rotation should remain unchanged
+				runner.assertAlmostEqual(entity.sprite.rotation, rotation, 0.01);
 			});
 		});
 

@@ -1,5 +1,10 @@
 # Project Instructions
 
+## Project Structure
+
+- **Issues/TODO:** `/Users/benwheatley/Documents/Code/JS-game-engine/ISSUES.md`
+- **Unit Tests:** `/Users/benwheatley/Documents/Code/JS-game-engine/JS game engine/UnitTests.html` (all tests go here)
+
 ## Development Workflow
 
 - **DO NOT** run `open skeleton.html` or similar browser commands
