@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Collision Detection Interactive Test</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 20px;
+			font-family: 'Courier New', monospace;
+			background: #1e1e1e;
+			color: #d4d4d4;
+		}
+		h1 {
+			color: #4ec9b0;
+			margin-bottom: 10px;
+		}
+		.info {
+			margin-bottom: 20px;
+			padding: 15px;
+			background: #252526;
+			border-left: 3px solid #569cd6;
+		}
+		.controls {
+			margin: 10px 0;
+		}
+		.key {
+			display: inline-block;
+			padding: 3px 8px;
+			background: #3c3c3c;
+			border: 1px solid #555;
+			border-radius: 3px;
+			margin: 0 3px;
+			font-weight: bold;
+			color: #4ec9b0;
+		}
+		canvas {
+			display: block;
+			background: #2d2d30;
+			border: 2px solid #3c3c3c;
+			cursor: crosshair;
+		}
+		.status {
+			margin-top: 20px;
+			padding: 10px;
+			background: #252526;
+			border-left: 3px solid #4ec9b0;
+		}
+		.collision {
+			color: #f48771;
+			font-weight: bold;
+		}
+		.no-collision {
+			color: #4ec9b0;
+		}
+	</style>
+</head>
+<body>
+	<h1>Collision Detection Interactive Test</h1>
+
+	<div class="info">
+		<div class="controls">
+			<strong>Controls:</strong><br>
+			<span class="key">1</span> <span class="key">2</span> <span class="key">3</span> Switch mouse shape (Polygon / AABB / Circle)<br>
+			<span class="key">Q</span> <span class="key">E</span> Rotate mouse polygon (hold to spin at 0.5 Hz)<br>
+			Move mouse to test collision detection
+		</div>
+	</div>
+
+	<canvas id="testCanvas" width="1200" height="800"></canvas>
+
+	<div class="status" id="status">
+		<div>Current Shape: <span id="currentShape">Polygon</span></div>
+		<div>Collisions: <span id="collisionStatus" class="no-collision">None</span></div>
+	</div>
+
+	<script type="module">
+		import { CollisionDetection } from './VibeEngine/CollisionDetection.js';
+		import { Vector2D } from './VibeEngine/Vector2D.js';
+
+		const canvas = document.getElementById('testCanvas');
+		const ctx = canvas.getContext('2d');
+
+		// State
+		let mousePos = new Vector2D(canvas.width / 2, canvas.height / 2);
+		let mouseShapeType = 'polygon'; // 'polygon', 'aabb', 'circle'
+		let mouseRotation = 0;
+		let rotationSpeed = 0; // Set to Math.PI (0.5 Hz) when q/e pressed
+		let keys = {};
+
+		// Fixed shapes
+		const fixedShapes = {
+			polygon: {
+				position: new Vector2D(300, 400),
+				rotation: 0,
+				size: new Vector2D(80, 80),
+				color: '#569cd6',
+				collisionPolygon: [
+					new Vector2D(0, -40),    // Top
+					new Vector2D(40, 40),    // Bottom right
+					new Vector2D(-40, 40)    // Bottom left
+				]
+			},
+			aabb: {
+				position: new Vector2D(600, 400),
+				rotation: 0,
+				size: new Vector2D(100, 80),
+				color: '#4ec9b0',
+				collisionPolygon: null
+			},
+			circle: {
+				position: new Vector2D(900, 400),
+				rotation: 0,
+				size: new Vector2D(60, 60),
+				color: '#c586c0',
+				collisionPolygon: null
+			}
+		};
+
+		// Create mouse-tracked shape
+		function getMouseShape() {
+			const shape = {
+				sprite: {
+					position: mousePos,
+					rotation: mouseRotation,
+					size: new Vector2D(70, 70)
+				}
+			};
+
+			if (mouseShapeType === 'polygon') {
+				shape.collisionPolygon = [
+					new Vector2D(0, -35),
+					new Vector2D(35, 35),
+					new Vector2D(-35, 35)
+				];
+			} else {
+				shape.collisionPolygon = null;
+			}
+
+			return shape;
+		}
+
+		// Event listeners
+		canvas.addEventListener('mousemove', (e) => {
+			const rect = canvas.getBoundingClientRect();
+			mousePos = new Vector2D(
+				e.clientX - rect.left,
+				e.clientY - rect.top
+			);
+		});
+
+		document.addEventListener('keydown', (e) => {
+			keys[e.key] = true;
+
+			// Switch shape type
+			if (e.key === '1') {
+				mouseShapeType = 'polygon';
+				mouseRotation = 0;
+				document.getElementById('currentShape').textContent = 'Polygon';
+			} else if (e.key === '2') {
+				mouseShapeType = 'aabb';
+				mouseRotation = 0;
+				document.getElementById('currentShape').textContent = 'AABB';
+			} else if (e.key === '3') {
+				mouseShapeType = 'circle';
+				mouseRotation = 0;
+				document.getElementById('currentShape').textContent = 'Circle';
+			}
+		});
+
+		document.addEventListener('keyup', (e) => {
+			keys[e.key] = false;
+		});
+
+		// Helper to create entity-like object for collision detection
+		function createEntity(pos, rot, size, polygon) {
+			return {
+				sprite: {
+					position: pos,
+					rotation: rot,
+					size: size
+				},
+				collisionPolygon: polygon
+			};
+		}
+
+		// Draw functions
+		function drawPolygon(ctx, pos, rotation, polygon, color, highlight = false) {
+			ctx.save();
+			ctx.translate(pos.x, pos.y);
+			ctx.rotate(rotation);
+
+			ctx.beginPath();
+			ctx.moveTo(polygon[0].x, polygon[0].y);
+			for (let i = 1; i < polygon.length; i++) {
+				ctx.lineTo(polygon[i].x, polygon[i].y);
+			}
+			ctx.closePath();
+
+			if (highlight) {
+				ctx.fillStyle = 'rgba(244, 135, 113, 0.3)';
+				ctx.fill();
+				ctx.strokeStyle = '#f48771';
+				ctx.lineWidth = 3;
+			} else {
+				ctx.fillStyle = color + '40';
+				ctx.fill();
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 2;
+			}
+			ctx.stroke();
+
+			ctx.restore();
+		}
+
+		function drawAABB(ctx, pos, size, color, highlight = false) {
+			if (highlight) {
+				ctx.fillStyle = 'rgba(244, 135, 113, 0.3)';
+				ctx.strokeStyle = '#f48771';
+				ctx.lineWidth = 3;
+			} else {
+				ctx.fillStyle = color + '40';
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 2;
+			}
+
+			ctx.fillRect(
+				pos.x - size.x / 2,
+				pos.y - size.y / 2,
+				size.x,
+				size.y
+			);
+			ctx.strokeRect(
+				pos.x - size.x / 2,
+				pos.y - size.y / 2,
+				size.x,
+				size.y
+			);
+		}
+
+		function drawCircle(ctx, pos, radius, color, highlight = false) {
+			ctx.beginPath();
+			ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+
+			if (highlight) {
+				ctx.fillStyle = 'rgba(244, 135, 113, 0.3)';
+				ctx.fill();
+				ctx.strokeStyle = '#f48771';
+				ctx.lineWidth = 3;
+			} else {
+				ctx.fillStyle = color + '40';
+				ctx.fill();
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 2;
+			}
+			ctx.stroke();
+		}
+
+		function drawCrosshair(ctx, pos, size) {
+			ctx.strokeStyle = '#888';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(pos.x - size, pos.y);
+			ctx.lineTo(pos.x + size, pos.y);
+			ctx.moveTo(pos.x, pos.y - size);
+			ctx.lineTo(pos.x, pos.y + size);
+			ctx.stroke();
+		}
+
+		// Update loop
+		let lastTime = Date.now();
+		function update() {
+			const currentTime = Date.now();
+			const deltaTime = currentTime - lastTime;
+			lastTime = currentTime;
+
+			// Update fixed polygon rotation (0.5 Hz = π radians per second)
+			fixedShapes.polygon.rotation += Math.PI * (deltaTime / 1000);
+
+			// Update mouse polygon rotation if q/e held
+			if (keys['q'] || keys['Q']) {
+				mouseRotation -= Math.PI * (deltaTime / 1000);
+			}
+			if (keys['e'] || keys['E']) {
+				mouseRotation += Math.PI * (deltaTime / 1000);
+			}
+
+			// Clear canvas
+			ctx.fillStyle = '#2d2d30';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			// Check collisions
+			const mouseShape = getMouseShape();
+			const collisions = [];
+
+			// Draw and check fixed shapes
+			for (const [name, shape] of Object.entries(fixedShapes)) {
+				const entity = createEntity(
+					shape.position,
+					shape.rotation,
+					shape.size,
+					shape.collisionPolygon
+				);
+
+				const isColliding = CollisionDetection.check(mouseShape, entity);
+				if (isColliding) {
+					collisions.push(name);
+				}
+
+				// Draw shape
+				if (shape.collisionPolygon) {
+					drawPolygon(ctx, shape.position, shape.rotation, shape.collisionPolygon, shape.color, isColliding);
+				} else if (name === 'circle') {
+					drawCircle(ctx, shape.position, shape.size.x / 2, shape.color, isColliding);
+				} else {
+					drawAABB(ctx, shape.position, shape.size, shape.color, isColliding);
+				}
+
+				// Draw label
+				ctx.fillStyle = '#d4d4d4';
+				ctx.font = '14px Courier New';
+				ctx.textAlign = 'center';
+				ctx.fillText(name.toUpperCase(), shape.position.x, shape.position.y + shape.size.y / 2 + 25);
+			}
+
+			// Draw mouse shape
+			const mouseColor = '#dcdcaa';
+			if (mouseShapeType === 'polygon') {
+				drawPolygon(ctx, mousePos, mouseRotation, mouseShape.collisionPolygon, mouseColor, false);
+			} else if (mouseShapeType === 'circle') {
+				drawCircle(ctx, mousePos, mouseShape.sprite.size.x / 2, mouseColor, false);
+			} else {
+				drawAABB(ctx, mousePos, mouseShape.sprite.size, mouseColor, false);
+			}
+
+			// Draw crosshair at mouse position
+			drawCrosshair(ctx, mousePos, 10);
+
+			// Update status
+			const statusEl = document.getElementById('collisionStatus');
+			if (collisions.length > 0) {
+				statusEl.className = 'collision';
+				statusEl.textContent = collisions.join(', ').toUpperCase();
+			} else {
+				statusEl.className = 'no-collision';
+				statusEl.textContent = 'None';
+			}
+
+			requestAnimationFrame(update);
+		}
+
+		// Start
+		update();
+	</script>
+</body>
+</html>

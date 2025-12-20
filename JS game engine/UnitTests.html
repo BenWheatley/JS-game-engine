@@ -1913,12 +1913,12 @@
 
 			runner.it('should scale wave for levels beyond defined waves', () => {
 				const lastDefinedLevel = 10; // Adjust based on GameConfig
-				const beyondLevel = 15;
+				const beyondLevel = 50; // Use larger gap to avoid quantization issues
 
 				const baseWave = window.SpawnSystem.getWaveDefinition(lastDefinedLevel);
 				const scaledWave = window.SpawnSystem.getWaveDefinition(beyondLevel);
 
-				// Scaled wave should have more entities
+				// Scaled wave should have more entities (using large level gap to avoid quantization)
 				let baseTotal = 0;
 				let scaledTotal = 0;
 
@@ -1929,7 +1929,7 @@
 					scaledTotal += count;
 				}
 
-				runner.assertTrue(scaledTotal >= baseTotal, 'Scaled wave should have at least as many entities');
+				runner.assertTrue(scaledTotal > baseTotal, 'Scaled wave should have more entities with large level gap');
 			});
 
 			runner.it('should have same entity types in scaled waves', () => {
