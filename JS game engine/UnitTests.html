@@ -74,10 +74,12 @@
 	<script type="module">
 		import { CollisionDetection } from './VibeEngine/CollisionDetection.js';
 		import { Vector2D } from './VibeEngine/Vector2D.js';
+		import { EntityManager } from './VibeEngine/EntityManager.js?v=2';
 
 		// Signal that modules are loaded
 		window.CollisionDetection = CollisionDetection;
 		window.Vector2D = Vector2D;
+		window.EntityManager = EntityManager;
 		window.modulesLoaded = true;
 
 		// Trigger test execution
@@ -206,7 +208,7 @@
 		// Wait for modules to load before running tests
 		function runAllTests() {
 			// Check if modules are loaded
-			if (!window.CollisionDetection || !window.Vector2D) {
+			if (!window.CollisionDetection || !window.Vector2D || !window.EntityManager) {
 				console.error('Modules not loaded yet');
 				return;
 			}
@@ -1011,6 +1013,487 @@
 				const entity2 = createAABBEntity(0, 0, 20, 20);
 				runner.assertTrue(CollisionDetection.check(entity1, entity2),
 					'Should collide at rotation ' + (Math.PI / 2));
+			});
+		});
+
+		// EntityManager Tests
+		runner.describe('EntityManager - Basic Operations', () => {
+			// Helper to create mock entities
+			function createMockEntity(name) {
+				return {
+					name: name,
+					update: function(deltaTime) { this.lastUpdate = deltaTime; },
+					draw: function() { this.drawn = true; }
+				};
+			}
+
+			runner.it('should create empty groups', () => {
+				const manager = new window.EntityManager();
+				manager.createGroup('test');
+				runner.assertEqual(manager.count('test'), 0);
+			});
+
+			runner.it('should add entities to groups', () => {
+				const manager = new window.EntityManager();
+				const entity = createMockEntity('entity1');
+				const result = manager.add('test', entity);
+				runner.assertTrue(result, 'add should return true');
+				runner.assertEqual(manager.count('test'), 1);
+			});
+
+			runner.it('should validate entities on add', () => {
+				const manager = new window.EntityManager();
+				const invalidEntity = { name: 'invalid' }; // missing update and draw
+				const result = manager.add('test', invalidEntity);
+				runner.assertFalse(result, 'add should return false for invalid entity');
+				runner.assertEqual(manager.count('test'), 0);
+			});
+
+			runner.it('should not add null entities', () => {
+				const manager = new window.EntityManager();
+				const result = manager.add('test', null);
+				runner.assertFalse(result);
+				runner.assertEqual(manager.count('test'), 0);
+			});
+
+			runner.it('should add multiple entities', () => {
+				const manager = new window.EntityManager();
+				const entities = [
+					createMockEntity('e1'),
+					createMockEntity('e2'),
+					createMockEntity('e3')
+				];
+				const added = manager.addMultiple('test', entities);
+				runner.assertEqual(added, 3);
+				runner.assertEqual(manager.count('test'), 3);
+			});
+
+			runner.it('should skip invalid entities in addMultiple', () => {
+				const manager = new window.EntityManager();
+				const entities = [
+					createMockEntity('e1'),
+					{ name: 'invalid' }, // missing methods
+					createMockEntity('e2')
+				];
+				const added = manager.addMultiple('test', entities);
+				runner.assertEqual(added, 2);
+				runner.assertEqual(manager.count('test'), 2);
+			});
+
+			runner.it('should remove entities from groups', () => {
+				const manager = new window.EntityManager();
+				const entity = createMockEntity('e1');
+				manager.add('test', entity);
+				const removed = manager.remove('test', entity);
+				runner.assertTrue(removed);
+				runner.assertEqual(manager.count('test'), 0);
+			});
+
+			runner.it('should return false when removing non-existent entity', () => {
+				const manager = new window.EntityManager();
+				const entity1 = createMockEntity('e1');
+				const entity2 = createMockEntity('e2');
+				manager.add('test', entity1);
+				const removed = manager.remove('test', entity2);
+				runner.assertFalse(removed);
+				runner.assertEqual(manager.count('test'), 1);
+			});
+
+			runner.it('should clear groups', () => {
+				const manager = new window.EntityManager();
+				manager.addMultiple('test', [
+					createMockEntity('e1'),
+					createMockEntity('e2')
+				]);
+				manager.clearGroup('test');
+				runner.assertEqual(manager.count('test'), 0);
+			});
+
+			runner.it('should get group entities', () => {
+				const manager = new window.EntityManager();
+				const entity = createMockEntity('e1');
+				manager.add('test', entity);
+				const group = manager.getGroup('test');
+				runner.assertEqual(group.length, 1);
+				runner.assertEqual(group[0], entity);
+			});
+
+			runner.it('should return empty array for non-existent group', () => {
+				const manager = new window.EntityManager();
+				const group = manager.getGroup('nonexistent');
+				runner.assertEqual(group.length, 0);
+			});
+		});
+
+		runner.describe('EntityManager - Lifecycle Hooks', () => {
+			function createMockEntity(name) {
+				return {
+					name: name,
+					update: function(deltaTime) {},
+					draw: function() {}
+				};
+			}
+
+			runner.it('should trigger onAdd hooks', () => {
+				const manager = new window.EntityManager();
+				let hookCalled = false;
+				let hookEntity = null;
+				let hookGroup = null;
+
+				manager.addHook('onAdd', (entity, groupName) => {
+					hookCalled = true;
+					hookEntity = entity;
+					hookGroup = groupName;
+				});
+
+				const entity = createMockEntity('e1');
+				manager.add('test', entity);
+
+				runner.assertTrue(hookCalled);
+				runner.assertEqual(hookEntity, entity);
+				runner.assertEqual(hookGroup, 'test');
+			});
+
+			runner.it('should trigger onRemove hooks', () => {
+				const manager = new window.EntityManager();
+				let hookCalled = false;
+				let hookEntity = null;
+
+				manager.addHook('onRemove', (entity, groupName) => {
+					hookCalled = true;
+					hookEntity = entity;
+				});
+
+				const entity = createMockEntity('e1');
+				manager.add('test', entity);
+				manager.remove('test', entity);
+
+				runner.assertTrue(hookCalled);
+				runner.assertEqual(hookEntity, entity);
+			});
+
+			runner.it('should trigger hooks for each entity in addMultiple', () => {
+				const manager = new window.EntityManager();
+				let hookCount = 0;
+
+				manager.addHook('onAdd', () => {
+					hookCount++;
+				});
+
+				manager.addMultiple('test', [
+					createMockEntity('e1'),
+					createMockEntity('e2'),
+					createMockEntity('e3')
+				]);
+
+				runner.assertEqual(hookCount, 3);
+			});
+
+			runner.it('should trigger hooks for each entity in clearGroup', () => {
+				const manager = new window.EntityManager();
+				let removeCount = 0;
+
+				manager.addHook('onRemove', () => {
+					removeCount++;
+				});
+
+				manager.addMultiple('test', [
+					createMockEntity('e1'),
+					createMockEntity('e2')
+				]);
+				manager.clearGroup('test');
+
+				runner.assertEqual(removeCount, 2);
+			});
+
+			runner.it('should allow removing hooks', () => {
+				const manager = new window.EntityManager();
+				let hookCount = 0;
+				const hook = () => { hookCount++; };
+
+				manager.addHook('onAdd', hook);
+				manager.add('test', createMockEntity('e1'));
+				runner.assertEqual(hookCount, 1);
+
+				manager.removeHook('onAdd', hook);
+				manager.add('test', createMockEntity('e2'));
+				runner.assertEqual(hookCount, 1); // Should not increment
+			});
+		});
+
+		runner.describe('EntityManager - Batch Operations', () => {
+			function createMockEntity(name) {
+				return {
+					name: name,
+					update: function(deltaTime) {},
+					draw: function() {}
+				};
+			}
+
+			runner.it('should support batch adds', () => {
+				const manager = new window.EntityManager();
+				const batch = manager.beginBatch('test');
+
+				batch.add(createMockEntity('e1'));
+				batch.add(createMockEntity('e2'));
+				runner.assertEqual(batch.size(), 2);
+				runner.assertEqual(manager.count('test'), 0); // Not committed yet
+
+				batch.commit();
+				runner.assertEqual(manager.count('test'), 2);
+			});
+
+			runner.it('should validate entities in batch commit', () => {
+				const manager = new window.EntityManager();
+				const batch = manager.beginBatch('test');
+
+				batch.add(createMockEntity('e1'));
+				batch.add({ name: 'invalid' }); // Invalid entity
+				batch.add(createMockEntity('e2'));
+
+				batch.commit();
+				runner.assertEqual(manager.count('test'), 2); // Only valid entities added
+			});
+
+			runner.it('should trigger hooks for batch commits', () => {
+				const manager = new window.EntityManager();
+				let hookCount = 0;
+
+				manager.addHook('onAdd', () => { hookCount++; });
+
+				const batch = manager.beginBatch('test');
+				batch.add(createMockEntity('e1'));
+				batch.add(createMockEntity('e2'));
+				batch.commit();
+
+				runner.assertEqual(hookCount, 2);
+			});
+		});
+
+		runner.describe('EntityManager - Query Operations', () => {
+			function createMockEntity(name, health) {
+				return {
+					name: name,
+					health: health,
+					update: function(deltaTime) {},
+					draw: function() {}
+				};
+			}
+
+			runner.it('should find first matching entity', () => {
+				const manager = new window.EntityManager();
+				manager.addMultiple('test', [
+					createMockEntity('e1', 100),
+					createMockEntity('e2', 50),
+					createMockEntity('e3', 75)
+				]);
+
+				const found = manager.find('test', e => e.health < 80);
+				runner.assertEqual(found.name, 'e2');
+			});
+
+			runner.it('should return undefined when no match found', () => {
+				const manager = new window.EntityManager();
+				manager.add('test', createMockEntity('e1', 100));
+
+				const found = manager.find('test', e => e.health < 50);
+				runner.assertEqual(found, undefined);
+			});
+
+			runner.it('should find all matching entities', () => {
+				const manager = new window.EntityManager();
+				manager.addMultiple('test', [
+					createMockEntity('e1', 100),
+					createMockEntity('e2', 50),
+					createMockEntity('e3', 75),
+					createMockEntity('e4', 30)
+				]);
+
+				const found = manager.findAll('test', e => e.health < 80);
+				runner.assertEqual(found.length, 3);
+			});
+
+			runner.it('should remove entities matching filter', () => {
+				const manager = new window.EntityManager();
+				manager.addMultiple('test', [
+					createMockEntity('e1', 100),
+					createMockEntity('e2', 50),
+					createMockEntity('e3', 75)
+				]);
+
+				const removed = manager.removeWhere('test', e => e.health < 80);
+				runner.assertEqual(removed, 2);
+				runner.assertEqual(manager.count('test'), 1);
+			});
+		});
+
+		runner.describe('EntityManager - Update/Render', () => {
+			function createMockEntity(name) {
+				return {
+					name: name,
+					updateCalled: false,
+					drawCalled: false,
+					lastDeltaTime: null,
+					update: function(deltaTime) {
+						this.updateCalled = true;
+						this.lastDeltaTime = deltaTime;
+					},
+					draw: function() {
+						this.drawCalled = true;
+					}
+				};
+			}
+
+			runner.it('should update all entities in a group', () => {
+				const manager = new window.EntityManager();
+				const entities = [
+					createMockEntity('e1'),
+					createMockEntity('e2')
+				];
+				manager.addMultiple('test', entities);
+
+				manager.updateGroup('test', 16.67);
+
+				runner.assertTrue(entities[0].updateCalled);
+				runner.assertTrue(entities[1].updateCalled);
+				runner.assertAlmostEqual(entities[0].lastDeltaTime, 16.67, 0.01);
+			});
+
+			runner.it('should render all entities in a group', () => {
+				const manager = new window.EntityManager();
+				const entities = [
+					createMockEntity('e1'),
+					createMockEntity('e2')
+				];
+				manager.addMultiple('test', entities);
+
+				manager.renderGroup('test');
+
+				runner.assertTrue(entities[0].drawCalled);
+				runner.assertTrue(entities[1].drawCalled);
+			});
+
+			runner.it('should update all entities in all groups', () => {
+				const manager = new window.EntityManager();
+				const e1 = createMockEntity('e1');
+				const e2 = createMockEntity('e2');
+				const e3 = createMockEntity('e3');
+
+				manager.add('group1', e1);
+				manager.add('group1', e2);
+				manager.add('group2', e3);
+
+				manager.updateAll(16.67);
+
+				runner.assertTrue(e1.updateCalled);
+				runner.assertTrue(e2.updateCalled);
+				runner.assertTrue(e3.updateCalled);
+			});
+
+			runner.it('should render all entities in all groups', () => {
+				const manager = new window.EntityManager();
+				const e1 = createMockEntity('e1');
+				const e2 = createMockEntity('e2');
+
+				manager.add('group1', e1);
+				manager.add('group2', e2);
+
+				manager.renderAll();
+
+				runner.assertTrue(e1.drawCalled);
+				runner.assertTrue(e2.drawCalled);
+			});
+		});
+
+		runner.describe('EntityManager - Group Management', () => {
+			function createMockEntity(name) {
+				return {
+					name: name,
+					update: function() {},
+					draw: function() {}
+				};
+			}
+
+			runner.it('should list all group names', () => {
+				const manager = new window.EntityManager();
+				manager.createGroup('group1');
+				manager.createGroup('group2');
+				manager.createGroup('group3');
+
+				const names = manager.getGroupNames();
+				runner.assertEqual(names.length, 3);
+				runner.assertTrue(names.includes('group1'));
+				runner.assertTrue(names.includes('group2'));
+				runner.assertTrue(names.includes('group3'));
+			});
+
+			runner.it('should check if group exists', () => {
+				const manager = new window.EntityManager();
+				manager.createGroup('test');
+
+				runner.assertTrue(manager.hasGroup('test'));
+				runner.assertFalse(manager.hasGroup('nonexistent'));
+			});
+
+			runner.it('should check if group is empty', () => {
+				const manager = new window.EntityManager();
+				manager.createGroup('test');
+
+				runner.assertTrue(manager.isEmpty('test'));
+
+				manager.add('test', createMockEntity('e1'));
+				runner.assertFalse(manager.isEmpty('test'));
+			});
+
+			runner.it('should count entities across all groups', () => {
+				const manager = new window.EntityManager();
+				manager.add('group1', createMockEntity('e1'));
+				manager.add('group1', createMockEntity('e2'));
+				manager.add('group2', createMockEntity('e3'));
+
+				runner.assertEqual(manager.countAll(), 3);
+			});
+
+			runner.it('should clear all groups', () => {
+				const manager = new window.EntityManager();
+				manager.add('group1', createMockEntity('e1'));
+				manager.add('group2', createMockEntity('e2'));
+
+				manager.clearAll();
+
+				runner.assertEqual(manager.count('group1'), 0);
+				runner.assertEqual(manager.count('group2'), 0);
+			});
+
+			runner.it('should iterate over group entities', () => {
+				const manager = new window.EntityManager();
+				const entities = [
+					createMockEntity('e1'),
+					createMockEntity('e2')
+				];
+				manager.addMultiple('test', entities);
+
+				let count = 0;
+				manager.forEach('test', (entity, index) => {
+					count++;
+					runner.assertEqual(entity, entities[index]);
+				});
+
+				runner.assertEqual(count, 2);
+			});
+
+			runner.it('should iterate over all entities', () => {
+				const manager = new window.EntityManager();
+				manager.add('group1', createMockEntity('e1'));
+				manager.add('group2', createMockEntity('e2'));
+
+				let count = 0;
+				manager.forEachAll((entity, groupName, index) => {
+					count++;
+					runner.assertTrue(['group1', 'group2'].includes(groupName));
+				});
+
+				runner.assertEqual(count, 2);
 			});
 		});
 

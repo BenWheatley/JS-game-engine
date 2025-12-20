@@ -888,13 +888,14 @@ class Game extends EventTarget {
 		// Reset wave-specific achievement tracking
 		this.achievementStats.damageTakenThisWave = 0;
 
-		SpawnSystem.spawnWave(
+		// Spawn new wave and add entities
+		const spawnedEntities = SpawnSystem.spawnWave(
 			this.currentLevel,
 			this.player.sprite.position,
 			this.canvas.width,
-			this.canvas.height,
-			this.entities.getGroup('npcs')
+			this.canvas.height
 		);
+		this.entities.addMultiple('npcs', spawnedEntities);
 	}
 	
 	_cheat_clearLevel() {
@@ -909,13 +910,15 @@ class Game extends EventTarget {
 		// Spawn one of each NPC type using SpawnSystem
 		const entityTypes = Object.keys(GameConfig.SPAWNING.ENTITY_TYPES);
 		for (const entityType of entityTypes) {
-			SpawnSystem.spawnEntity(
+			const entity = SpawnSystem.spawnEntity(
 				entityType,
 				this.player.sprite.position,
 				this.canvas.width,
-				this.canvas.height,
-				this.entities.getGroup('npcs')
+				this.canvas.height
 			);
+			if (entity) {
+				this.entities.add('npcs', entity);
+			}
 		}
 
 		this.player.weaponLevel = 7;
