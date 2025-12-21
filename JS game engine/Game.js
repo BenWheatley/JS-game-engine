@@ -251,17 +251,14 @@ class Game extends EventTarget {
 			);
 		}
 
-		// Draw wormhole collision circle (uses checkCircle with radiusScale=3)
+		// Draw wormhole collision circle (uses exact circle collision)
 		if (this.wormhole) {
 			context.strokeStyle = 'rgba(255, 255, 0, 0.7)'; // Yellow for wormhole
-			// Matches CollisionDetection.checkCircle() calculation
-			const radiusScale = 3;
-			const collisionRadius = this.wormhole.size.x / radiusScale;
 			context.beginPath();
 			context.arc(
 				this.wormhole.position.x,
 				this.wormhole.position.y,
-				collisionRadius,
+				this.wormhole.radius,
 				0,
 				Math.PI * 2
 			);
@@ -694,7 +691,8 @@ class Game extends EventTarget {
 		}
 
 		// Check player-wormhole collision (show upgrade menu) - only if player is alive
-		if (this.player.health > 0 && this.wormhole && CollisionDetection.checkCircle(this.wormhole, this.player)) {
+		// Wormhole uses exact circle collision (radius property)
+		if (this.player.health > 0 && this.wormhole && CollisionDetection.check(this.wormhole, this.player)) {
 			this.dispatchEvent(new Event('upgrade-menu-requested'));
 			soundManager.play('achievement', 0.5); // Play a sound effect
 		}
