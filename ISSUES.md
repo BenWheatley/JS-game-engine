@@ -52,25 +52,7 @@ if (!this._canvas) {
 
 ---
 
-### 4. Race Condition in MusicPlayer
-**File:** MusicPlayer.js (lines 67-77)
-**Priority:** High
-
-`onPlaybackEnd()` doesn't check if `isPlaying` changed during timeout execution. If `stop()` is called just before timeout fires, it will restart music unexpectedly.
-
-**Recommendation:**
-```javascript
-onPlaybackEnd() {
-  if (!this.isPlaying) return; // Check state before restarting
-  if (this.looping) {
-    this.play();
-  }
-}
-```
-
----
-
-### 5. Missing deltaTime Validation
+### 4. Missing deltaTime Validation
 **File:** VibeEngine.js (lines 169-171)
 **Priority:** Medium
 
@@ -86,7 +68,7 @@ this._lastCallTime = currentTime;
 
 ---
 
-### 6. AudioContext State Not Checked
+### 5. AudioContext State Not Checked
 **File:** SoundManager.js (lines 76-94)
 **Priority:** Medium
 
@@ -105,7 +87,7 @@ play(soundName, volume = 1.0) {
 
 ---
 
-### 7. Infinite Loop Risk in Vector2D
+### 6. Infinite Loop Risk in Vector2D
 **File:** Vector2D.js (lines 22-26)
 **Priority:** Medium
 
@@ -123,7 +105,7 @@ static normalizeAngleDiff(angle) {
 
 ---
 
-### 8. Memory Leak in ParticleSystem
+### 7. Memory Leak in ParticleSystem
 **File:** ParticleSystem.js (line 70)
 **Priority:** Medium
 
@@ -143,7 +125,7 @@ update(deltaTime) {
 
 ---
 
-### 9. Date.now() Instead of performance.now()
+### 8. Date.now() Instead of performance.now()
 **File:** VibeEngine.js (lines 164, 169)
 **Priority:** Medium
 
@@ -160,7 +142,7 @@ const currentTime = performance.now();
 
 ---
 
-### 10. Asset Loading Partial Failure Handling
+### 9. Asset Loading Partial Failure Handling
 **File:** AssetLoader.js (line 64)
 **Priority:** Medium
 
@@ -206,6 +188,6 @@ Components that could be generalized and moved to VibeEngine:
 
 ## Summary
 
-**Code Issues:** 10 (3 High Priority, 7 Medium Priority)
+**Code Issues:** 9 (2 High Priority, 7 Medium Priority)
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified
