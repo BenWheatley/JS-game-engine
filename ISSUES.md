@@ -36,26 +36,7 @@ Failed sprite loads throw errors and crash the game. Consider fallback/error spr
 
 ---
 
-### 3. XSS Vulnerability in MenuSystem
-**File:** MenuSystem.js (line 247)
-**Priority:** High
-
-Uses `innerHTML` with achievement data which could allow script injection if achievement configuration is modified or loaded externally.
-
-**Recommendation:**
-```javascript
-// Replace innerHTML with textContent
-const nameEl = document.createElement('strong');
-nameEl.textContent = achievement.name;
-const descEl = document.createElement('div');
-descEl.textContent = achievement.description;
-toast.appendChild(nameEl);
-toast.appendChild(descEl);
-```
-
----
-
-### 4. Division by Zero in Vector2D
+### 3. Division by Zero in Vector2D
 **File:** Vector2D.js (lines 41-42)
 **Priority:** High
 
@@ -242,6 +223,6 @@ Components that could be generalized and moved to VibeEngine:
 
 ## Summary
 
-**Code Issues:** 12 (5 High Priority, 7 Medium Priority)
+**Code Issues:** 11 (4 High Priority, 7 Medium Priority)
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified
