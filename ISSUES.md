@@ -36,24 +36,7 @@ Failed sprite loads throw errors and crash the game. Consider fallback/error spr
 
 ---
 
-### 3. Division by Zero in Vector2D
-**File:** Vector2D.js (lines 41-42)
-**Priority:** High
-
-`div()` method has no safety check for division by zero. If velocity becomes (0,0) and `norm()` is called, subsequent `div()` will produce NaN values, corrupting game state.
-
-**Recommendation:**
-```javascript
-norm() {
-  const m = this.mag();
-  if (m === 0) return new Vector2D(0, 0);
-  return this.div(m);
-}
-```
-
----
-
-### 5. Null Canvas Context Validation
+### 3. Null Canvas Context Validation
 **File:** VibeEngine.js (line 28)
 **Priority:** High
 
@@ -69,7 +52,7 @@ if (!this._canvas) {
 
 ---
 
-### 6. Race Condition in MusicPlayer
+### 4. Race Condition in MusicPlayer
 **File:** MusicPlayer.js (lines 67-77)
 **Priority:** High
 
@@ -87,7 +70,7 @@ onPlaybackEnd() {
 
 ---
 
-### 7. Missing deltaTime Validation
+### 5. Missing deltaTime Validation
 **File:** VibeEngine.js (lines 169-171)
 **Priority:** Medium
 
@@ -103,7 +86,7 @@ this._lastCallTime = currentTime;
 
 ---
 
-### 8. AudioContext State Not Checked
+### 6. AudioContext State Not Checked
 **File:** SoundManager.js (lines 76-94)
 **Priority:** Medium
 
@@ -122,7 +105,7 @@ play(soundName, volume = 1.0) {
 
 ---
 
-### 9. Infinite Loop Risk in Vector2D
+### 7. Infinite Loop Risk in Vector2D
 **File:** Vector2D.js (lines 22-26)
 **Priority:** Medium
 
@@ -140,7 +123,7 @@ static normalizeAngleDiff(angle) {
 
 ---
 
-### 10. Memory Leak in ParticleSystem
+### 8. Memory Leak in ParticleSystem
 **File:** ParticleSystem.js (line 70)
 **Priority:** Medium
 
@@ -160,7 +143,7 @@ update(deltaTime) {
 
 ---
 
-### 11. Date.now() Instead of performance.now()
+### 9. Date.now() Instead of performance.now()
 **File:** VibeEngine.js (lines 164, 169)
 **Priority:** Medium
 
@@ -177,7 +160,7 @@ const currentTime = performance.now();
 
 ---
 
-### 12. Asset Loading Partial Failure Handling
+### 10. Asset Loading Partial Failure Handling
 **File:** AssetLoader.js (line 64)
 **Priority:** Medium
 
@@ -223,6 +206,6 @@ Components that could be generalized and moved to VibeEngine:
 
 ## Summary
 
-**Code Issues:** 11 (4 High Priority, 7 Medium Priority)
+**Code Issues:** 10 (3 High Priority, 7 Medium Priority)
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified
