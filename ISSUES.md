@@ -86,27 +86,7 @@ static normalizeAngleDiff(angle) {
 
 ---
 
-### 6. Memory Leak in ParticleSystem
-**File:** ParticleSystem.js (line 70)
-**Priority:** Medium
-
-Particle array is filtered every frame. If particles never die (isDead() always false due to bug), array grows unbounded causing memory leak.
-
-**Recommendation:**
-```javascript
-// Add age limit as failsafe
-update(deltaTime) {
-  const MAX_PARTICLE_AGE = 10000; // 10 seconds
-  this.particles = this.particles.filter(p => {
-    p.update(deltaTime);
-    return !p.isDead() && p.age < MAX_PARTICLE_AGE;
-  });
-}
-```
-
----
-
-### 7. Asset Loading Partial Failure Handling
+### 6. Asset Loading Partial Failure Handling
 **File:** AssetLoader.js (line 64)
 **Priority:** Medium
 
@@ -152,6 +132,6 @@ Components that could be generalized and moved to VibeEngine:
 
 ## Summary
 
-**Code Issues:** 7 (2 High Priority, 5 Medium Priority)
+**Code Issues:** 6 (2 High Priority, 4 Medium Priority)
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified
