@@ -161,12 +161,12 @@ class VibeEngine extends EventTarget {
 		this._updateCallback = updateCallback;
 		this._renderCallback = renderCallback;
 		this._loadingCheckCallback = loadingCheckCallback;
-		this._lastCallTime = Date.now();
+		this._lastCallTime = performance.now();
 		this._loop();
 	}
 
 	_loop() {
-		const currentTime = Date.now();
+		const currentTime = performance.now();
 		const deltaTime = currentTime - this._lastCallTime;
 		this._lastCallTime = currentTime;
 

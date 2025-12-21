@@ -68,26 +68,7 @@ this._lastCallTime = currentTime;
 
 ---
 
-### 5. AudioContext State Not Checked
-**File:** SoundManager.js (lines 76-94)
-**Priority:** Medium
-
-Doesn't validate AudioContext state before creating nodes. If context is closed, operations will fail silently.
-
-**Recommendation:**
-```javascript
-play(soundName, volume = 1.0) {
-  if (this.audioContext.state === 'closed') {
-    DebugLogger.error('AudioContext is closed');
-    return;
-  }
-  // ... rest of method
-}
-```
-
----
-
-### 6. Infinite Loop Risk in Vector2D
+### 5. Infinite Loop Risk in Vector2D
 **File:** Vector2D.js (lines 22-26)
 **Priority:** Medium
 
@@ -105,7 +86,7 @@ static normalizeAngleDiff(angle) {
 
 ---
 
-### 7. Memory Leak in ParticleSystem
+### 6. Memory Leak in ParticleSystem
 **File:** ParticleSystem.js (line 70)
 **Priority:** Medium
 
@@ -125,24 +106,7 @@ update(deltaTime) {
 
 ---
 
-### 8. Date.now() Instead of performance.now()
-**File:** VibeEngine.js (lines 164, 169)
-**Priority:** Medium
-
-Uses `Date.now()` which is affected by system clock changes. `performance.now()` is monotonic and immune to clock adjustments.
-
-**Recommendation:**
-```javascript
-// In start():
-this._lastCallTime = performance.now();
-
-// In _loop():
-const currentTime = performance.now();
-```
-
----
-
-### 9. Asset Loading Partial Failure Handling
+### 7. Asset Loading Partial Failure Handling
 **File:** AssetLoader.js (line 64)
 **Priority:** Medium
 
@@ -188,6 +152,6 @@ Components that could be generalized and moved to VibeEngine:
 
 ## Summary
 
-**Code Issues:** 9 (2 High Priority, 7 Medium Priority)
+**Code Issues:** 7 (2 High Priority, 5 Medium Priority)
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified

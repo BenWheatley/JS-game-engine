@@ -60,6 +60,12 @@ class SoundManager {
       return;
     }
 
+    // Check if AudioContext is closed (can't create nodes on closed context)
+    if (SoundManager.audioContext.state === 'closed') {
+      DebugLogger.error('AudioContext is closed - cannot play sound');
+      return;
+    }
+
     // Resume AudioContext if suspended (required by browser autoplay policies)
     DebugLogger.log(`AudioContext state before play: ${SoundManager.audioContext.state}`);
 
