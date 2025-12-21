@@ -789,7 +789,12 @@ class Game extends EventTarget {
 			return;
 		}
 
-		const gamepads = navigator.getGamepads();
+		// Check if Gamepad API is available and returns valid data
+		const gamepads = navigator.getGamepads?.() || [];
+		if (!gamepads || gamepads.length === 0) {
+			return;
+		}
+
 		const deadzone = GameConfig.PLAYER.GAMEPAD_DEADZONE; // Ignore small stick movements to prevent drift
 
 		for (const gamepad of gamepads) {
