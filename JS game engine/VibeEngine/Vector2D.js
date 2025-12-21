@@ -20,10 +20,11 @@ class Vector2D {
      * @returns {number} Normalized angle difference in radians
      */
     static normalizeAngleDiff(toAngle, fromAngle) {
-        let angleDiff = toAngle - fromAngle;
-        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-        return angleDiff;
+        const twoPi = 2 * Math.PI;
+        let diff = toAngle - fromAngle;
+        diff = (diff + Math.PI) % twoPi;
+        if (diff < 0) diff += twoPi;
+        return diff - Math.PI;
     }
 
     add(v) {
