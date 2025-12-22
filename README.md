@@ -1,6 +1,8 @@
 # JavaScript 2D Game Engine - VibeEngine
 
-A lightweight, browser-based 2D game engine built with vanilla JavaScript ES6 modules and HTML5 Canvas. Originally created as a collaboration with ChatGPT to explore AI-assisted game development, now fully modularized.
+**Elevator Pitch:** A lightweight, modular 2D game engine built with vanilla JavaScript ES6 modules and HTML5 Canvas, featuring comprehensive collision detection (AABB/Circle/Polygon), entity management, particle effects, and a complete space shooter demo with upgrades, achievements, and wave-based progression.
+
+A browser-based game engine originally created through AI collaboration (ChatGPT + Claude Code) to explore AI-assisted game development, now fully modularized with 220+ unit tests.
 
 ## Demo
 

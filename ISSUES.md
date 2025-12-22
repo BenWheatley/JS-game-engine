@@ -1,6 +1,6 @@
 # Outstanding Issues
 
-**Last Updated:** 2025-12-21
+**Last Updated:** 2025-12-22
 
 ---
 
@@ -60,7 +60,7 @@ If system clock jumps (sleep/resume), deltaTime could be enormous, causing physi
 
 **Recommendation:**
 ```javascript
-const currentTime = Date.now();
+const currentTime = performance.now();
 let deltaTime = currentTime - this._lastCallTime;
 deltaTime = Math.min(deltaTime, 100); // Cap at 100ms
 this._lastCallTime = currentTime;
@@ -68,7 +68,7 @@ this._lastCallTime = currentTime;
 
 ---
 
-### 6. Asset Loading Partial Failure Handling
+### 5. Asset Loading Partial Failure Handling
 **File:** AssetLoader.js (line 64)
 **Priority:** Medium
 
@@ -114,6 +114,6 @@ Components that could be generalized and moved to VibeEngine:
 
 ## Summary
 
-**Code Issues:** 6 (2 High Priority, 4 Medium Priority)
+**Code Issues:** 5 (1 High Priority, 4 Medium Priority)
 **Missing Tests:** 5 components (all low priority)
 **Engine Opportunities:** 5 components identified
