@@ -558,7 +558,9 @@ class Game extends EventTarget {
 
 			// Handle battleship beam damage (only if player is alive)
 			if (this.player.health > 0 && npc instanceof AlienBattleship) {
-				const beamHit = npc.checkBeamHit(this.player.sprite.position, deltaTime);
+				// Calculate player collision radius from sprite size (circular approximation)
+				const playerRadius = (this.player.sprite.size.x + this.player.sprite.size.y) / 4;
+				const beamHit = npc.checkBeamHit(this.player.sprite.position, playerRadius, deltaTime);
 				if (beamHit) {
 					this.player.health -= beamHit.damage;
 					this.player.onDamage(beamHit.damage); // Reset shield regen timer and trigger haptic

@@ -247,6 +247,50 @@ class CollisionDetection {
   }
 
   /**
+   * Check if a circle intersects with a beam (capsule collision)
+   * Treats the beam as a line segment with width, checking if a circle intersects it
+   * @param {Vector2D} circleCenter - Center position of the circle
+   * @param {number} circleRadius - Radius of the circle
+   * @param {Vector2D} beamOrigin - Beam start position
+   * @param {number} beamRotation - Beam direction in radians
+   * @param {number} beamLength - Beam length in pixels
+   * @param {number} beamWidth - Beam width in pixels
+   * @returns {boolean} True if circle intersects beam
+   */
+  static checkBeamCircle(circleCenter, circleRadius, beamOrigin, beamRotation, beamLength, beamWidth) {
+    // Calculate beam end point
+    const endX = beamOrigin.x + Math.cos(beamRotation) * beamLength;
+    const endY = beamOrigin.y + Math.sin(beamRotation) * beamLength;
+
+    // Vector from beam origin to circle center
+    const dx = circleCenter.x - beamOrigin.x;
+    const dy = circleCenter.y - beamOrigin.y;
+
+    // Beam direction vector
+    const beamDx = endX - beamOrigin.x;
+    const beamDy = endY - beamOrigin.y;
+
+    // Project circle center onto beam line
+    const beamLengthSquared = beamDx * beamDx + beamDy * beamDy;
+    const projection = (dx * beamDx + dy * beamDy) / beamLengthSquared;
+
+    // Check if projection is within beam length (0 to 1)
+    if (projection < 0 || projection > 1) {
+      return false;
+    }
+
+    // Find closest point on beam centerline
+    const closestX = beamOrigin.x + projection * beamDx;
+    const closestY = beamOrigin.y + projection * beamDy;
+
+    // Check if distance from circle center to beam centerline is within combined radii
+    const distanceSquared = (circleCenter.x - closestX) ** 2 + (circleCenter.y - closestY) ** 2;
+    const combinedRadius = (beamWidth / 2) + circleRadius;
+
+    return distanceSquared <= combinedRadius * combinedRadius;
+  }
+
+  /**
    * Smart collision check - routes to appropriate collision method based on shape types
    * Supports: Polygon, Circle (via radius property), and AABB
    * @param {GameEntity} entity1 - First entity

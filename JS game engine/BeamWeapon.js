@@ -47,6 +47,25 @@ class BeamWeapon {
 	}
 
 	/**
+	 * Check if beam intersects with a circle (for player collision with radius)
+	 * @param {Vector2D} circleCenter - Center position of the circle
+	 * @param {number} circleRadius - Radius of the circle
+	 * @returns {boolean} True if circle intersects beam
+	 */
+	intersectsCircle(circleCenter, circleRadius) {
+		if (!this.active) return false;
+
+		return CollisionDetection.checkBeamCircle(
+			circleCenter,
+			circleRadius,
+			this.origin,
+			this.rotation,
+			this.length,
+			this.width
+		);
+	}
+
+	/**
 	 * Draw the beam
 	 * @param {CanvasRenderingContext2D} context - Canvas context
 	 */
