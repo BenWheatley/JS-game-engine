@@ -204,6 +204,49 @@ class CollisionDetection {
   }
 
   /**
+   * Check if a point intersects with a beam (rectangular line with width)
+   * Used for beam weapon collision detection
+   * @param {Vector2D} point - Point to test
+   * @param {Vector2D} beamOrigin - Beam start position
+   * @param {number} beamRotation - Beam direction in radians
+   * @param {number} beamLength - Beam length in pixels
+   * @param {number} beamWidth - Beam width in pixels
+   * @returns {boolean} True if point is inside beam
+   */
+  static checkBeamPoint(point, beamOrigin, beamRotation, beamLength, beamWidth) {
+    // Calculate beam end point
+    const endX = beamOrigin.x + Math.cos(beamRotation) * beamLength;
+    const endY = beamOrigin.y + Math.sin(beamRotation) * beamLength;
+
+    // Vector from beam origin to point
+    const dx = point.x - beamOrigin.x;
+    const dy = point.y - beamOrigin.y;
+
+    // Beam direction vector
+    const beamDx = endX - beamOrigin.x;
+    const beamDy = endY - beamOrigin.y;
+
+    // Project point onto beam line
+    const beamLengthSquared = beamDx * beamDx + beamDy * beamDy;
+    const projection = (dx * beamDx + dy * beamDy) / beamLengthSquared;
+
+    // Check if projection is within beam length (0 to 1)
+    if (projection < 0 || projection > 1) {
+      return false;
+    }
+
+    // Find closest point on beam line
+    const closestX = beamOrigin.x + projection * beamDx;
+    const closestY = beamOrigin.y + projection * beamDy;
+
+    // Check if distance from point to line is within beam width
+    const distanceSquared = (point.x - closestX) ** 2 + (point.y - closestY) ** 2;
+    const halfWidth = beamWidth / 2;
+
+    return distanceSquared <= halfWidth * halfWidth;
+  }
+
+  /**
    * Smart collision check - routes to appropriate collision method based on shape types
    * Supports: Polygon, Circle (via radius property), and AABB
    * @param {GameEntity} entity1 - First entity
