@@ -1,11 +1,18 @@
 # Project Instructions
 
+## Project Structure
+
+- **Issues/TODO:** `/Users/benwheatley/Documents/Code/JS-game-engine/ISSUES.md`
+- **Unit Tests:** `/Users/benwheatley/Documents/Code/JS-game-engine/JS game engine/UnitTests.html` (all tests go here)
+
 ## Development Workflow
 
 - **DO NOT** run `open skeleton.html` or similar browser commands
 - The game is already open in a browser tab during development
 - `file:///` URLs have CORS restrictions that prevent asset loading
 - Testing happens manually by the developer
+- **IMPORTANT:** Whenever any task is completed, update ISSUES.md to remove the completed item entirely
+- **IMPORTANT:** ISSUES.md contains ONLY outstanding issues - never add completed work, changelogs, or "Recent Improvements" sections
 
 ## Code Style
 

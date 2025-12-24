@@ -106,14 +106,32 @@ class AchievementManager {
     const toast = document.createElement('div');
     toast.className = 'achievement-toast';
 
-    toast.innerHTML = `
-      <div class="achievement-toast-icon">✓</div>
-      <div class="achievement-toast-content">
-        <div class="achievement-toast-title">Achievement Unlocked</div>
-        <div class="achievement-toast-name">${achievement.name}</div>
-        <div class="achievement-toast-description">${achievement.description}</div>
-      </div>
-    `;
+    // SECURITY: Build DOM structure with textContent to prevent XSS
+    const icon = document.createElement('div');
+    icon.className = 'achievement-toast-icon';
+    icon.textContent = '✓';
+
+    const content = document.createElement('div');
+    content.className = 'achievement-toast-content';
+
+    const title = document.createElement('div');
+    title.className = 'achievement-toast-title';
+    title.textContent = 'Achievement Unlocked';
+
+    const name = document.createElement('div');
+    name.className = 'achievement-toast-name';
+    name.textContent = achievement.name;
+
+    const description = document.createElement('div');
+    description.className = 'achievement-toast-description';
+    description.textContent = achievement.description;
+
+    content.appendChild(title);
+    content.appendChild(name);
+    content.appendChild(description);
+
+    toast.appendChild(icon);
+    toast.appendChild(content);
 
     container.appendChild(toast);
 

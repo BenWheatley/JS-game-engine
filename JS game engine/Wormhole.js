@@ -12,6 +12,11 @@ class Wormhole {
 		// Create sprite for main game view
 		this.sprite = new Sprite('wormhole.png', this.position, this.size);
 
+		// Collision radius: approximately half the visual size for easier entry
+		// Average visual dimension = (81 + 84) / 2 = 82.5 pixels
+		// Collision radius = ~40 pixels (about half)
+		this.radius = 40;
+
 		// Animation properties
 		this.rotation = 0;
 	}

@@ -67,33 +67,33 @@ const GameConfig = {
     // Each level: { fireRate, spreadAngle (in degrees), projectileTypes (array) }
     // projectileTypes: array of 'laser', 'plasma', or 'missile' for each shot (center outward)
     WEAPON: [
-      { fireRate: 500, spreadAngle: 0, projectileTypes: ['laser'] },                           // Level 0 (starting)
-      { fireRate: 400, spreadAngle: 0, projectileTypes: ['laser'] },                           // Level 1: Faster fire
-      { fireRate: 400, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },                  // Level 2: Dual shot
-      { fireRate: 300, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },                  // Level 3: Even faster
-      { fireRate: 300, spreadAngle: 10, projectileTypes: ['laser', 'laser', 'laser'] },        // Level 4: Triple shot
-      { fireRate: 300, spreadAngle: 10, projectileTypes: ['laser', 'plasma', 'laser'] },       // Level 5: Center plasma
-      { fireRate: 300, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'plasma', 'laser'] }, // Level 6: Quad shot
-      { fireRate: 250, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'plasma', 'laser'] }, // Level 7: Max fire rate
-      { fireRate: 250, spreadAngle: 20, projectileTypes: ['laser', 'plasma', 'plasma', 'plasma', 'laser'] }, // Level 8: Penta shot with center plasma
-      { fireRate: 200, spreadAngle: 20, projectileTypes: ['laser', 'plasma', 'plasma', 'plasma', 'laser'] }, // Level 9: Ultra rapid
-      { fireRate: 200, spreadAngle: 25, projectileTypes: ['missile', 'laser', 'plasma', 'laser', 'missile'] } // Level 10: Outer missiles
+      { fireRate: 500, spreadAngle: 0, projectileTypes: ['laser'] },
+      { fireRate: 400, spreadAngle: 0, projectileTypes: ['laser'] },
+      { fireRate: 400, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },
+      { fireRate: 300, spreadAngle: 5, projectileTypes: ['laser', 'laser'] },
+      { fireRate: 300, spreadAngle: 10, projectileTypes: ['laser', 'laser', 'laser'] },
+      { fireRate: 300, spreadAngle: 10, projectileTypes: ['laser', 'plasma', 'laser'] },
+      { fireRate: 300, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'plasma', 'laser'] },
+      { fireRate: 250, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'plasma', 'laser'] },
+      { fireRate: 250, spreadAngle: 20, projectileTypes: ['laser', 'plasma', 'plasma', 'plasma', 'laser'] },
+      { fireRate: 200, spreadAngle: 20, projectileTypes: ['laser', 'plasma', 'plasma', 'plasma', 'laser'] },
+      { fireRate: 200, spreadAngle: 15, projectileTypes: ['laser', 'plasma', 'missile', 'plasma', 'missile', 'plasma', 'laser'] }
     ],
 
     // Engine upgrades - affects movement stats
     // Each level: { maxSpeedMultiplier, accelerationMultiplier, rotationMultiplier }
     ENGINE: [
-      { maxSpeedMultiplier: 1.0, accelerationMultiplier: 1.0, rotationMultiplier: 1.0 },     // Level 0
-      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.0, rotationMultiplier: 1.0 },     // Level 1: +20% speed
-      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.0, rotationMultiplier: 1.2 },     // Level 2: +20% turn
-      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.2, rotationMultiplier: 1.2 },     // Level 3: +20% accel
-      { maxSpeedMultiplier: 1.44, accelerationMultiplier: 1.2, rotationMultiplier: 1.2 },    // Level 4: +20% speed
-      { maxSpeedMultiplier: 1.44, accelerationMultiplier: 1.2, rotationMultiplier: 1.44 },   // Level 5: +20% turn
-      { maxSpeedMultiplier: 1.44, accelerationMultiplier: 1.44, rotationMultiplier: 1.44 },  // Level 6: +20% accel
-      { maxSpeedMultiplier: 1.728, accelerationMultiplier: 1.44, rotationMultiplier: 1.44 }, // Level 7: +20% speed
-      { maxSpeedMultiplier: 1.728, accelerationMultiplier: 1.44, rotationMultiplier: 1.728 },// Level 8: +20% turn
-      { maxSpeedMultiplier: 1.728, accelerationMultiplier: 1.728, rotationMultiplier: 1.728 },// Level 9: +20% accel
-      { maxSpeedMultiplier: 2.074, accelerationMultiplier: 2.074, rotationMultiplier: 2.074 } // Level 10: Final boost
+      { maxSpeedMultiplier: 1.0, accelerationMultiplier: 1.0, rotationMultiplier: 1.0 },
+      { maxSpeedMultiplier: 1.1, accelerationMultiplier: 1.0, rotationMultiplier: 1.0 },
+      { maxSpeedMultiplier: 1.1, accelerationMultiplier: 1.0, rotationMultiplier: 1.1 },
+      { maxSpeedMultiplier: 1.1, accelerationMultiplier: 1.1, rotationMultiplier: 1.1 },
+      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.1, rotationMultiplier: 1.1 },
+      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.1, rotationMultiplier: 1.2 },
+      { maxSpeedMultiplier: 1.2, accelerationMultiplier: 1.2, rotationMultiplier: 1.2 },
+      { maxSpeedMultiplier: 1.3, accelerationMultiplier: 1.2, rotationMultiplier: 1.2 },
+      { maxSpeedMultiplier: 1.3, accelerationMultiplier: 1.2, rotationMultiplier: 1.3 },
+      { maxSpeedMultiplier: 1.3, accelerationMultiplier: 1.3, rotationMultiplier: 1.3 },
+      { maxSpeedMultiplier: 1.4, accelerationMultiplier: 1.4, rotationMultiplier: 1.4 }
     ],
 
     // Shield upgrades - affects max health and regeneration
@@ -427,24 +427,27 @@ const GameConfig = {
 
   // Projectile types
   LASER: {
-    DAMAGE: 10,                         // Damage dealt
-    HIT_SOUND: 'hit',                   // Sound when hitting target
-    HIT_VOLUME: 0.3,                    // Volume for hit sound
-    PARTICLE_COLOR: '255, 200, 100'     // Yellow/orange impact particles
+    DAMAGE: 10,
+    SPEED: 8,
+    HIT_SOUND: 'hit',
+    HIT_VOLUME: 0.3,
+    PARTICLE_COLOR: '255, 200, 100'
   },
 
   PLASMA: {
-    DAMAGE: 25,                         // Damage dealt
-    HIT_SOUND: 'hit',                   // Sound when hitting target
-    HIT_VOLUME: 0.5,                    // Volume for hit sound
-    PARTICLE_COLOR: '50, 150, 255'      // Blue/cyan particles
+    DAMAGE: 25,
+    SPEED: 6,
+    HIT_SOUND: 'hit',
+    HIT_VOLUME: 0.5,
+    PARTICLE_COLOR: '50, 150, 255'
   },
 
   MISSILE: {
-    DAMAGE: 50,                         // Damage dealt
-    HIT_SOUND: 'explosion',             // Sound when hitting target
-    HIT_VOLUME: 0.6,                    // Volume for hit sound
-    PARTICLE_COLOR: '255, 100, 50'      // Orange explosion particles
+    DAMAGE: 50,
+    SPEED: 4,
+    HIT_SOUND: 'explosion',
+    HIT_VOLUME: 0.6,
+    PARTICLE_COLOR: '255, 100, 50'
   },
 
   // Achievement definitions

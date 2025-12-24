@@ -18,7 +18,7 @@ class MissileCruiser extends NPC {
 
       try {
         // Fire missile directly forward
-        const missileVelocity = Vector2D.fromRadial(this.sprite.rotation, Missile.speed);
+        const missileVelocity = Vector2D.fromRadial(this.sprite.rotation, GameConfig.MISSILE.SPEED);
         const newMissile = new Missile(
           new Vector2D(
             this.sprite.position.x,

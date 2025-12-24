@@ -3,9 +3,15 @@
  *
  * Responsibilities:
  * - AABB (Axis-Aligned Bounding Box) collision detection
- * - Circle collision detection
+ * - Exact Circle collision detection (Circle vs Circle, Circle vs AABB, Circle vs Polygon)
  * - Polygon collision detection (SAT - Separating Axis Theorem)
+ * - Smart routing - Automatic collision method selection based on entity shape properties
  * - Centralized collision logic for all entity types
+ *
+ * Shape Detection:
+ * - Circle: Entity has 'radius' property
+ * - Polygon: Entity has 'collisionPolygon' property (array of vertices)
+ * - AABB: Entity has neither (uses sprite.position and sprite.size)
  */
 class CollisionDetection {
   /**
@@ -32,7 +38,7 @@ class CollisionDetection {
 
   /**
    * Checks circle collision between two entities
-   * Used for circular entities like wormholes
+   * Used for circular entities like wormholes (legacy method with radiusScale)
    * @param {Object} entity1 - First entity (must have position and size)
    * @param {Object} entity2 - Second entity (must have sprite.position and sprite.size)
    * @param {number} radiusScale - Scale factor for collision radius (default: 3)
@@ -53,17 +59,280 @@ class CollisionDetection {
   }
 
   /**
-   * Smart collision check - uses polygon if available, otherwise AABB
+   * Exact circle vs circle collision detection
+   * @param {Object} entity1 - First entity (must have radius and sprite.position)
+   * @param {Object} entity2 - Second entity (must have radius and sprite.position)
+   * @returns {boolean} True if circles are colliding
+   */
+  static checkCircleCircle(entity1, entity2) {
+    const pos1 = entity1.sprite.position;
+    const pos2 = entity2.sprite.position;
+    const radius1 = entity1.radius;
+    const radius2 = entity2.radius;
+
+    const dx = pos1.x - pos2.x;
+    const dy = pos1.y - pos2.y;
+    const distanceSquared = dx * dx + dy * dy;
+    const radiusSum = radius1 + radius2;
+
+    return distanceSquared < radiusSum * radiusSum;
+  }
+
+  /**
+   * Exact circle vs AABB collision detection
+   * @param {Object} circle - Circle entity (must have radius and sprite.position)
+   * @param {Object} aabb - AABB entity (must have sprite.position and sprite.size)
+   * @returns {boolean} True if circle and AABB are colliding
+   */
+  static checkCircleAABB(circle, aabb) {
+    const circlePos = circle.sprite.position;
+    const radius = circle.radius;
+    const aabbPos = aabb.sprite.position;
+    const aabbSize = aabb.sprite.size;
+
+    // Find the closest point on the AABB to the circle center
+    const halfWidth = aabbSize.x / 2;
+    const halfHeight = aabbSize.y / 2;
+
+    const closestX = Math.max(
+      aabbPos.x - halfWidth,
+      Math.min(circlePos.x, aabbPos.x + halfWidth)
+    );
+    const closestY = Math.max(
+      aabbPos.y - halfHeight,
+      Math.min(circlePos.y, aabbPos.y + halfHeight)
+    );
+
+    // Calculate distance from circle center to closest point
+    const dx = circlePos.x - closestX;
+    const dy = circlePos.y - closestY;
+    const distanceSquared = dx * dx + dy * dy;
+
+    return distanceSquared < radius * radius;
+  }
+
+  /**
+   * Exact circle vs polygon collision detection
+   * @param {Object} circle - Circle entity (must have radius and sprite.position)
+   * @param {Object} polygon - Polygon entity (must have collisionPolygon, sprite.position, sprite.rotation)
+   * @returns {boolean} True if circle and polygon are colliding
+   */
+  static checkCirclePolygon(circle, polygon) {
+    const circlePos = circle.sprite.position;
+    const radius = circle.radius;
+
+    // Transform polygon to world space
+    const worldPolygon = this.transformPolygon(
+      polygon.collisionPolygon,
+      polygon.sprite.position,
+      polygon.sprite.rotation
+    );
+
+    // Check 1: Is circle center inside polygon?
+    if (this.pointInPolygon(circlePos, worldPolygon)) {
+      return true;
+    }
+
+    // Check 2: Does circle intersect any edge of the polygon?
+    for (let i = 0; i < worldPolygon.length; i++) {
+      const p1 = worldPolygon[i];
+      const p2 = worldPolygon[(i + 1) % worldPolygon.length];
+
+      if (this.circleIntersectsLineSegment(circlePos, radius, p1, p2)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a point is inside a polygon using ray casting algorithm
+   * @param {Vector2D} point - Point to test
+   * @param {Array<Vector2D>} polygon - Array of polygon vertices in world space
+   * @returns {boolean} True if point is inside polygon
+   */
+  static pointInPolygon(point, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x, yi = polygon[i].y;
+      const xj = polygon[j].x, yj = polygon[j].y;
+
+      const intersect = ((yi > point.y) !== (yj > point.y))
+        && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  /**
+   * Check if a circle intersects a line segment
+   * @param {Vector2D} circlePos - Circle center position
+   * @param {number} radius - Circle radius
+   * @param {Vector2D} lineStart - Line segment start point
+   * @param {Vector2D} lineEnd - Line segment end point
+   * @returns {boolean} True if circle intersects line segment
+   */
+  static circleIntersectsLineSegment(circlePos, radius, lineStart, lineEnd) {
+    // Vector from line start to circle center
+    const dx = circlePos.x - lineStart.x;
+    const dy = circlePos.y - lineStart.y;
+
+    // Vector along the line segment
+    const lineDx = lineEnd.x - lineStart.x;
+    const lineDy = lineEnd.y - lineStart.y;
+
+    // Length squared of line segment
+    const lineLengthSquared = lineDx * lineDx + lineDy * lineDy;
+
+    // Project circle center onto line segment (clamped to [0, 1])
+    let t = 0;
+    if (lineLengthSquared !== 0) {
+      t = Math.max(0, Math.min(1, (dx * lineDx + dy * lineDy) / lineLengthSquared));
+    }
+
+    // Find closest point on line segment
+    const closestX = lineStart.x + t * lineDx;
+    const closestY = lineStart.y + t * lineDy;
+
+    // Distance from circle center to closest point
+    const distX = circlePos.x - closestX;
+    const distY = circlePos.y - closestY;
+    const distanceSquared = distX * distX + distY * distY;
+
+    return distanceSquared <= radius * radius;
+  }
+
+  /**
+   * Check if a point intersects with a beam (rectangular line with width)
+   * Used for beam weapon collision detection
+   * @param {Vector2D} point - Point to test
+   * @param {Vector2D} beamOrigin - Beam start position
+   * @param {number} beamRotation - Beam direction in radians
+   * @param {number} beamLength - Beam length in pixels
+   * @param {number} beamWidth - Beam width in pixels
+   * @returns {boolean} True if point is inside beam
+   */
+  static checkBeamPoint(point, beamOrigin, beamRotation, beamLength, beamWidth) {
+    // Calculate beam end point
+    const endX = beamOrigin.x + Math.cos(beamRotation) * beamLength;
+    const endY = beamOrigin.y + Math.sin(beamRotation) * beamLength;
+
+    // Vector from beam origin to point
+    const dx = point.x - beamOrigin.x;
+    const dy = point.y - beamOrigin.y;
+
+    // Beam direction vector
+    const beamDx = endX - beamOrigin.x;
+    const beamDy = endY - beamOrigin.y;
+
+    // Project point onto beam line
+    const beamLengthSquared = beamDx * beamDx + beamDy * beamDy;
+    const projection = (dx * beamDx + dy * beamDy) / beamLengthSquared;
+
+    // Check if projection is within beam length (0 to 1)
+    if (projection < 0 || projection > 1) {
+      return false;
+    }
+
+    // Find closest point on beam line
+    const closestX = beamOrigin.x + projection * beamDx;
+    const closestY = beamOrigin.y + projection * beamDy;
+
+    // Check if distance from point to line is within beam width
+    const distanceSquared = (point.x - closestX) ** 2 + (point.y - closestY) ** 2;
+    const halfWidth = beamWidth / 2;
+
+    return distanceSquared <= halfWidth * halfWidth;
+  }
+
+  /**
+   * Check if a circle intersects with a beam (capsule collision)
+   * Treats the beam as a line segment with width, checking if a circle intersects it
+   * @param {Vector2D} circleCenter - Center position of the circle
+   * @param {number} circleRadius - Radius of the circle
+   * @param {Vector2D} beamOrigin - Beam start position
+   * @param {number} beamRotation - Beam direction in radians
+   * @param {number} beamLength - Beam length in pixels
+   * @param {number} beamWidth - Beam width in pixels
+   * @returns {boolean} True if circle intersects beam
+   */
+  static checkBeamCircle(circleCenter, circleRadius, beamOrigin, beamRotation, beamLength, beamWidth) {
+    // Calculate beam end point
+    const endX = beamOrigin.x + Math.cos(beamRotation) * beamLength;
+    const endY = beamOrigin.y + Math.sin(beamRotation) * beamLength;
+
+    // Vector from beam origin to circle center
+    const dx = circleCenter.x - beamOrigin.x;
+    const dy = circleCenter.y - beamOrigin.y;
+
+    // Beam direction vector
+    const beamDx = endX - beamOrigin.x;
+    const beamDy = endY - beamOrigin.y;
+
+    // Project circle center onto beam line
+    const beamLengthSquared = beamDx * beamDx + beamDy * beamDy;
+    const projection = (dx * beamDx + dy * beamDy) / beamLengthSquared;
+
+    // Check if projection is within beam length (0 to 1)
+    if (projection < 0 || projection > 1) {
+      return false;
+    }
+
+    // Find closest point on beam centerline
+    const closestX = beamOrigin.x + projection * beamDx;
+    const closestY = beamOrigin.y + projection * beamDy;
+
+    // Check if distance from circle center to beam centerline is within combined radii
+    const distanceSquared = (circleCenter.x - closestX) ** 2 + (circleCenter.y - closestY) ** 2;
+    const combinedRadius = (beamWidth / 2) + circleRadius;
+
+    return distanceSquared <= combinedRadius * combinedRadius;
+  }
+
+  /**
+   * Smart collision check - routes to appropriate collision method based on shape types
+   * Supports: Polygon, Circle (via radius property), and AABB
    * @param {GameEntity} entity1 - First entity
    * @param {GameEntity} entity2 - Second entity
    * @returns {boolean} True if entities are colliding
    */
   static check(entity1, entity2) {
-    // If either entity has a collision polygon, use polygon collision
-    if (entity1.collisionPolygon || entity2.collisionPolygon) {
+    const has1Polygon = entity1.collisionPolygon != null;
+    const has2Polygon = entity2.collisionPolygon != null;
+    const has1Radius = entity1.radius !== undefined;
+    const has2Radius = entity2.radius !== undefined;
+
+    // 1. Polygon vs Polygon
+    if (has1Polygon && has2Polygon) {
       return this.checkPolygonCollision(entity1, entity2);
     }
-    // Otherwise use fast AABB
+
+    // 2. Circle vs Polygon (exact collision)
+    if ((has1Radius && has2Polygon) || (has1Polygon && has2Radius)) {
+      const circle = has1Radius ? entity1 : entity2;
+      const polygon = has1Polygon ? entity1 : entity2;
+      return this.checkCirclePolygon(circle, polygon);
+    }
+
+    // 3. Polygon vs AABB (convert AABB to polygon)
+    if (has1Polygon || has2Polygon) {
+      return this.checkPolygonCollision(entity1, entity2);
+    }
+
+    // 4. Circle vs Circle (exact collision)
+    if (has1Radius && has2Radius) {
+      return this.checkCircleCircle(entity1, entity2);
+    }
+
+    // 5. Circle vs AABB (exact collision)
+    if (has1Radius || has2Radius) {
+      const circle = has1Radius ? entity1 : entity2;
+      const aabb = has1Radius ? entity2 : entity1;
+      return this.checkCircleAABB(circle, aabb);
+    }
+
+    // 6. AABB vs AABB (default)
     return this.checkAABB(entity1, entity2);
   }
 

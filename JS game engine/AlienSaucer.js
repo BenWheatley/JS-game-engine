@@ -98,7 +98,7 @@ class AlienSaucer extends NPC {
     // Fire in 8 directions: 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°
     for (let i = 0; i < 8; i++) {
       const angle = (i * Math.PI / 4); // 0, π/4, π/2, 3π/4, π, 5π/4, 3π/2, 7π/4
-      const velocity = Vector2D.fromRadial(angle, Plasma.speed);
+      const velocity = Vector2D.fromRadial(angle, GameConfig.PLASMA.SPEED);
       const shot = new Plasma(
         new Vector2D(this.sprite.position.x, this.sprite.position.y),
         velocity

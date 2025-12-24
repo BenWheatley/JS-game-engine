@@ -3,6 +3,9 @@ import { DebugLogger } from './DebugLogger.js';
 import './CanvasRenderingContext2D-extensions.js';
 import { Vector2D } from './Vector2D.js';
 import { Sprite } from './Sprite.js';
+import { Entity } from './Entity.js';
+import { EntityManager } from './EntityManager.js';
+import { Camera } from './Camera.js';
 import { Projectile } from './Projectile.js';
 import { Particle } from './Particle.js';
 import { ParticleSystem } from './ParticleSystem.js';
@@ -158,12 +161,12 @@ class VibeEngine extends EventTarget {
 		this._updateCallback = updateCallback;
 		this._renderCallback = renderCallback;
 		this._loadingCheckCallback = loadingCheckCallback;
-		this._lastCallTime = Date.now();
+		this._lastCallTime = performance.now();
 		this._loop();
 	}
 
 	_loop() {
-		const currentTime = Date.now();
+		const currentTime = performance.now();
 		const deltaTime = currentTime - this._lastCallTime;
 		this._lastCallTime = currentTime;
 
@@ -192,6 +195,9 @@ export {
 	DebugLogger,
 	Vector2D,
 	Sprite,
+	Entity,
+	EntityManager,
+	Camera,
 	Projectile,
 	Particle,
 	ParticleSystem,

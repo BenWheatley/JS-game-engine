@@ -100,10 +100,9 @@ class SpawnSystem {
    * @param {Vector2D} playerPos - Player position for spawn calculations
    * @param {number} canvasWidth - Canvas width
    * @param {number} canvasHeight - Canvas height
-   * @param {Array} npcsArray - Array to push spawned entity into
    * @returns {Object|null} Spawned entity or null if type invalid
    */
-  static spawnEntity(entityType, playerPos, canvasWidth, canvasHeight, npcsArray) {
+  static spawnEntity(entityType, playerPos, canvasWidth, canvasHeight) {
     const entityDef = GameConfig.SPAWNING.ENTITY_TYPES[entityType];
 
     // Validate entity type
@@ -126,7 +125,6 @@ class SpawnSystem {
 
     // Instantiate using the class reference from config
     const entity = new entityDef.class(position, playerPos, canvasWidth, canvasHeight);
-    npcsArray.push(entity);
 
     DebugLogger.log(`Spawned ${entityType} at`, position);
     return entity;
@@ -139,10 +137,11 @@ class SpawnSystem {
    * @param {Vector2D} playerPos - Player position for spawn calculations
    * @param {number} canvasWidth - Canvas width
    * @param {number} canvasHeight - Canvas height
-   * @param {Array} npcsArray - Array to push spawned NPCs into
+   * @returns {Array} Array of spawned entities
    */
-  static spawnWave(level, playerPos, canvasWidth, canvasHeight, npcsArray) {
+  static spawnWave(level, playerPos, canvasWidth, canvasHeight) {
     const wave = SpawnSystem.getWaveDefinition(level);
+    const spawnedEntities = [];
 
     DebugLogger.log(`Spawning Wave ${level}:`, wave);
 
@@ -150,9 +149,14 @@ class SpawnSystem {
     for (const [entityType, count] of Object.entries(wave)) {
       // Spawn the specified count using spawnEntity
       for (let i = 0; i < count; i++) {
-        SpawnSystem.spawnEntity(entityType, playerPos, canvasWidth, canvasHeight, npcsArray);
+        const entity = SpawnSystem.spawnEntity(entityType, playerPos, canvasWidth, canvasHeight);
+        if (entity) {
+          spawnedEntities.push(entity);
+        }
       }
     }
+
+    return spawnedEntities;
   }
 }
 

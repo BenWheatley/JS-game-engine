@@ -1,4 +1,5 @@
 import { GameConfig } from './GameConfig.js';
+import { CollisionDetection } from './VibeEngine/CollisionDetection.js';
 
 /**
  * BeamWeapon - Visual beam attack used by AlienBattleship
@@ -36,36 +37,32 @@ class BeamWeapon {
 	intersectsPoint(point) {
 		if (!this.active) return false;
 
-		// Calculate beam end point
-		const endX = this.origin.x + Math.cos(this.rotation) * this.length;
-		const endY = this.origin.y + Math.sin(this.rotation) * this.length;
+		return CollisionDetection.checkBeamPoint(
+			point,
+			this.origin,
+			this.rotation,
+			this.length,
+			this.width
+		);
+	}
 
-		// Vector from beam origin to point
-		const dx = point.x - this.origin.x;
-		const dy = point.y - this.origin.y;
+	/**
+	 * Check if beam intersects with a circle (for player collision with radius)
+	 * @param {Vector2D} circleCenter - Center position of the circle
+	 * @param {number} circleRadius - Radius of the circle
+	 * @returns {boolean} True if circle intersects beam
+	 */
+	intersectsCircle(circleCenter, circleRadius) {
+		if (!this.active) return false;
 
-		// Beam direction vector
-		const beamDx = endX - this.origin.x;
-		const beamDy = endY - this.origin.y;
-
-		// Project point onto beam line
-		const beamLengthSquared = beamDx * beamDx + beamDy * beamDy;
-		const projection = (dx * beamDx + dy * beamDy) / beamLengthSquared;
-
-		// Check if projection is within beam length (0 to 1)
-		if (projection < 0 || projection > 1) {
-			return false;
-		}
-
-		// Find closest point on beam line
-		const closestX = this.origin.x + projection * beamDx;
-		const closestY = this.origin.y + projection * beamDy;
-
-		// Check if distance from point to line is within beam width
-		const distanceSquared = (point.x - closestX) ** 2 + (point.y - closestY) ** 2;
-		const halfWidth = this.width / 2;
-
-		return distanceSquared <= halfWidth * halfWidth;
+		return CollisionDetection.checkBeamCircle(
+			circleCenter,
+			circleRadius,
+			this.origin,
+			this.rotation,
+			this.length,
+			this.width
+		);
 	}
 
 	/**
