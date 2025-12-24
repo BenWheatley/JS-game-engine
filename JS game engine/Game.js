@@ -423,13 +423,13 @@ class Game extends EventTarget {
 					// Create the appropriate projectile
 					let newShot;
 					if (projectileType === 'plasma') {
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Plasma.speed);
+						const shotVelocity = Vector2D.fromRadial(shotAngle, GameConfig.PLASMA.SPEED);
 						newShot = new Plasma(shotPosition, shotVelocity);
 					} else if (projectileType === 'missile') {
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Missile.speed);
+						const shotVelocity = Vector2D.fromRadial(shotAngle, GameConfig.MISSILE.SPEED);
 						newShot = new Missile(shotPosition, shotVelocity);
 					} else if (projectileType === 'laser') {
-						const shotVelocity = Vector2D.fromRadial(shotAngle, Laser.speed);
+						const shotVelocity = Vector2D.fromRadial(shotAngle, GameConfig.LASER.SPEED);
 						newShot = new Laser(shotPosition, shotVelocity);
 					} else {
 						DebugLogger.log(`Unexpected projectileType: ${projectileType}`);
