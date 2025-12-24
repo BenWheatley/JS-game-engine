@@ -63,7 +63,8 @@
 			<strong>Controls:</strong><br>
 			<span class="key">1</span> <span class="key">2</span> <span class="key">3</span> Switch mouse shape (Polygon / AABB / Circle)<br>
 			<span class="key">Q</span> <span class="key">E</span> Rotate mouse polygon (hold to spin at 0.5 Hz)<br>
-			Move mouse to test collision detection
+			Move mouse to test collision detection<br><br>
+			<strong>Test Shapes:</strong> Polygon (rotating), AABB, Circle, Beam (rotating)
 		</div>
 	</div>
 
@@ -91,7 +92,7 @@
 		// Fixed shapes
 		const fixedShapes = {
 			polygon: {
-				position: new Vector2D(300, 400),
+				position: new Vector2D(300, 300),
 				rotation: 0,
 				size: new Vector2D(80, 80),
 				color: '#569cd6',
@@ -103,7 +104,7 @@
 				]
 			},
 			aabb: {
-				position: new Vector2D(600, 400),
+				position: new Vector2D(600, 300),
 				rotation: 0,
 				size: new Vector2D(100, 80),
 				color: '#4ec9b0',
@@ -111,13 +112,22 @@
 				collisionPolygon: null
 			},
 			circle: {
-				position: new Vector2D(900, 400),
+				position: new Vector2D(900, 300),
 				rotation: 0,
 				size: new Vector2D(60, 60),
 				radius: 30, // Circle uses radius property
 				color: '#c586c0',
 				type: 'circle',
 				collisionPolygon: null
+			},
+			beam: {
+				position: new Vector2D(300, 600),
+				rotation: 0,
+				length: 300,
+				width: 40,
+				color: '#ce9178',
+				type: 'beam',
+				size: new Vector2D(300, 40) // For label positioning
 			}
 		};
 
@@ -274,6 +284,49 @@
 			ctx.stroke();
 		}
 
+		function drawBeam(ctx, pos, rotation, length, width, color, highlight = false) {
+			ctx.save();
+			ctx.translate(pos.x, pos.y);
+			ctx.rotate(rotation);
+
+			// Draw beam body
+			if (highlight) {
+				ctx.fillStyle = 'rgba(244, 135, 113, 0.3)';
+				ctx.strokeStyle = '#f48771';
+				ctx.lineWidth = 3;
+			} else {
+				// Draw gradient
+				const gradient = ctx.createLinearGradient(0, -width / 2, 0, width / 2);
+				gradient.addColorStop(0, color + '20');
+				gradient.addColorStop(0.5, color + '60');
+				gradient.addColorStop(1, color + '20');
+				ctx.fillStyle = gradient;
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 2;
+			}
+
+			ctx.fillRect(0, -width / 2, length, width);
+			ctx.strokeRect(0, -width / 2, length, width);
+
+			// Draw centerline
+			ctx.strokeStyle = highlight ? '#f48771' : color;
+			ctx.lineWidth = 1;
+			ctx.setLineDash([5, 5]);
+			ctx.beginPath();
+			ctx.moveTo(0, 0);
+			ctx.lineTo(length, 0);
+			ctx.stroke();
+			ctx.setLineDash([]);
+
+			// Draw origin marker
+			ctx.fillStyle = highlight ? '#f48771' : color;
+			ctx.beginPath();
+			ctx.arc(0, 0, 4, 0, Math.PI * 2);
+			ctx.fill();
+
+			ctx.restore();
+		}
+
 		// Update loop
 		let lastTime = Date.now();
 		function update() {
@@ -283,6 +336,9 @@
 
 			// Update fixed polygon rotation (0.5 Hz = π radians per second)
 			fixedShapes.polygon.rotation += Math.PI * (deltaTime / 1000);
+
+			// Update beam rotation (slower: 0.25 Hz)
+			fixedShapes.beam.rotation += Math.PI * 0.5 * (deltaTime / 1000);
 
 			// Update mouse polygon rotation if q/e held
 			if (keys['q'] || keys['Q']) {
@@ -302,28 +358,57 @@
 
 			// Draw and check fixed shapes
 			for (const [name, shape] of Object.entries(fixedShapes)) {
-				// Create entity with radius if it's a circle
-				const entity = {
-					sprite: {
-						position: shape.position,
-						rotation: shape.rotation,
-						size: shape.size
-					},
-					collisionPolygon: shape.collisionPolygon
-				};
-				if (shape.radius !== undefined) {
-					entity.radius = shape.radius;
-				}
+				let isColliding = false;
 
-				// Use smart routing - it now handles all collision types!
-				const isColliding = CollisionDetection.check(mouseShape, entity);
+				// Check collision based on shape type
+				if (shape.type === 'beam') {
+					// Beam collision - check if mouse intersects beam
+					if (mouseShapeType === 'circle') {
+						// Circle vs beam
+						isColliding = CollisionDetection.checkBeamCircle(
+							mousePos,
+							mouseShape.radius,
+							shape.position,
+							shape.rotation,
+							shape.length,
+							shape.width
+						);
+					} else {
+						// Point vs beam (for polygon and AABB, use center point)
+						isColliding = CollisionDetection.checkBeamPoint(
+							mousePos,
+							shape.position,
+							shape.rotation,
+							shape.length,
+							shape.width
+						);
+					}
+				} else {
+					// Standard collision detection for other shapes
+					const entity = {
+						sprite: {
+							position: shape.position,
+							rotation: shape.rotation,
+							size: shape.size
+						},
+						collisionPolygon: shape.collisionPolygon
+					};
+					if (shape.radius !== undefined) {
+						entity.radius = shape.radius;
+					}
+
+					// Use smart routing - it now handles all collision types!
+					isColliding = CollisionDetection.check(mouseShape, entity);
+				}
 
 				if (isColliding) {
 					collisions.push(name);
 				}
 
 				// Draw shape
-				if (shape.collisionPolygon) {
+				if (shape.type === 'beam') {
+					drawBeam(ctx, shape.position, shape.rotation, shape.length, shape.width, shape.color, isColliding);
+				} else if (shape.collisionPolygon) {
 					drawPolygon(ctx, shape.position, shape.rotation, shape.collisionPolygon, shape.color, isColliding);
 				} else if (name === 'circle') {
 					drawCircle(ctx, shape.position, shape.size.x / 2, shape.color, isColliding);
